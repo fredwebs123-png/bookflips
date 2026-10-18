@@ -1,0 +1,604 @@
+<title>Designer Fun Redesigns</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: one row per app — the phone on the left at native 390px, the design notes beside it; stacks on narrow screens. */
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --fg:#1B1B19; --muted:#6B6A64; --line:#DEDCD4;
+  --accent:#2F5D50; --accent-ink:#FFFFFF; --chip:#E9E7DF;
+  --font-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+    --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+  --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,5vw,54px);line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.jump a:hover,.jump a:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+.app{display:grid;grid-template-columns:390px minmax(0,1fr);gap:40px;align-items:start;scroll-margin-top:16px}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}}
+.notes{display:flex;flex-direction:column;gap:20px;min-width:0;padding-top:8px}
+.notes h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:36px;line-height:1.05;letter-spacing:-.01em}
+.notes h2 small{display:block;font-family:var(--font-body);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.notes .lead{margin:0;font-size:18px;line-height:1.45}
+.notes h3{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.notes ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.notes li{padding-left:18px;position:relative;max-width:60ch}
+.notes li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.refs li{padding-left:0}.refs li::before{display:none}
+.refs a{display:flex;gap:10px;align-items:baseline;text-decoration:none;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.refs a:hover,.refs a:focus-visible{border-color:var(--accent)}
+.refs b{font-weight:600;white-space:nowrap}
+.refs span{color:var(--muted);font-size:14px}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px;max-width:70ch}
+footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
+
+/* Phone frame. Each screen is a single deliberate look — the app's own palette — so it reads the same in both page themes. */
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:48px;padding:10px;background:#0B0B0C;box-shadow:0 20px 50px rgba(0,0,0,.22);justify-self:start}
+.screen{position:relative;border-radius:40px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums}
+.status{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 0;font-weight:600;font-size:14px}
+.status .batt{width:24px;height:11px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.85}
+.status .batt::after{content:"";position:absolute;inset:2px;right:4px;background:currentColor;border-radius:1px}
+.body{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 22px;font-size:11px;font-weight:600}
+.tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;text-decoration:none;color:inherit;background:none;border:0;font:inherit;padding:4px 0;cursor:pointer}
+.tabbar svg{width:22px;height:22px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:12px}
+.seg button{border:0;border-radius:9px;min-height:34px;font:inherit;font-weight:600;font-size:13px;cursor:pointer;background:transparent}
+.ey{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+
+/* ── DuoBudget: deep navy, teal for Fred, coral for Kaley ── */
+.duo{background:#0F1B2D;color:#EAF0F6;font-family:var(--font-body)}
+.duo .body{padding:16px 18px 0;gap:12px}
+.duo .top{display:flex;justify-content:space-between;align-items:center}
+.duo .top .ey{color:#8FA3B8}
+.duo .brand{font-weight:700;font-size:20px;letter-spacing:-.01em}
+.duo .avs{display:flex}
+.duo .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid #0F1B2D;color:#0F1B2D}
+.duo .av+.av{margin-left:-8px}
+.duo .seg{background:#1A2A40}
+.duo .seg button{color:#8FA3B8}
+.duo .seg button[aria-pressed="true"]{background:#EAF0F6;color:#0F1B2D}
+.duo .hero{background:#16263C;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.duo .hero .ey{color:#8FA3B8}
+.duo .big{font-size:48px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.duo .big small{font-size:18px;font-weight:500;color:#8FA3B8;letter-spacing:0}
+.duo .sub{color:#B9C7D6;font-size:13px}
+.duo .pace{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8FA3B8}
+.duo .pill{display:inline-flex;align-items:center;gap:6px;background:#0F3B36;color:#5EEAD4;font-weight:700;font-size:12px;padding:4px 10px;border-radius:999px}
+.duo svg text{font-family:var(--font-body)}
+.duo .card{background:#16263C;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.duo .ch{display:flex;justify-content:space-between;align-items:baseline}
+.duo .ch b{font-size:15px}.duo .ch a{font-size:12px;color:#5EEAD4;text-decoration:none;font-weight:600}
+.duo .legend{display:flex;gap:12px;font-size:11px;color:#8FA3B8}
+.duo .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:1px}
+.duo .row{display:flex;flex-direction:column;gap:5px}
+.duo .row .l{display:flex;justify-content:space-between;font-size:13px}
+.duo .row .l b{font-weight:600}.duo .row .l span{color:#8FA3B8}
+.duo .row .l .over{color:#FCA5A5;font-weight:700}
+.duo .bar{height:7px;border-radius:4px;background:#243752;display:flex;overflow:hidden}
+.duo .bar i{display:block;height:100%}
+.duo .bar .f{background:#2DD4BF}.duo .bar .k{background:#FB923C}.duo .bar .o{background:#EF4444}
+.duo .bar.dim .k{opacity:.25}.duo .bar.dimf .f{opacity:.25}
+.duo .tx{display:flex;align-items:center;gap:10px;background:#16263C;border-radius:14px;padding:10px 12px}
+.duo .tx .d{width:30px;height:30px;border-radius:50%;flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#0F1B2D}
+.duo .tx .t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.duo .tx .t span{font-size:12px;color:#8FA3B8}
+.duo .tx b{font-weight:700}
+.duo .tabbar{background:#0B1524;color:#8FA3B8;border-top:1px solid #1A2A40}
+.duo .tabbar .on{color:#5EEAD4}
+.duo .fab{width:50px;height:50px;border-radius:50%;background:#2DD4BF;color:#0F1B2D;margin-top:-26px;box-shadow:0 8px 20px rgba(45,212,191,.35);align-items:center;justify-content:center;min-width:0}
+
+/* ── DailyBrief: warm paper, plum accent, serif day name ── */
+.brief{background:#F7F5F0;color:#1D1B18}
+.brief .body{padding:10px 18px 0;gap:12px}
+.brief .top{display:flex;justify-content:space-between;align-items:flex-end}
+.brief .day{font-family:var(--font-display);font-size:44px;line-height:1;letter-spacing:-.01em}
+.brief .date{font-size:12px;color:#6F6B64;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.brief .today{font-size:12px;font-weight:600;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:6px 12px}
+.brief .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;color:#6F6B64}
+.brief .week div{padding:6px 0 4px;border-radius:10px;display:flex;flex-direction:column;gap:2px}
+.brief .week b{font-size:15px;color:#1D1B18;font-weight:600}
+.brief .week .on{background:#8B2F5C;color:#F7E6EE}.brief .week .on b{color:#FFFFFF}
+.brief .week i{display:block;width:4px;height:4px;border-radius:50%;background:#8B2F5C;margin:0 auto;opacity:.6}
+.brief .stats{display:flex;gap:6px;font-size:12px;color:#6F6B64}
+.brief .stats span{background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:5px 10px}
+.brief .stats b{color:#1D1B18;font-weight:700}
+.brief .first{background:#1D1B18;color:#F7F5F0;border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
+.brief .first .ey{color:#C9B2BE}
+.brief .first p{margin:2px 0 0;font-size:14px;line-height:1.35}
+.brief .first p b{color:#FFFFFF}
+.brief .first button{flex:0 0 auto;border:1px solid #8B2F5C;background:#8B2F5C;color:#FFFFFF;border-radius:10px;min-height:36px;padding:0 12px;font:inherit;font-weight:600;font-size:13px;cursor:pointer}
+.brief .first button[aria-pressed="true"]{background:transparent;color:#C9B2BE;border-color:#4A4541}
+.brief .first.done p{color:#9D978F;text-decoration:line-through}
+.brief .tl{position:relative;display:flex;flex-direction:column;gap:0;padding-left:54px;flex:1 1 auto;min-height:0;overflow:hidden}
+.brief .tl::before{content:"";position:absolute;left:46px;top:6px;bottom:0;width:2px;background:#E6E2DA}
+.brief .ev{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:12px;background:#FFFFFF;border:1px solid #E6E2DA;margin:0 0 8px 12px}
+.brief .ev .t{position:absolute;left:-66px;top:8px;width:50px;text-align:right;font-size:12px;font-weight:600;color:#6F6B64}
+.brief .ev::before{content:"";position:absolute;left:-21px;top:12px;width:10px;height:10px;border-radius:50%;background:#FFFFFF;border:2px solid #C4BDB3}
+.brief .ev b{font-size:14px;font-weight:600}.brief .ev span{font-size:12px;color:#6F6B64}
+.brief .ev.now{background:#8B2F5C;color:#FFFFFF;border-color:#8B2F5C}
+.brief .ev.now span,.brief .ev.now .t{color:#F0D4E1}
+.brief .ev.now::before{background:#8B2F5C;border-color:#8B2F5C;box-shadow:0 0 0 4px rgba(139,47,92,.2)}
+.brief .ev.reply{border-style:dashed;border-color:#C9A3B8;background:#FBF4F8}
+.brief .ev.reply::before{border-color:#8B2F5C}
+.brief .ev.long{min-height:64px}
+.brief .free{position:relative;margin:0 0 8px 12px;padding:4px 12px;font-size:12px;color:#8E887F;font-style:italic;font-family:var(--font-display);font-size:15px}
+.brief .nowline{position:relative;height:0;margin:2px 0 10px 0}
+.brief .nowline::before{content:"";position:absolute;left:-8px;right:0;top:0;border-top:2px solid #8B2F5C}
+.brief .nowline span{position:absolute;left:-54px;top:-9px;font-size:11px;font-weight:700;color:#8B2F5C;background:#F7F5F0;padding-right:4px}
+.brief .apps{display:flex;gap:8px;overflow:hidden;padding-bottom:4px;min-width:0;width:100%}
+.brief .apps div{flex:0 0 auto;min-width:96px;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px}
+.brief .apps .ey{font-size:10px}.brief .apps b{font-size:16px;font-weight:700}.brief .apps span{font-size:11px;color:#6F6B64}
+.brief .tabbar{background:#FFFFFF;border-top:1px solid #E6E2DA;color:#6F6B64}
+.brief .tabbar .on{color:#8B2F5C}
+
+/* ── OpsCheck: cool grey floor, high-vis blue, amber for "now" ── */
+.ops{background:#EEF1F4;color:#121A24}
+.ops .body{padding:10px 18px 0;gap:12px}
+.ops .top{display:flex;justify-content:space-between;align-items:flex-start}
+.ops .top .ey{color:#5B6775}
+.ops .top h2{margin:2px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.ops .who{display:flex;align-items:center;gap:8px;background:#FFFFFF;border-radius:999px;padding:4px 10px 4px 4px;font-size:12px;font-weight:600}
+.ops .who i{width:24px;height:24px;border-radius:50%;background:#1E55E6;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700}
+.ops .rail{display:grid;grid-template-columns:repeat(4,1fr);position:relative;padding-top:12px}
+.ops .rail::before{content:"";position:absolute;left:12.5%;right:12.5%;top:17px;height:3px;background:#D3D9E0;border-radius:2px}
+.ops .rail::after{content:"";position:absolute;left:12.5%;width:25%;top:17px;height:3px;background:#1E55E6;border-radius:2px}
+.ops .rail div{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:11px;color:#5B6775}
+.ops .rail i{width:14px;height:14px;border-radius:50%;background:#FFFFFF;border:3px solid #D3D9E0;display:block}
+.ops .rail .done i{background:#1E55E6;border-color:#1E55E6}
+.ops .rail .now i{background:#F59E0B;border-color:#F59E0B;box-shadow:0 0 0 4px rgba(245,158,11,.25)}
+.ops .rail b{color:#121A24;font-weight:700;font-size:12px}
+.ops .rail .now b{color:#B45309}
+.ops .rail .now{font-weight:600}
+.ops .card{background:#FFFFFF;border-radius:18px;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;min-height:0;overflow:hidden}
+.ops .ch{display:flex;justify-content:space-between;align-items:center}
+.ops .ch div{display:flex;flex-direction:column}.ops .ch b{font-size:16px}.ops .ch span{font-size:12px;color:#5B6775}
+.ops .cnt{font-size:24px;font-weight:700;color:#1E55E6;letter-spacing:-.02em}
+.ops .segs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.ops .segs i{height:6px;border-radius:3px;background:#E3E8EE;display:block}
+.ops .segs i.on{background:#1E55E6}
+.ops .list{display:flex;flex-direction:column;gap:6px}
+.ops .task{display:flex;align-items:flex-start;gap:12px;padding:10px 8px;border-radius:12px;border:0;background:#F6F8FA;text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%}
+.ops .task .box{width:28px;height:28px;flex:0 0 28px;border-radius:9px;border:2px solid #A4B0BE;background:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ops .task .box svg{width:16px;height:16px;display:none}
+.ops .task[aria-checked="true"] .box{background:#1E55E6;border-color:#1E55E6}
+.ops .task[aria-checked="true"] .box svg{display:block}
+.ops .task .t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ops .task b{font-size:14px;font-weight:600}
+.ops .task span{font-size:12px;color:#5B6775}
+.ops .task[aria-checked="true"] b{color:#5B6775;text-decoration:line-through}
+.ops .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.ops .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:#FFF4D6;color:#92400E}
+.ops .chip.blue{background:#E4ECFF;color:#1E40AF}
+.ops .chip svg{width:12px;height:12px}
+.ops .temp{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.ops .temp input{width:56px;border:1px solid #C7D0DA;border-radius:8px;padding:4px 6px;font:inherit;font-size:13px;font-weight:600;background:#FFFFFF;color:#121A24}
+.ops .doneh{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#5B6775;padding:6px 8px 0;border-top:1px dashed #E3E8EE;margin-top:2px}
+.ops .doneh button{border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:#1E55E6;cursor:pointer;padding:4px 0}
+.ops .done .task{background:transparent;padding:6px 8px}
+.ops .actions{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;padding-bottom:18px}
+.ops .actions button{min-height:48px;border-radius:12px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.ops .b2{border:1px solid #D3D9E0;background:#FFFFFF;color:#121A24}
+.ops .b1{border:0;background:#D3D9E0;color:#5B6775}
+.ops .b1.ready{background:#1E55E6;color:#FFFFFF}
+
+/* ── RetaTrack: warm off-white, ink hero, clay accent ── */
+.reta{background:#F5F2ED;color:#1B1A19}
+.reta .body{padding:10px 18px 0;gap:10px}
+.reta .top{display:flex;justify-content:space-between;align-items:center}
+.reta .top .ey{color:#7A736B}
+.reta .brand{font-weight:700;font-size:20px;letter-spacing:-.01em}
+.reta .scan{width:40px;height:40px;border-radius:12px;border:0;background:#1B1A19;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.reta .scan svg{width:20px;height:20px}
+.reta .hero{background:#1B1A19;color:#F5F2ED;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.reta .hero .ey{color:#B8AFA5}
+.reta .hero .hr{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.reta .big{font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.reta .big small{font-size:14px;font-weight:500;color:#B8AFA5;letter-spacing:0}
+.reta .dose{font-size:13px;color:#E8E1D8}
+.reta .dose b{color:#FFFFFF}
+.reta .cycle{height:6px;border-radius:3px;background:#3A3734;overflow:hidden;position:relative}
+.reta .cycle i{position:absolute;left:0;top:0;bottom:0;background:#E8805A;border-radius:3px}
+.reta .cycle em{position:absolute;top:-2px;width:2px;height:10px;background:#F5F2ED;opacity:.5}
+.reta .site{display:flex;align-items:center;gap:12px;font-size:12px;color:#E8E1D8}
+.reta .site .grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:40px}
+.reta .site .grid i{display:block;height:14px;border-radius:3px;background:#3A3734}
+.reta .site .grid i.last{background:#6B645C}
+.reta .site .grid i.next{background:#E8805A}
+.reta .site button{margin-left:auto;border:0;border-radius:10px;background:#E8805A;color:#1B1A19;font:inherit;font-weight:700;font-size:13px;min-height:36px;padding:0 14px;cursor:pointer}
+.reta .card{background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.reta .ch{display:flex;justify-content:space-between;align-items:baseline}
+.reta .ch b{font-size:14px;font-weight:700}
+.reta .ch span{font-size:12px;color:#7A736B}
+.reta .ch .tag{background:#FBE3D8;color:#9A3412;font-weight:700;font-size:12px;padding:3px 9px;border-radius:999px}
+.reta svg text{font-family:var(--font-body)}
+.reta .wt{display:flex;align-items:baseline;gap:6px}
+.reta .wt b{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.reta .wt span{font-size:13px;color:#7A736B}
+.reta .insight{font-size:12px;color:#5F5850;line-height:1.35}
+.reta .insight b{color:#1B1A19}
+.reta .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:4px}
+.reta .tile{background:#FFFFFF;border-radius:14px;padding:10px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.reta .tile .ey{color:#7A736B;font-size:10px}
+.reta .tile b{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.reta .tile b small{font-size:11px;font-weight:500;color:#7A736B}
+.reta .tile .mini{height:4px;border-radius:2px;background:#ECE7E0;overflow:hidden}
+.reta .tile .mini i{display:block;height:100%;background:#E8805A}
+.reta .tile .mini.b i{background:#2563EB}.reta .tile .mini.g i{background:#16A34A}
+.reta .tile button{margin-top:2px;border:1px solid #2563EB;background:#FFFFFF;color:#2563EB;border-radius:8px;min-height:30px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.reta .tabbar{background:#FFFFFF;border-top:1px solid #E6E0D8;color:#7A736B}
+.reta .tabbar .on{color:#C2410C}
+@media (prefers-reduced-motion:no-preference){.ops .task,.brief .first button,.reta .tile button{transition:background .15s,color .15s}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">designer-fun · mockups v2 · Oct 18, 2026</div>
+  <h1>Four apps, redesigned around what the <em>best-rated</em> apps in each category actually do</h1>
+  <p>Each screen below keeps the app's job and data from the first round of mockups, but rebuilds the layout around one pattern lifted from a top app in the same space, found through ScreensDesign recordings. The phones are live: switch partners, tick tasks, log water.</p>
+  <nav class="jump" aria-label="Jump to app">
+    <a href="#duobudget">DuoBudget</a><a href="#dailybrief">DailyBrief</a><a href="#opscheck">OpsCheck</a><a href="#retatrack">RetaTrack</a>
+  </nav>
+</header>
+
+<!-- ───────────── DuoBudget ───────────── -->
+<section class="app" id="duobudget" aria-labelledby="h-duo">
+<div class="phone"><div class="screen duo">
+  <div class="status"><span>9:41</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="body">
+    <div class="top">
+      <div><div class="ey">October 2026 · Day 18 of 31</div><div class="brand">DuoBudget</div></div>
+      <div class="avs"><span class="av" style="background:#2DD4BF">F</span><span class="av" style="background:#FB923C">K</span></div>
+    </div>
+    <div class="seg" role="group" aria-label="Show spending for" id="duo-seg">
+      <button type="button" data-who="both" aria-pressed="true">Both</button>
+      <button type="button" data-who="you" aria-pressed="false">You</button>
+      <button type="button" data-who="kaley" aria-pressed="false">Kaley</button>
+    </div>
+    <div class="hero">
+      <div class="ey">Safe to spend per day</div>
+      <div class="big"><span id="duo-perday">$82</span><small> /day until Fri's paycheck</small></div>
+      <div class="sub"><span id="duo-left">$412</span> left · 5 days · next deposit <b id="duo-pay">$1,150</b></div>
+      <svg viewBox="0 0 320 110" width="100%" height="110" role="img" aria-label="Month-to-date spending compared with an even pace through the month. Spending is on pace." style="display:block;max-width:100%">
+        <line x1="10" y1="100" x2="310" y2="100" stroke="#243752" stroke-width="1"></line>
+        <line x1="10" y1="100" x2="310" y2="10" stroke="#5B7490" stroke-width="1.5" stroke-dasharray="4 4"></line>
+        <line x1="180" y1="6" x2="180" y2="100" stroke="#243752" stroke-width="1"></line>
+        <path id="duo-area" d="" fill="#2DD4BF" fill-opacity=".14"></path>
+        <path id="duo-line" d="" fill="none" stroke="#2DD4BF" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+        <circle id="duo-dot" cx="180" cy="48" r="4.5" fill="#2DD4BF" stroke="#16263C" stroke-width="2"></circle>
+        <text x="10" y="109" font-size="10" fill="#8FA3B8">Oct 1</text>
+        <text x="180" y="109" font-size="10" fill="#EAF0F6" text-anchor="middle" font-weight="600">Today</text>
+        <text x="310" y="109" font-size="10" fill="#8FA3B8" text-anchor="end">Oct 31</text>
+        <text x="306" y="20" font-size="10" fill="#8FA3B8" text-anchor="end">even pace</text>
+      </svg>
+      <div class="pace"><span id="duo-spent">$2,231 of $3,850 flexible</span><span class="pill" id="duo-pill">● On pace · $4 under</span></div>
+    </div>
+    <div class="card">
+      <div class="ch"><b>Budgets</b><a href="#duobudget">See all 16</a></div>
+      <div class="legend"><span><i style="background:#2DD4BF"></i>Fred</span><span><i style="background:#FB923C"></i>Kaley</span><span><i style="background:#EF4444"></i>Over</span></div>
+      <div id="duo-budgets" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div id="duo-tx" style="display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+  <nav class="tabbar" aria-label="Main">
+    <a href="#duobudget" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+    <a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a>
+    <button type="button" class="fab" aria-label="Add a purchase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a>
+    <a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a>
+  </nav>
+</div></div>
+<aside class="notes">
+  <h2 id="h-duo"><small>01 · Couples budget</small>DuoBudget</h2>
+  <p class="lead">The number people act on is a daily one, not a monthly one. The hero now answers "how much can we spend today" and shows whether the month is on pace.</p>
+  <div><h3>What changed</h3><ul>
+    <li><b>Per-day allowance</b> replaces the lump sum. $412 until payday is hard to feel; $82 a day is a decision you can make at the checkout.</li>
+    <li><b>Pace line.</b> Month-to-date spend plotted against an even-pace dashed line, with a one-glance verdict pill (on pace / ahead / behind). Switching to You or Kaley redraws the line for that person.</li>
+    <li><b>Two-tone budget bars.</b> Every category bar is split into Fred's and Kaley's portion, so "who spent the dining budget" never needs a tap. Over-limit spills show in red at the cap.</li>
+    <li>Dark navy ground so the single teal line and the two partner colors carry the whole screen; less card-on-card than before.</li>
+  </ul></div>
+  <div><h3>Borrowed from</h3><ul class="refs">
+    <li><a href="https://screensdesign.com/apps/buddy-budget-planner-app/?vs=73517&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Buddy</b><span>"$36 left to spend per day" as the headline figure; household budget switcher</span></a></li>
+    <li><a href="https://screensdesign.com/apps/copilot-track-budget-money/?vs=41246&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Copilot</b><span>budget pace line with a "$3,000 under" verdict label on the endpoint</span></a></li>
+  </ul></div>
+</aside>
+</section>
+
+<!-- ───────────── DailyBrief ───────────── -->
+<section class="app" id="dailybrief" aria-labelledby="h-brief">
+<div class="phone"><div class="screen brief">
+  <div class="status"><span>7:05</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="body">
+    <div class="top"><div><div class="date">Oct 18, 2026 · 7:05 AM</div><div class="day">Sunday</div></div><span class="today">Today</span></div>
+    <div class="week" aria-hidden="true">
+      <div class="on"><span>S</span><b>18</b><i style="background:#F7E6EE"></i></div><div><span>M</span><b>19</b><i></i></div><div><span>T</span><b>20</b><i></i></div><div><span>W</span><b>21</b><i></i></div><div><span>T</span><b>22</b><i></i></div><div><span>F</span><b>23</b><i></i></div><div><span>S</span><b>24</b><i style="opacity:0"></i></div>
+    </div>
+    <div class="stats"><span><b>3</b> meetings</span><span><b id="brief-reply">2</b> to reply</span><span><b>2 h 40 m</b> free</span></div>
+    <div class="first" id="brief-first">
+      <div style="flex:1 1 auto;min-width:0"><div class="ey">Do first · due Tue</div><p>Reply to the <b>landlord</b> about the lease renewal, before your 10:00.</p></div>
+      <button type="button" id="brief-done" aria-pressed="false">Mark done</button>
+    </div>
+    <div class="tl" aria-label="Today's timeline">
+      <div class="nowline"><span>Now</span></div>
+      <div class="ev reply"><span class="t">8:30</span><b>Reply: district manager</b><span>Friday's sales numbers · 10 min</span></div>
+      <div class="ev now long"><span class="t">10:00</span><b>Weekly planning</b><span>Video call · 30 min · starts in 2 h 55 m</span></div>
+      <div class="free">free until 12:30</div>
+      <div class="ev long"><span class="t">12:30</span><b>Lunch with Kaley</b><span>Downtown · 1 h</span></div>
+      <div class="ev"><span class="t">15:00</span><b>Site walk</b><span>Store 214 · 45 min</span></div>
+      <div class="ev"><span class="t">18:00</span><b>Gym</b><span>Blocked time</span></div>
+    </div>
+    <div class="apps" aria-label="My apps">
+      <div><span class="ey" style="color:#0F766E">DuoBudget</span><b>$82/day</b><span>until Fri</span></div>
+      <div><span class="ey" style="color:#C2410C">RetaTrack</span><b>Tue</b><span>next shot · 2 mg</span></div>
+      <div><span class="ey" style="color:#7C3AED">GoalPulse</span><b>4 of 6</b><span>met yesterday</span></div>
+      <div><span class="ey" style="color:#1D4ED8">OpsCheck</span><b>7:00</b><span>opening check</span></div>
+    </div>
+  </div>
+  <nav class="tabbar" aria-label="Main">
+    <a href="#dailybrief" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a>
+    <a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a>
+    <a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a>
+  </nav>
+</div></div>
+<aside class="notes">
+  <h2 id="h-brief"><small>02 · Morning brief</small>DailyBrief</h2>
+  <p class="lead">A brief is read in order, so the screen is now one vertical timeline with a "now" line, instead of three tabs you have to visit.</p>
+  <div><h3>What changed</h3><ul>
+    <li><b>Timeline with a now marker.</b> Schedule, replies and free time sit on one rail in time order. The next meeting is the only filled block; everything else is paper.</li>
+    <li><b>Inbox folds into the day.</b> Emails that need a reply become dashed timeline items at the time you'd realistically answer them, so "to reply" stops being a separate list.</li>
+    <li><b>Free time is written, not computed.</b> "free until 12:30" in italic serif reads like a note to self, and is the thing you actually plan around.</li>
+    <li><b>Day name as the headline.</b> A large serif "Sunday" with the date as an eyebrow; the greeting sentence is gone, the three counts stay as small pills.</li>
+    <li>"My apps" is a one-line scrolling strip at the foot, pulling the headline number from each sibling app.</li>
+  </ul></div>
+  <div><h3>Borrowed from</h3><ul class="refs">
+    <li><a href="https://screensdesign.com/apps/structured-daily-planner/?vs=135555&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Structured</b><span>vertical timeline, current-time marker, "task nears, 3m" relative nudges</span></a></li>
+    <li><a href="https://screensdesign.com/apps/tiimo-ai-plan-focus-to-do/?vs=289503&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Tiimo</b><span>serif day name over a week strip; time-of-day grouping with counts</span></a></li>
+  </ul></div>
+</aside>
+</section>
+
+<!-- ───────────── OpsCheck ───────────── -->
+<section class="app" id="opscheck" aria-labelledby="h-ops">
+<div class="phone"><div class="screen ops">
+  <div class="status"><span>12:18</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="body">
+    <div class="top">
+      <div><div class="ey">Store 214 · Sun Oct 18</div><h2>Midday check</h2></div>
+      <div class="who"><i>J</i>Jordan on shift</div>
+    </div>
+    <div class="rail" aria-label="Today's check windows">
+      <div class="done"><i></i><b>Open</b><span>done 6:52</span></div>
+      <div class="now"><i></i><b>Midday</b><span>42 min left</span></div>
+      <div><i></i><b>Afternoon</b><span>4–5 PM</span></div>
+      <div><i></i><b>Close</b><span>10–11 PM</span></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><b>Due by 1:00 PM</b><span id="ops-sub">3 left · grill temp still needed</span></div><span class="cnt"><span id="ops-count">3</span>/6</span></div>
+      <div class="segs" id="ops-segs" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="list" id="ops-open" role="group" aria-label="Open tasks"></div>
+      <div class="doneh"><span><span id="ops-donecount">3</span> done</span><button type="button" id="ops-toggle" aria-expanded="false">Show</button></div>
+      <div class="list done" id="ops-done" role="group" aria-label="Done tasks" hidden></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="b2">Add photo</button>
+      <button type="button" class="b1" id="ops-submit" disabled>3 left</button>
+    </div>
+  </div>
+</div></div>
+<aside class="notes">
+  <h2 id="h-ops"><small>03 · Store ops checklist</small>OpsCheck</h2>
+  <p class="lead">A shift check is a clock problem. The redesign puts the four windows on one rail with a countdown, and keeps only the open tasks in front of whoever is on shift.</p>
+  <div><h3>What changed</h3><ul>
+    <li><b>Shift rail.</b> Open, Midday, Afternoon, Close as nodes on a line, with the current window in amber and "42 min left" under it. The previous four equal boxes didn't say what was next or how urgent.</li>
+    <li><b>Done tasks collapse.</b> Checked items drop into a "3 done · Show" group at the bottom, so the list shrinks as the check progresses. Tap a done item to reopen it.</li>
+    <li><b>Requirements live on the task.</b> "Photo required" chips and an inline °F field for the roller grill replace the hint text; the submit button stays grey until everything, including the temp, is in.</li>
+    <li><b>Six-segment progress</b> instead of a smooth bar: there are six tasks, so the bar shows six.</li>
+    <li>Who's on shift is a chip in the header, so a manager reading the log later sees it.</li>
+  </ul></div>
+  <div><h3>Borrowed from</h3><ul class="refs">
+    <li><a href="https://screensdesign.com/apps/to-do-list-todo-reminders/?vs=215436&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Todoery</b><span>collapsible "Completed Today" group under the active list</span></a></li>
+    <li><a href="https://screensdesign.com/apps/business-insider/?vs=342393&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Business Insider · Action Pack</b><span>"Due by" tags on tasks, green Done badges, daily/weekly sections with x/y counts</span></a></li>
+    <li><a href="https://screensdesign.com/apps/skylight-app/?vs=239064&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Skylight</b><span>per-person "1/2 tasks done" with the person's avatar in the header</span></a></li>
+  </ul></div>
+</aside>
+</section>
+
+<!-- ───────────── RetaTrack ───────────── -->
+<section class="app" id="retatrack" aria-labelledby="h-reta">
+<div class="phone"><div class="screen reta">
+  <div class="status"><span>9:41</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="body">
+    <div class="top">
+      <div><div class="ey">Week 8 · Sun Oct 18</div><div class="brand">RetaTrack</div></div>
+      <button type="button" class="scan" aria-label="Scan food with camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <div class="hero">
+      <div class="hr">
+        <div><div class="ey">Next shot</div><div class="big">1 day 14 h</div></div>
+        <div class="dose" style="text-align:right">Tue Oct 20 · <b>2 mg</b><br>semaglutide · weekly</div>
+      </div>
+      <div class="cycle" aria-hidden="true"><i style="width:77%"></i><em style="left:14.3%"></em><em style="left:28.6%"></em><em style="left:42.9%"></em><em style="left:57.1%"></em><em style="left:71.4%"></em><em style="left:85.7%"></em></div>
+      <div class="site">
+        <div class="grid" aria-hidden="true"><i class="last"></i><i></i><i></i><i class="next"></i></div>
+        <div>Next site: <b style="color:#FFFFFF">abdomen, lower right</b><br><span style="color:#B8AFA5">Last: upper left · rotated</span></div>
+        <button type="button">Log shot</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><b>Estimated level</b><span>last 2 weeks · relative</span></div>
+      <svg viewBox="0 0 320 78" width="100%" height="78" role="img" aria-label="Estimated medication level over the last two weeks: a sawtooth that rises on each Tuesday dose and decays through the week, with a dashed projection to the next dose." style="display:block;max-width:100%">
+        <line x1="10" y1="64" x2="310" y2="64" stroke="#ECE7E0"></line>
+        <path d="M10 52 L31 18 C60 28,120 40,160 46 L181 12 C215 22,250 32,267 36" fill="none" stroke="#E8805A" stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M10 52 L31 18 C60 28,120 40,160 46 L181 12 C215 22,250 32,267 36 L267 64 L10 64 Z" fill="#E8805A" fill-opacity=".12"></path>
+        <path d="M267 36 C285 40,300 43,310 44 L310 10" fill="none" stroke="#E8805A" stroke-width="2" stroke-dasharray="3 4" stroke-linecap="round"></path>
+        <circle cx="267" cy="36" r="4" fill="#E8805A" stroke="#FFFFFF" stroke-width="2"></circle>
+        <text x="31" y="75" font-size="10" fill="#7A736B" text-anchor="middle">Oct 6</text>
+        <text x="181" y="75" font-size="10" fill="#7A736B" text-anchor="middle">Oct 13</text>
+        <text x="267" y="75" font-size="10" fill="#1B1A19" text-anchor="middle" font-weight="600">Today</text>
+        <text x="310" y="75" font-size="10" fill="#7A736B" text-anchor="end">Tue</text>
+      </svg>
+      <div class="insight"><b>Level is at its weekly low.</b> Appetite is usually strongest today and tomorrow; protein first at each meal.</div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="wt"><b>203.6</b><span>lb</span></div><span class="tag">−10.4 lb in 8 wks</span></div>
+      <svg viewBox="0 0 320 110" width="100%" height="110" role="img" aria-label="Weight fell steadily from 214 to 203.6 pounds over eight weeks. Goal line at 185." style="display:block;max-width:100%">
+        <line x1="10" y1="100" x2="310" y2="100" stroke="#9A3412" stroke-width="1" stroke-dasharray="3 4"></line>
+        <text x="10" y="96" font-size="10" fill="#9A3412">goal 185 · est. Feb 14 at this pace</text>
+        <path d="M10 15 L47.5 19.6 L85 24 L122.5 28.7 L160 35.2 L197.5 39 L235 42.2 L272.5 45.4 L272.5 100 L10 100 Z" fill="#E8805A" fill-opacity=".12"></path>
+        <path d="M10 15 L47.5 19.6 L85 24 L122.5 28.7 L160 35.2 L197.5 39 L235 42.2 L272.5 45.4" fill="none" stroke="#E8805A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+        <path d="M272.5 45.4 L310 48.5" fill="none" stroke="#E8805A" stroke-width="2" stroke-dasharray="3 4"></path>
+        <circle cx="272.5" cy="45.4" r="4.5" fill="#E8805A" stroke="#FFFFFF" stroke-width="2"></circle>
+        <text x="10" y="11" font-size="10" fill="#7A736B">214</text>
+        <text x="10" y="109" font-size="10" fill="#7A736B">Aug 23</text>
+        <text x="272.5" y="109" font-size="10" fill="#1B1A19" text-anchor="middle" font-weight="600">Today</text>
+      </svg>
+    </div>
+    <div class="tiles">
+      <div class="tile"><span class="ey">Food</span><b>1,140<small> /1,800</small></b><div class="mini"><i style="width:72%"></i></div><span style="font-size:11px;color:#7A736B">94 g protein · 72%</span></div>
+      <div class="tile"><span class="ey">Water</span><b><span id="reta-water">1.6</span><small> /2.5 L</small></b><div class="mini b"><i id="reta-waterbar" style="width:64%"></i></div><button type="button" id="reta-add">+ 250 ml</button></div>
+      <div class="tile"><span class="ey">Steps</span><b>6,420<small> /8k</small></b><div class="mini g"><i style="width:80%"></i></div><span style="font-size:11px;color:#7A736B">1,580 to go</span></div>
+    </div>
+  </div>
+  <nav class="tabbar" aria-label="Main">
+    <a href="#retatrack" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a>
+    <a href="#retatrack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2l4 4M14 6l4 4M3 21l9-9M12 12l6-6"/></svg>Shots</a>
+    <a href="#retatrack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg>Food</a>
+    <a href="#retatrack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a>
+  </nav>
+</div></div>
+<aside class="notes">
+  <h2 id="h-reta"><small>04 · GLP-1 weight tracker</small>RetaTrack</h2>
+  <p class="lead">For someone on a weekly injection, the week has a shape: dose, peak, fade. The redesign leads with the dose cycle and uses it to explain the rest of the day.</p>
+  <div><h3>What changed</h3><ul>
+    <li><b>Dose countdown hero.</b> "1 day 14 h" with a seven-notch cycle bar, the dose, and the drug name. The old "Next shot · 2 mg" row was the most important line on the screen and the smallest.</li>
+    <li><b>Injection-site rotation.</b> A 2×2 abdomen grid shows the last site and the next one, and the Log shot button sits beside it. This is the one thing every dedicated GLP-1 app has that a general tracker lacks.</li>
+    <li><b>Estimated level curve.</b> A sawtooth over two weeks with a dashed projection to Tuesday, and a one-line insight tied to where you are in the cycle ("level at weekly low, appetite strongest").</li>
+    <li><b>Weight chart gets a goal line</b> (185) and a pace projection, so the −10.4 lb badge has somewhere to point.</li>
+    <li>Food, water and steps compress to three tiles with a mini-bar each; the macros breakdown moves to the Food tab.</li>
+  </ul></div>
+  <div><h3>Borrowed from</h3><ul class="refs">
+    <li><a href="https://screensdesign.com/apps/monju-lose-weight-on-glp-1/?vs=364979&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Monju</b><span>"Next application · 6 days 23 hours" countdown card with cycle bar at the top of Home</span></a></li>
+    <li><a href="https://screensdesign.com/apps/glowise-glp-1-tracker-diary/?vs=304686&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Glowise</b><span>"Medication pattern" level curve and the Daily insight card above the charts</span></a></li>
+    <li><a href="https://screensdesign.com/apps/shotsy-glp-1-tracker/?vs=265685&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens" target="_blank" rel="noopener"><b>Shotsy</b><span>injection-site log ("Stomach – Upper Left") on each shot record</span></a></li>
+  </ul></div>
+</aside>
+</section>
+
+<footer>References are recorded App Store screens from ScreensDesign; each link opens the exact screen. The first-round mockups these build on live in <code>mockups/</code> on branch <code>ccr-fdaa41e2-k83xz6</code>; this page is <code>mockups-v2/redesigns.html</code>.</footer>
+</div>
+
+<script>
+(function(){
+  /* DuoBudget */
+  var who='both';
+  var people={both:{scale:1,perday:'$82',left:'$412',pay:'$1,150',spent:'$2,231 of $3,850 flexible'},
+    you:{scale:.56,perday:'$46',left:'$231',pay:'$1,150',spent:'$1,251 of $2,156 flexible'},
+    kaley:{scale:.44,perday:'$36',left:'$181',pay:'$1,980',spent:'$980 of $1,694 flexible'}};
+  var cum=[[1,0],[4,330],[8,890],[12,1420],[15,1880],[18,2231]];
+  var cats=[['Groceries',180,232,600],['Dining Out',110,128,250],['Gas & Transport',118,42,220],['Subscriptions',64,0,60]];
+  var txns=[['kaley',"Trader Joe's",'Groceries · Kaley · Today','−$86.40'],['you','Shell','Gas & Transport · You · Today','−$48.10'],['kaley','Chipotle','Dining Out · Kaley · Yesterday','−$23.75'],['you','Spotify Duo','Subscriptions · You · Oct 16','−$16.99']];
+  function X(d){return 10+(d-1)/30*300} function Y(v){return 100-v/3850*90}
+  function renderDuo(){
+    var p=people[who];
+    document.getElementById('duo-perday').textContent=p.perday;
+    document.getElementById('duo-left').textContent=p.left;
+    document.getElementById('duo-pay').textContent=p.pay;
+    document.getElementById('duo-spent').textContent=p.spent;
+    var pts=cum.map(function(c){return [X(c[0]),Y(c[1]*p.scale)]});
+    var line=pts.map(function(q,i){return (i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)}).join(' ');
+    var last=pts[pts.length-1];
+    document.getElementById('duo-line').setAttribute('d',line);
+    document.getElementById('duo-area').setAttribute('d',line+' L'+last[0].toFixed(1)+' 100 L10 100 Z');
+    var dot=document.getElementById('duo-dot');dot.setAttribute('cx',last[0]);dot.setAttribute('cy',last[1]);
+    var idealAtToday=3850*p.scale*(17/30), diff=Math.round(idealAtToday-2231*p.scale);
+    var pill=document.getElementById('duo-pill');
+    if(Math.abs(diff)<25){pill.textContent='● On pace · $'+Math.abs(diff)+(diff>=0?' under':' over');pill.style.background='#0F3B36';pill.style.color='#5EEAD4'}
+    else if(diff>0){pill.textContent='● $'+diff+' under pace';pill.style.background='#0F3B36';pill.style.color='#5EEAD4'}
+    else{pill.textContent='● $'+(-diff)+' over pace';pill.style.background='#3B1A1A';pill.style.color='#FCA5A5'}
+    var bh='';
+    cats.forEach(function(c){
+      var f=c[1],k=c[2],lim=c[3],tot=f+k,over=tot>lim;
+      var fw=Math.min(f,lim)/lim*100, kw=Math.max(0,Math.min(tot,lim)-f)/lim*100, ow=over?Math.min(100,(tot-lim)/lim*100):0;
+      var shown=who==='both'?tot:who==='you'?f:k;
+      bh+='<div class="row"><div class="l"><b>'+c[0]+'</b><span><span class="'+(over&&who==='both'?'over':'')+'" style="'+(over&&who==='both'?'':'color:#EAF0F6;font-weight:700')+'">$'+shown+'</span> / $'+lim+'</span></div>'+
+        '<div class="bar '+(who==='you'?'dim':who==='kaley'?'dimf':'')+'"><i class="f" style="width:'+fw.toFixed(1)+'%"></i><i class="k" style="width:'+kw.toFixed(1)+'%"></i><i class="o" style="width:'+ow.toFixed(1)+'%"></i></div></div>';
+    });
+    document.getElementById('duo-budgets').innerHTML=bh;
+    var th='<div class="ey" style="color:#8FA3B8;padding:2px 2px 0">Recent</div>';
+    txns.filter(function(t){return who==='both'||t[0]===who}).slice(0,2).forEach(function(t){
+      th+='<div class="tx"><span class="d" style="background:'+(t[0]==='you'?'#2DD4BF':'#FB923C')+'">'+(t[0]==='you'?'F':'K')+'</span><div class="t"><b>'+t[1]+'</b><span>'+t[2]+'</span></div><b>'+t[3]+'</b></div>';
+    });
+    document.getElementById('duo-tx').innerHTML=th;
+    Array.prototype.forEach.call(document.querySelectorAll('#duo-seg button'),function(b){b.setAttribute('aria-pressed',String(b.dataset.who===who))});
+  }
+  document.getElementById('duo-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;who=b.dataset.who;renderDuo()});
+  renderDuo();
+
+  /* DailyBrief */
+  var first=document.getElementById('brief-first'),fb=document.getElementById('brief-done'),rc=document.getElementById('brief-reply');
+  fb.addEventListener('click',function(){var on=fb.getAttribute('aria-pressed')==='true';fb.setAttribute('aria-pressed',String(!on));fb.textContent=on?'Mark done':'Done';first.classList.toggle('done',!on);rc.textContent=on?'2':'1'});
+
+  /* OpsCheck */
+  var tasks=[
+    {id:1,label:'Restrooms clean and stocked',hint:'Soap, paper, floors',done:true},
+    {id:2,label:'Coffee station refilled',hint:'Cups, lids, creamer',done:true},
+    {id:3,label:'Cooler doors faced',hint:'Front and fill gaps',done:true},
+    {id:4,label:'Fuel pumps checked',hint:'Screens, squeegees, trash',photo:true,done:false},
+    {id:5,label:'Roller grill rotated',hint:'Log the holding temp',temp:true,done:false},
+    {id:6,label:'Lot and entrance swept',hint:'Note any spills',done:false}];
+  var temp='';
+  var camSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>';
+  var chk='<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+  function taskHtml(t){
+    var extra='';
+    if(t.photo&&!t.done)extra='<div class="chips"><span class="chip">'+camSvg+'Photo required</span></div>';
+    if(t.temp&&!t.done)extra='<div class="chips"><span class="chip blue">Hold ≥ 140 °F</span><label class="temp">Temp <input type="text" inputmode="decimal" id="ops-temp" value="'+temp+'" placeholder="°F" aria-label="Roller grill temperature in Fahrenheit"> °F</label></div>';
+    if(t.temp&&t.done)extra='<div class="chips"><span class="chip blue">Logged '+temp+' °F</span></div>';
+    return '<button type="button" class="task" role="checkbox" aria-checked="'+t.done+'" data-id="'+t.id+'"><span class="box">'+chk+'</span><span class="t"><b>'+t.label+'</b><span>'+t.hint+'</span>'+extra+'</span></button>';
+  }
+  var openEl=document.getElementById('ops-open'),doneEl=document.getElementById('ops-done'),tog=document.getElementById('ops-toggle');
+  function renderOps(){
+    openEl.innerHTML=tasks.filter(function(t){return !t.done}).map(taskHtml).join('');
+    doneEl.innerHTML=tasks.filter(function(t){return t.done}).map(taskHtml).join('');
+    var n=tasks.filter(function(t){return t.done}).length,left=6-n;
+    document.getElementById('ops-count').textContent=n;document.getElementById('ops-donecount').textContent=n;
+    Array.prototype.forEach.call(document.querySelectorAll('#ops-segs i'),function(s,i){s.classList.toggle('on',i<n)});
+    var grill=tasks[4];var sub=document.getElementById('ops-sub');
+    sub.textContent=left===0?'All six logged · ready to submit':left+' left'+(!grill.done&&!temp?' · grill temp still needed':'');
+    var s=document.getElementById('ops-submit');s.disabled=left>0;s.classList.toggle('ready',left===0);s.textContent=left===0?'Submit check':left+' left';
+    var ti=document.getElementById('ops-temp');if(ti){ti.addEventListener('input',function(){temp=ti.value});ti.addEventListener('click',function(e){e.stopPropagation()})}
+  }
+  function onTask(e){
+    var b=e.target.closest('.task');if(!b||e.target.closest('input'))return;
+    var t=tasks[+b.dataset.id-1];
+    if(t.temp&&!t.done){var v=parseFloat(temp);if(!(v>=140)){var ti=document.getElementById('ops-temp');if(ti){ti.focus();ti.style.borderColor='#B45309'}return}}
+    t.done=!t.done;renderOps();
+  }
+  openEl.addEventListener('click',onTask);doneEl.addEventListener('click',onTask);
+  tog.addEventListener('click',function(){var open=tog.getAttribute('aria-expanded')==='true';tog.setAttribute('aria-expanded',String(!open));tog.textContent=open?'Show':'Hide';doneEl.hidden=open});
+  renderOps();
+
+  /* RetaTrack */
+  var water=1.6;
+  document.getElementById('reta-add').addEventListener('click',function(){water=Math.min(2.5,Math.round((water+.25)*100)/100);document.getElementById('reta-water').textContent=water.toFixed(water%1?2:1).replace(/0$/,'');document.getElementById('reta-waterbar').style.width=(water/2.5*100)+'%'});
+})();
+</script>
