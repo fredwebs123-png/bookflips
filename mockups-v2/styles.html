@@ -1,0 +1,576 @@
+<title>DuoBudget & DailyBrief Styles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: one row per app, three phones showing the same home screen in three visual directions; a short style card under each. */
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --fg:#1B1B19; --muted:#6B6A64; --line:#DEDCD4;
+  --accent:#2F5D50; --accent-ink:#FFFFFF; --chip:#E9E7DF;
+  --font-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --font-poster:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+    --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+  --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:72px}
+header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,5vw,54px);line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.jump a:hover,.jump a:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+.chapter{display:flex;flex-direction:column;gap:28px;scroll-margin-top:16px}
+.chapter>h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:40px;line-height:1.05;letter-spacing:-.01em}
+.chapter>h2 small{display:block;font-family:var(--font-body);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.lead{margin:0;font-size:18px;line-height:1.45;max-width:66ch}
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;align-items:start}
+@media (min-width:1240px){.screens{grid-template-columns:repeat(4,1fr);gap:20px}.screens .phone{zoom:.74}.screens .cap{max-width:none}}
+.shot{display:flex;flex-direction:column;gap:16px;min-width:0}
+.cap{display:flex;flex-direction:column;gap:10px;max-width:390px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.cap h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.cap h3 small{color:var(--muted);font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.cap p{margin:0;color:var(--muted);font-size:14px}
+.cap dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.cap dt{color:var(--muted);font-weight:600}
+.cap dd{margin:0}
+.cap .sw{display:flex;gap:6px}
+.cap .sw i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.1)}
+.cap .pick{font-size:13px;padding-top:8px;border-top:1px solid var(--line)}
+.cap .pick b{font-weight:600}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px;max-width:70ch}
+footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
+
+/* phone frame (shared) */
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:52px;padding:11px;background:#121214;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #2C2C30,0 24px 60px rgba(0,0,0,.28)}
+.screen{position:relative;border-radius:42px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums}
+.screen::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#0B0B0C;z-index:5}
+.screen::after{content:"";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.28;z-index:5}
+.status{display:flex;justify-content:space-between;align-items:center;height:54px;padding:12px 30px 0 34px;font-weight:600;font-size:16px;letter-spacing:-.01em;flex:0 0 auto}
+.status .sys{display:flex;align-items:center;gap:6px}
+.status .batt{width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.status .batt::after{content:"";position:absolute;inset:2px;right:3px;background:currentColor;border-radius:1.5px}
+.status .batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;opacity:.5}
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.body>*{flex:0 0 auto}
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 28px;font-size:11px;font-weight:600}
+.tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;text-decoration:none;color:inherit;background:none;border:0;font:inherit;padding:4px 0;cursor:pointer}
+.tabbar svg{width:22px;height:22px}
+.ey{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+
+/* ════ DuoBudget A · Ledger (navy) ════ */
+.dA{background:#0F1B2D;color:#EAF0F6}
+.dA .body{padding:8px 20px 16px;gap:12px}
+.dA .top{display:flex;justify-content:space-between;align-items:center}
+.dA .top .ey{color:#8FA3B8}.dA .brand{font-weight:700;font-size:20px}
+.dA .avs{display:flex}.dA .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid #0F1B2D;color:#0F1B2D}.dA .av+.av{margin-left:-8px}
+.dA .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:12px;background:#1A2A40}
+.dA .seg span{border-radius:9px;min-height:34px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:#8FA3B8}
+.dA .seg .on{background:#EAF0F6;color:#0F1B2D}
+.dA .hero{background:#16263C;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.dA .hero .ey{color:#8FA3B8}
+.dA .big{font-size:48px;font-weight:700;line-height:1;letter-spacing:-.02em}.dA .big small{font-size:18px;font-weight:500;color:#8FA3B8;letter-spacing:0}
+.dA .sub{color:#B9C7D6;font-size:13px}
+.dA .pace{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8FA3B8}
+.dA .pill{background:#0F3B36;color:#5EEAD4;font-weight:700;font-size:12px;padding:4px 10px;border-radius:999px}
+.dA .card{background:#16263C;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.dA .ch{display:flex;justify-content:space-between;align-items:baseline}.dA .ch b{font-size:15px}.dA .ch a{font-size:12px;color:#5EEAD4;text-decoration:none;font-weight:600}
+.dA .row{display:flex;flex-direction:column;gap:5px}.dA .row .l{display:flex;justify-content:space-between;font-size:13px}.dA .row .l b{font-weight:600}.dA .row .l span{color:#8FA3B8}.dA .row .l span b{color:#EAF0F6}.dA .row .l .over{color:#FCA5A5}
+.dA .bar{height:7px;border-radius:4px;background:#243752;display:flex;overflow:hidden}.dA .bar i{display:block;height:100%}.dA .f{background:#2DD4BF}.dA .k{background:#FB923C}.dA .o{background:#EF4444}
+.dA .tx{display:flex;align-items:center;gap:10px;background:#16263C;border-radius:14px;padding:10px 12px}.dA .tx .d{width:30px;height:30px;border-radius:50%;flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#0F1B2D}.dA .tx .t{flex:1 1 auto;display:flex;flex-direction:column}.dA .tx .t span{font-size:12px;color:#8FA3B8}.dA .tx b{font-weight:700}
+.dA .tabbar{background:#0B1524;color:#8FA3B8;border-top:1px solid #1A2A40}.dA .tabbar .on{color:#5EEAD4}
+.dA .fab{width:50px;height:50px;border-radius:50%;background:#2DD4BF;color:#0F1B2D;margin-top:-26px;box-shadow:0 8px 20px rgba(45,212,191,.35);align-items:center;justify-content:center;min-width:0}
+
+/* ════ DuoBudget B · Receipt (paper + mono) ════ */
+.dB{background:#F3EEE4;color:#1C1917;font-family:var(--font-body)}
+.dB .mono{font-family:var(--font-mono)}
+.dB .body{padding:8px 22px 16px;gap:14px}
+.dB .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1C1917;padding-bottom:10px}
+.dB .top .ey{font-family:var(--font-mono);color:#78716C;letter-spacing:.06em}
+.dB .brand{font-family:var(--font-mono);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.dB .avs{display:flex;gap:4px}.dB .av{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:#F3EEE4}
+.dB .seg{display:flex;gap:14px;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#78716C}
+.dB .seg .on{color:#1C1917;border-bottom:2px solid #1C1917;padding-bottom:2px}
+.dB .hero{display:flex;flex-direction:column;gap:6px;padding:6px 0 12px;border-bottom:1px dashed #A8A29E}
+.dB .hero .ey{font-family:var(--font-mono);color:#78716C}
+.dB .big{font-family:var(--font-mono);font-weight:700;font-size:60px;line-height:1;letter-spacing:-.04em}
+.dB .big small{font-size:16px;font-weight:500;letter-spacing:0;color:#78716C;margin-left:8px}
+.dB .ln{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:12px;color:#44403C}
+.dB .ln .dots{flex:1 1 auto;border-bottom:1px dotted #A8A29E;margin:0 8px;transform:translateY(-4px)}
+.dB .ln b{color:#1C1917}
+.dB .ok{color:#0F766E;font-weight:700}
+.dB .sec{display:flex;flex-direction:column;gap:10px}
+.dB .sec h4{margin:0;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#78716C;display:flex;justify-content:space-between}
+.dB .sec h4 a{color:#1C1917;text-decoration:underline;text-underline-offset:3px}
+.dB .row{display:flex;flex-direction:column;gap:5px}
+.dB .bar{height:4px;background:#E7E0D3;display:flex}.dB .bar i{display:block;height:100%}.dB .f{background:#0F766E}.dB .k{background:#C2410C}.dB .o{background:#B91C1C}
+.dB .tx{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;padding:6px 0;border-bottom:1px dotted #A8A29E}
+.dB .tx span{color:#78716C}.dB .tx b{font-weight:700}
+.dB .tx .who{display:inline-block;width:16px;height:16px;border-radius:3px;color:#F3EEE4;font-size:10px;text-align:center;line-height:16px;margin-right:6px;vertical-align:1px}
+.dB .tabbar{background:#F3EEE4;border-top:2px solid #1C1917;color:#78716C;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.dB .tabbar .on{color:#1C1917}
+.dB .fab{width:48px;height:48px;border-radius:10px;background:#1C1917;color:#F3EEE4;margin-top:-24px;align-items:center;justify-content:center;min-width:0}
+
+/* ════ DuoBudget C · Poster (white + blocks) ════ */
+.dC{background:#FFFFFF;color:#0A0A0A}
+.dC .body{padding:8px 0 16px;gap:0}
+.dC .top{display:flex;justify-content:space-between;align-items:center;padding:0 20px 12px}
+.dC .top .ey{color:#6B7280}.dC .brand{font-family:var(--font-poster);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.dC .avs{display:flex;gap:-6px}.dC .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-poster);font-weight:800;font-size:13px;color:#0A0A0A;border:2px solid #FFFFFF}.dC .av+.av{margin-left:-10px}
+.dC .seg{display:flex;gap:6px;padding:0 20px 14px}
+.dC .seg span{border:2px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}
+.dC .seg .on{background:#0A0A0A;color:#FFFFFF}
+.dC .hero{background:#00B3A4;color:#0A0A0A;padding:22px 20px 18px;display:flex;flex-direction:column;gap:4px}
+.dC .hero .ey{color:#064E46}
+.dC .big{font-family:var(--font-poster);font-weight:800;font-size:84px;line-height:.9;letter-spacing:-.04em}
+.dC .big small{font-family:var(--font-body);font-size:18px;font-weight:700;letter-spacing:-.01em}
+.dC .sub{font-size:14px;font-weight:600;color:#064E46;margin-top:8px}
+.dC .pace{display:flex;gap:8px;margin-top:10px}
+.dC .pace span{background:#0A0A0A;color:#FFFFFF;font-weight:700;font-size:12px;padding:6px 10px;border-radius:999px}
+.dC .sec{padding:16px 20px 0;display:flex;flex-direction:column;gap:8px}
+.dC .sec h4{margin:0 0 4px;font-family:var(--font-poster);font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;justify-content:space-between;align-items:baseline}
+.dC .sec h4 a{font-family:var(--font-body);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.dC .block{position:relative;height:40px;border-radius:10px;background:#F3F4F6;overflow:hidden;display:flex;align-items:center}
+.dC .block i{position:absolute;top:0;bottom:0;left:0}
+.dC .block .f{background:#00B3A4}.dC .block .k{background:#FF7A1A}.dC .block .o{background:#E11D48}
+.dC .block b,.dC .block span{position:relative;z-index:1;padding:0 12px;font-weight:700;font-size:14px}
+.dC .block span{margin-left:auto;font-weight:600;font-size:13px}
+.dC .block.over span{color:#FFFFFF}
+.dC .tx{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid #0A0A0A;font-weight:700}
+.dC .tx span{display:block;font-size:12px;font-weight:500;color:#6B7280}
+.dC .tabbar{background:#0A0A0A;color:#9CA3AF;padding-top:12px}.dC .tabbar .on{color:#FFFFFF}
+.dC .fab{width:52px;height:52px;border-radius:50%;background:#00B3A4;color:#0A0A0A;margin-top:-28px;align-items:center;justify-content:center;min-width:0;border:3px solid #0A0A0A}
+
+/* ════ DailyBrief A · Paper (serif + plum) ════ */
+.bA{background:#F7F5F0;color:#1D1B18}
+.bA .body{padding:4px 20px 16px;gap:12px}
+.bA .top{display:flex;justify-content:space-between;align-items:flex-end}
+.bA .day{font-family:var(--font-display);font-size:44px;line-height:1;letter-spacing:-.01em}
+.bA .date{font-size:12px;color:#6F6B64;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.bA .today{font-size:12px;font-weight:600;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:6px 12px}
+.bA .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;color:#6F6B64}
+.bA .week div{padding:6px 0 4px;border-radius:10px;display:flex;flex-direction:column;gap:2px}.bA .week b{font-size:15px;color:#1D1B18;font-weight:600}
+.bA .week .on{background:#8B2F5C;color:#F7E6EE}.bA .week .on b{color:#FFFFFF}
+.bA .stats{display:flex;gap:6px;font-size:12px;color:#6F6B64}.bA .stats span{background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:5px 10px}.bA .stats b{color:#1D1B18;font-weight:700}
+.bA .first{background:#1D1B18;color:#F7F5F0;border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
+.bA .first .ey{color:#C9B2BE}.bA .first p{margin:2px 0 0;font-size:14px;line-height:1.35}.bA .first p b{color:#FFFFFF}
+.bA .first span.btn{flex:0 0 auto;background:#8B2F5C;color:#FFFFFF;border-radius:10px;min-height:36px;padding:0 12px;font-weight:600;font-size:13px;display:flex;align-items:center}
+.bA .tl{position:relative;display:flex;flex-direction:column;padding:14px 0 0 66px}
+.bA .tl::before{content:"";position:absolute;left:52px;top:14px;bottom:4px;width:2px;background:#E6E2DA}
+.bA .ev{position:relative;display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:12px;background:#FFFFFF;border:1px solid #E6E2DA;margin:0 0 8px 14px}
+.bA .ev .t{position:absolute;left:-80px;top:9px;width:44px;text-align:right;font-size:12px;font-weight:600;color:#6F6B64}
+.bA .ev::before{content:"";position:absolute;left:-33px;top:12px;width:10px;height:10px;border-radius:50%;background:#F7F5F0;border:2px solid #C4BDB3;box-sizing:border-box}
+.bA .ev b{font-size:14px;font-weight:600}.bA .ev span{font-size:12px;color:#6F6B64}
+.bA .ev.now{background:#8B2F5C;color:#FFFFFF;border-color:#8B2F5C}.bA .ev.now span{color:#F0D4E1}.bA .ev.now .t{color:#8B2F5C}.bA .ev.now::before{background:#8B2F5C;border-color:#8B2F5C;box-shadow:0 0 0 4px rgba(139,47,92,.2)}
+.bA .ev.reply{border-style:dashed;border-color:#C9A3B8;background:#FBF4F8}.bA .ev.reply::before{border-color:#8B2F5C}
+.bA .free{margin:0 0 8px 14px;padding:4px 12px;color:#8E887F;font-style:italic;font-family:var(--font-display);font-size:15px}
+.bA .nowline{position:relative;height:0;margin:4px 0 14px 0}
+.bA .nowline::before{content:"";position:absolute;left:-18px;right:0;top:0;border-top:2px solid #8B2F5C}
+.bA .nowline::after{content:"";position:absolute;left:-18px;top:-4px;width:10px;height:10px;border-radius:50%;background:#8B2F5C}
+.bA .nowline span{position:absolute;left:-66px;top:-9px;width:40px;text-align:right;font-size:11px;font-weight:700;color:#8B2F5C;letter-spacing:.04em;text-transform:uppercase}
+.bA .tabbar{background:#FFFFFF;border-top:1px solid #E6E2DA;color:#6F6B64}.bA .tabbar .on{color:#8B2F5C}
+
+/* ════ DailyBrief B · Blocks (soft, grouped by time of day) ════ */
+.bB{background:#EEF2F7;color:#1F2937}
+.bB .body{padding:4px 20px 16px;gap:14px}
+.bB .top{display:flex;justify-content:space-between;align-items:center}
+.bB .day{font-weight:700;font-size:30px;letter-spacing:-.02em;line-height:1.05}
+.bB .date{font-size:13px;color:#6B7280;font-weight:500}
+.bB .ring{width:44px;height:44px;border-radius:50%;background:conic-gradient(#1D4ED8 0 33%,#DBE3F0 33% 100%);display:flex;align-items:center;justify-content:center}
+.bB .ring i{width:34px;height:34px;border-radius:50%;background:#EEF2F7;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:11px}
+.bB .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.bB .week div{background:#FFFFFF;border-radius:12px;padding:8px 0;font-size:11px;color:#6B7280;display:flex;flex-direction:column;gap:2px}
+.bB .week b{font-size:15px;color:#1F2937}
+.bB .week .on{background:#1D4ED8;color:#C7D7FF}.bB .week .on b{color:#FFFFFF}
+.bB .first{background:#1D4ED8;color:#FFFFFF;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.bB .first .ey{color:#C7D7FF}.bB .first p{margin:0;font-size:15px;font-weight:600;line-height:1.3}
+.bB .first .act{display:flex;gap:8px;margin-top:8px}
+.bB .first .act span{background:#FFFFFF;color:#1D4ED8;font-weight:700;font-size:12px;padding:7px 12px;border-radius:9px}
+.bB .first .act span.g{background:rgba(255,255,255,.18);color:#FFFFFF}
+.bB .grp{display:flex;flex-direction:column;gap:8px}
+.bB .chip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px}
+.bB .chip.m{background:#FFE8D6;color:#B45309}.bB .chip.a{background:#DCEBFF;color:#1D4ED8}.bB .chip.e{background:#E9E2FF;color:#6D28D9}
+.bB .ev{display:flex;align-items:center;gap:12px;background:#FFFFFF;border-radius:14px;padding:10px 12px}
+.bB .ev .ic{width:36px;height:36px;border-radius:10px;flex:0 0 36px;display:flex;align-items:center;justify-content:center}
+.bB .ev .ic svg{width:18px;height:18px}
+.bB .ev .t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}.bB .ev b{font-size:14px;font-weight:600}.bB .ev span{font-size:12px;color:#6B7280}
+.bB .ev .chk{width:24px;height:24px;border-radius:50%;border:2px solid #CBD5E1;flex:0 0 24px}
+.bB .ev.now{outline:2px solid #1D4ED8}
+.bB .ev.now .when{font-size:11px;font-weight:700;color:#1D4ED8;padding:3px 8px;background:#DCEBFF;border-radius:999px}
+.bB .tabbar{background:#FFFFFF;border-radius:20px 20px 0 0;color:#6B7280}.bB .tabbar .on{color:#1D4ED8}
+
+/* ════ DailyBrief C · Console (dark + mono + amber) ════ */
+.bC{background:#0E0F12;color:#E6E6E6;font-family:var(--font-mono)}
+.bC .body{padding:6px 20px 16px;gap:14px}
+.bC .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #1F2228;padding-bottom:12px}
+.bC .clock{font-size:52px;font-weight:700;line-height:1;letter-spacing:-.04em}
+.bC .clock small{font-size:14px;font-weight:500;color:#8A8F98;letter-spacing:0;margin-left:6px}
+.bC .date{font-size:12px;color:#8A8F98;letter-spacing:.08em;text-transform:uppercase}
+.bC .date b{color:#F5B700;font-weight:700}
+.bC .cnt{text-align:right;font-size:11px;color:#8A8F98;line-height:1.7;letter-spacing:.04em}
+.bC .cnt b{color:#E6E6E6;font-weight:700}
+.bC .first{border:1px solid #F5B700;border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;background:rgba(245,183,0,.06)}
+.bC .first .ey{color:#F5B700;letter-spacing:.12em}
+.bC .first p{margin:0;font-family:var(--font-body);font-size:14px;line-height:1.4;color:#E6E6E6}
+.bC .first p b{color:#F5B700;font-weight:600}
+.bC .agenda{display:flex;flex-direction:column}
+.bC .r{display:grid;grid-template-columns:50px 1fr auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid #1F2228;font-size:13px}
+.bC .r:first-child{border-top:0}
+.bC .r .t{color:#8A8F98;font-size:12px}
+.bC .r .n{font-family:var(--font-body);font-weight:600;color:#E6E6E6}
+.bC .r .n span{display:block;font-family:var(--font-mono);font-size:11px;color:#8A8F98;font-weight:400;margin-top:2px}
+.bC .r .d{font-size:11px;color:#8A8F98}
+.bC .r.now{background:#F5B700;color:#0E0F12;margin:0 -20px;padding:10px 20px;border-radius:0}
+.bC .r.now .t,.bC .r.now .n,.bC .r.now .n span,.bC .r.now .d{color:#0E0F12}
+.bC .r.now .n span{opacity:.75}
+.bC .r.reply .n::before{content:"↩ ";color:#F5B700}
+.bC .r.dim{opacity:.55}
+.bC .nowmark{display:flex;align-items:center;gap:8px;font-size:10px;color:#F5B700;letter-spacing:.12em;text-transform:uppercase;padding:4px 0}
+.bC .nowmark::after{content:"";flex:1 1 auto;border-top:1px dashed #F5B700;opacity:.6}
+.bC .apps{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#1F2228;border:1px solid #1F2228;border-radius:8px;overflow:hidden}
+.bC .apps div{background:#0E0F12;padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:11px;color:#8A8F98}
+.bC .apps b{font-size:15px;color:#E6E6E6;font-weight:700}
+.bC .tabbar{background:#0E0F12;border-top:1px solid #1F2228;color:#8A8F98;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase}.bC .tabbar .on{color:#F5B700}
+
+/* ════ D · Marvie (from the uploaded Sketch kit: slate ground, mint/coral/amber color-block cards, SF Pro, circled-home nav) ════ */
+.mv{background:#22343C;color:#FFFFFF;font-family:-apple-system,"SF Pro Display","SF Pro Text","Instrument Sans",system-ui,sans-serif}
+.mv .body{padding:8px 20px 16px;gap:14px}
+.mv .top{display:flex;justify-content:space-between;align-items:center}
+.mv .h{font-weight:700;font-size:24px;letter-spacing:-.01em}
+.mv .sub{font-size:14px;color:#96A7AF}
+.mv .avs{display:flex}.mv .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#22343C;border:2px solid #22343C}.mv .av+.av{margin-left:-8px}
+.mv .seg{display:flex;gap:8px}
+.mv .seg span{background:#30444E;color:#96A7AF;font-weight:600;font-size:13px;padding:8px 14px;border-radius:12px}
+.mv .seg .on{background:#3DD598;color:#22343C}
+.mv .block{border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;color:#22343C}
+.mv .block.mint{background:#3DD598}.mv .block.coral{background:#FF575F;color:#FFFFFF}.mv .block.amber{background:#FFC542}
+.mv .block .ey{opacity:.75}
+.mv .block .big{font-size:42px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.mv .block .big small{font-size:14px;font-weight:600;letter-spacing:0;opacity:.75;margin-left:4px}
+.mv .block .btn{align-self:flex-start;margin-top:6px;background:#22343C;color:#FFFFFF;font-weight:600;font-size:13px;padding:8px 14px;border-radius:12px}
+.mv .block.coral .btn{background:#FFFFFF;color:#FF575F}
+.mv .ringrow{display:flex;align-items:center;gap:14px}
+.mv .ring{width:74px;height:74px;border-radius:50%;flex:0 0 74px;display:flex;align-items:center;justify-content:center}
+.mv .ring i{width:54px;height:54px;border-radius:50%;background:#30444E;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:13px;color:#FFFFFF}
+.mv .card{background:#30444E;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.mv .ch{display:flex;justify-content:space-between;align-items:baseline}.mv .ch b{font-size:16px;font-weight:700}.mv .ch span{font-size:13px;color:#96A7AF}
+.mv .row{display:flex;flex-direction:column;gap:6px}
+.mv .row .l{display:flex;justify-content:space-between;font-size:14px}.mv .row .l b{font-weight:600}.mv .row .l span{color:#96A7AF}.mv .row .l span b{color:#FFFFFF}
+.mv .bar{height:8px;border-radius:4px;background:#22343C;display:flex;overflow:hidden}.mv .bar i{display:block;height:100%}.mv .f{background:#3DD598}.mv .k{background:#FF575F}.mv .o{background:#FFC542}
+.mv .tx{display:flex;align-items:center;gap:12px;background:#30444E;border-radius:14px;padding:10px 12px}
+.mv .tx .d{width:36px;height:36px;border-radius:50%;flex:0 0 36px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#22343C}
+.mv .tx .t{flex:1 1 auto;display:flex;flex-direction:column}.mv .tx .t b{font-weight:600;font-size:14px}.mv .tx .t span{font-size:12px;color:#96A7AF}.mv .tx>b{font-weight:700}
+.mv .legend{display:flex;gap:14px;font-size:12px;color:#96A7AF}.mv .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.mv .tabbar{background:#22343C;border-top:1px solid #30444E;color:#96A7AF;padding-top:10px}
+.mv .tabbar .home{width:52px;height:52px;border-radius:50%;background:#3DD598;color:#22343C;align-items:center;justify-content:center;min-width:0;margin-top:-20px;box-shadow:0 8px 20px rgba(61,213,152,.35)}
+/* DailyBrief in Marvie */
+.mv .week{display:flex;justify-content:space-between}
+.mv .week div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:#96A7AF;width:40px;padding:8px 0;border-radius:12px}
+.mv .week b{font-size:15px;color:#FFFFFF;font-weight:600}
+.mv .week .on{background:#3DD598;color:#22343C}.mv .week .on b{color:#22343C}
+.mv .ev{display:flex;align-items:center;gap:12px;background:#30444E;border-radius:14px;padding:11px 12px}
+.mv .ev .ic{width:40px;height:40px;border-radius:50%;flex:0 0 40px;display:flex;align-items:center;justify-content:center;color:#22343C}
+.mv .ev .ic svg{width:18px;height:18px}
+.mv .ev .t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}.mv .ev b{font-size:14px;font-weight:600}.mv .ev span{font-size:12px;color:#96A7AF}
+.mv .ev .tm{font-size:13px;font-weight:600;color:#96A7AF}
+.mv .ev.now{background:#3DD598;color:#22343C}.mv .ev.now span,.mv .ev.now .tm{color:#22343C;opacity:.75}.mv .ev.now .ic{background:#22343C;color:#3DD598}
+.mv .free{font-size:13px;color:#96A7AF;padding:2px 4px;display:flex;align-items:center;gap:8px}
+.mv .free::before,.mv .free::after{content:"";flex:1 1 auto;border-top:1px dashed #475E69}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">designer-fun · mockups v2 · style explorations</div>
+  <h1>Same screen, <em>four</em> directions each</h1>
+  <p>The home screen of each app rebuilt in four distinct visual systems, with identical content so only the style varies. A is the direction from the deep dive. B and C push in opposite directions. D is built from the Marvie iOS kit you uploaded: its actual palette, type and components, applied to your content. Pick one, or point at the parts you like in each.</p>
+  <nav class="jump" aria-label="Jump to app"><a href="#duobudget">DuoBudget</a><a href="#dailybrief">DailyBrief</a><a href="https://claude.ai/artifact/8DS8x6UvB46iqjTNbx9g7N">All four apps ↗</a></nav>
+</header>
+
+<!-- ═══════════════ DuoBudget ═══════════════ -->
+<section class="chapter" id="duobudget" aria-labelledby="h-duo">
+  <h2 id="h-duo"><small>01 · Couples budget</small>DuoBudget</h2>
+  <p class="lead">Three answers to the same question: how should money feel between two people? Calm instrument, honest receipt, or loud scoreboard.</p>
+  <div class="screens">
+
+    <!-- A Ledger -->
+    <div class="shot">
+    <div class="phone"><div class="screen dA">
+      <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="ey">October 2026 · Day 18 of 31</div><div class="brand">DuoBudget</div></div><div class="avs"><span class="av" style="background:#2DD4BF">F</span><span class="av" style="background:#FB923C">K</span></div></div>
+        <div class="seg"><span class="on">Both</span><span>You</span><span>Kaley</span></div>
+        <div class="hero">
+          <div class="ey">Safe to spend per day</div>
+          <div class="big">$82<small> /day until Fri's paycheck</small></div>
+          <div class="sub">$412 left · 5 days · next deposit <b>$1,150</b></div>
+          <svg viewBox="0 0 320 110" width="100%" height="110" role="img" aria-label="Spending on pace with the month" style="display:block">
+            <line x1="10" y1="100" x2="310" y2="100" stroke="#243752"/><line x1="10" y1="100" x2="310" y2="10" stroke="#5B7490" stroke-width="1.5" stroke-dasharray="4 4"/><line x1="180" y1="6" x2="180" y2="100" stroke="#243752"/>
+            <path d="M10 100 L40 92.3 L80 79.2 L120 66.8 L150 56 L180 48.9 L180 100 Z" fill="#2DD4BF" fill-opacity=".14"/><path d="M10 100 L40 92.3 L80 79.2 L120 66.8 L150 56 L180 48.9" fill="none" stroke="#2DD4BF" stroke-width="2.5" stroke-linejoin="round"/><circle cx="180" cy="48.9" r="4.5" fill="#2DD4BF" stroke="#16263C" stroke-width="2"/>
+            <text x="10" y="109" font-size="10" fill="#8FA3B8" font-family="Instrument Sans">Oct 1</text><text x="180" y="109" font-size="10" fill="#EAF0F6" text-anchor="middle" font-weight="600" font-family="Instrument Sans">Today</text><text x="310" y="109" font-size="10" fill="#8FA3B8" text-anchor="end" font-family="Instrument Sans">Oct 31</text><text x="236" y="60" font-size="10" fill="#8FA3B8" font-family="Instrument Sans">even pace</text>
+          </svg>
+          <div class="pace"><span>$2,186 of $3,850 flexible</span><span class="pill">● On pace · $4 under</span></div>
+        </div>
+        <div class="card">
+          <div class="ch"><b>Budgets</b><a href="#duobudget">See all 16</a></div>
+          <div class="row"><div class="l"><b>Groceries</b><span><b>$412</b> / $600</span></div><div class="bar"><i class="f" style="width:30%"></i><i class="k" style="width:38.7%"></i></div></div>
+          <div class="row"><div class="l"><b>Dining Out</b><span><b>$238</b> / $250</span></div><div class="bar"><i class="f" style="width:44%"></i><i class="k" style="width:51.2%"></i></div></div>
+          <div class="row"><div class="l"><b>Gas &amp; Transport</b><span><b>$160</b> / $220</span></div><div class="bar"><i class="f" style="width:53.6%"></i><i class="k" style="width:19.1%"></i></div></div>
+          <div class="row"><div class="l"><b>Subscriptions</b><span><b class="over">$64</b> / $60</span></div><div class="bar"><i class="f" style="width:93.3%"></i><i class="o" style="width:6.7%"></i></div></div>
+        </div>
+        <div class="ey" style="color:#8FA3B8;padding:2px 2px 6px">Recent</div>
+        <div class="tx"><span class="d" style="background:#FB923C">K</span><div class="t"><b>Trader Joe's</b><span>Groceries · Kaley · Today</span></div><b>−$86.40</b></div>
+        <div style="height:6px"></div>
+        <div class="tx"><span class="d" style="background:#2DD4BF">F</span><div class="t"><b>Shell</b><span>Gas &amp; Transport · You · Today</span></div><b>−$48.10</b></div>
+      </div>
+      <nav class="tabbar"><a href="#duobudget" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><button type="button" class="fab" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a></nav>
+    </div></div>
+    <div class="cap"><h3>A · Ledger<small>current direction</small></h3><p>A calm instrument panel. Dark navy keeps the partner colors legible without shouting; cards group the data; one teal verdict.</p>
+      <dl><dt>Type</dt><dd>Instrument Sans throughout; tight bold numerals</dd><dt>Color</dt><dd><span class="sw"><i style="background:#0F1B2D"></i><i style="background:#16263C"></i><i style="background:#2DD4BF"></i><i style="background:#FB923C"></i></span></dd><dt>Mood</dt><dd>Private, trustworthy, evening-friendly</dd></dl>
+      <div class="pick"><b>Pick this if</b> you want it to feel like a tool you check twice a day without it nagging.</div></div>
+    </div>
+
+    <!-- B Receipt -->
+    <div class="shot">
+    <div class="phone"><div class="screen dB">
+      <div class="status mono"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="ey">OCT 2026 · DAY 18/31</div><div class="brand">DUOBUDGET</div></div><div class="avs"><span class="av" style="background:#0F766E">F</span><span class="av" style="background:#C2410C">K</span></div></div>
+        <div class="seg"><span class="on">Both</span><span>You</span><span>Kaley</span></div>
+        <div class="hero">
+          <div class="ey">Safe to spend / day</div>
+          <div class="big">$82<small>until Fri 23</small></div>
+          <div class="ln"><span>LEFT TO PAYDAY</span><span class="dots"></span><b>$412 · 5d</b></div>
+          <div class="ln"><span>MONTH TO DATE</span><span class="dots"></span><b>$2,186 / $3,850</b></div>
+          <div class="ln"><span>PACE</span><span class="dots"></span><b class="ok">ON PACE · $4 UNDER</b></div>
+        </div>
+        <div class="sec">
+          <h4><span>Budgets</span><a href="#duobudget">all 16</a></h4>
+          <div class="row"><div class="ln"><span>GROCERIES</span><span class="dots"></span><b>412 / 600</b></div><div class="bar"><i class="f" style="width:30%"></i><i class="k" style="width:38.7%"></i></div></div>
+          <div class="row"><div class="ln"><span>DINING OUT</span><span class="dots"></span><b>238 / 250</b></div><div class="bar"><i class="f" style="width:44%"></i><i class="k" style="width:51.2%"></i></div></div>
+          <div class="row"><div class="ln"><span>GAS &amp; TRANSPORT</span><span class="dots"></span><b>160 / 220</b></div><div class="bar"><i class="f" style="width:53.6%"></i><i class="k" style="width:19.1%"></i></div></div>
+          <div class="row"><div class="ln"><span>SUBSCRIPTIONS</span><span class="dots"></span><b style="color:#B91C1C">64 / 60 ▲</b></div><div class="bar"><i class="f" style="width:93.3%"></i><i class="o" style="width:6.7%"></i></div></div>
+        </div>
+        <div class="sec">
+          <h4><span>Recent</span><span>F = Fred · K = Kaley</span></h4>
+          <div class="tx"><span><i class="who" style="background:#C2410C">K</i>TRADER JOE'S <span>· groceries</span></span><b>−86.40</b></div>
+          <div class="tx"><span><i class="who" style="background:#0F766E">F</i>SHELL <span>· gas</span></span><b>−48.10</b></div>
+          <div class="tx"><span><i class="who" style="background:#C2410C">K</i>CHIPOTLE <span>· dining</span></span><b>−23.75</b></div>
+        </div>
+      </div>
+      <nav class="tabbar"><a href="#duobudget" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><button type="button" class="fab" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a></nav>
+    </div></div>
+    <div class="cap"><h3>B · Receipt<small>paper and mono</small></h3><p>Money as a printed slip: dotted leaders, monospace numerals, no cards at all. The honesty of a till receipt, with the partner split as two inks.</p>
+      <dl><dt>Type</dt><dd>JetBrains Mono for every number and label; Instrument Sans for prose</dd><dt>Color</dt><dd><span class="sw"><i style="background:#F3EEE4"></i><i style="background:#1C1917"></i><i style="background:#0F766E"></i><i style="background:#C2410C"></i></span></dd><dt>Mood</dt><dd>Frugal, exact, a little nostalgic</dd></dl>
+      <div class="pick"><b>Pick this if</b> the app's personality should be "we keep receipts", and you like a style no other budget app has.</div></div>
+    </div>
+
+    <!-- C Poster -->
+    <div class="shot">
+    <div class="phone"><div class="screen dC">
+      <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="ey">October · day 18 of 31</div><div class="brand">DuoBudget</div></div><div class="avs"><span class="av" style="background:#00B3A4">F</span><span class="av" style="background:#FF7A1A">K</span></div></div>
+        <div class="seg"><span class="on">Both</span><span>You</span><span>Kaley</span></div>
+        <div class="hero">
+          <div class="ey">Safe to spend today</div>
+          <div class="big">$82<small>/day</small></div>
+          <div class="sub">$412 until Friday's paycheck · 5 days</div>
+          <div class="pace"><span>On pace</span><span style="background:rgba(10,10,10,.12);color:#064E46">$2,186 of $3,850</span></div>
+        </div>
+        <div class="sec">
+          <h4>Budgets <a href="#duobudget">All 16</a></h4>
+          <div class="block"><i class="f" style="width:30%"></i><i class="k" style="left:30%;width:38.7%"></i><b>Groceries</b><span>$412 / $600</span></div>
+          <div class="block"><i class="f" style="width:44%"></i><i class="k" style="left:44%;width:51.2%"></i><b>Dining Out</b><span>$238 / $250</span></div>
+          <div class="block"><i class="f" style="width:53.6%"></i><i class="k" style="left:53.6%;width:19.1%"></i><b>Gas &amp; Transport</b><span>$160 / $220</span></div>
+          <div class="block over"><i class="f" style="width:93.3%"></i><i class="o" style="left:93.3%;width:6.7%"></i><b>Subscriptions</b><span style="color:#0A0A0A">$64 / $60 · over</span></div>
+        </div>
+        <div class="sec">
+          <h4>Recent</h4>
+          <div class="tx"><div>Trader Joe's<span>Groceries · Kaley · today</span></div><div>−$86.40</div></div>
+          <div class="tx"><div>Shell<span>Gas &amp; Transport · you · today</span></div><div>−$48.10</div></div>
+        </div>
+      </div>
+      <nav class="tabbar"><a href="#duobudget" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><button type="button" class="fab" aria-label="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a></nav>
+    </div></div>
+    <div class="cap"><h3>C · Poster<small>white and blocks</small></h3><p>A scoreboard. One giant number on a solid teal field, budgets as thick two-tone blocks you read from across the room, black outline buttons.</p>
+      <dl><dt>Type</dt><dd>Bricolage Grotesque 800 for display; Instrument Sans for everything else</dd><dt>Color</dt><dd><span class="sw"><i style="background:#FFFFFF"></i><i style="background:#0A0A0A"></i><i style="background:#00B3A4"></i><i style="background:#FF7A1A"></i></span></dd><dt>Mood</dt><dd>Confident, playful, daylight</dd></dl>
+      <div class="pick"><b>Pick this if</b> you want the per-day number to be the whole brand and you'd share screenshots of it.</div></div>
+    </div>
+
+    <!-- D Marvie -->
+    <div class="shot">
+    <div class="phone"><div class="screen mv">
+      <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="h">DuoBudget</div><div class="sub">October · day 18 of 31</div></div><div class="avs"><span class="av" style="background:#3DD598">F</span><span class="av" style="background:#FF575F">K</span></div></div>
+        <div class="seg"><span class="on">Both</span><span>You</span><span>Kaley</span></div>
+        <div class="block mint">
+          <div class="ey">Safe to spend per day</div>
+          <div class="big">$82<small>until Friday's paycheck</small></div>
+          <div class="sub" style="color:#22343C;opacity:.8">$412 left · 5 days · next deposit $1,150</div>
+          <span class="btn">Add a purchase</span>
+        </div>
+        <div class="card">
+          <div class="ringrow">
+            <div class="ring" style="background:conic-gradient(#3DD598 0 57%,#22343C 57% 100%)"><i>57%</i></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">On pace</b><span style="font-size:13px;color:#96A7AF">$2,186 of $3,850 flexible · $4 under an even month</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><b>Budgets</b><span>See all 16</span></div>
+          <div class="legend"><span><i style="background:#3DD598"></i>Fred</span><span><i style="background:#FF575F"></i>Kaley</span><span><i style="background:#FFC542"></i>Over</span></div>
+          <div class="row"><div class="l"><b>Groceries</b><span><b>$412</b> / $600</span></div><div class="bar"><i class="f" style="width:30%"></i><i class="k" style="width:38.7%"></i></div></div>
+          <div class="row"><div class="l"><b>Dining Out</b><span><b>$238</b> / $250</span></div><div class="bar"><i class="f" style="width:44%"></i><i class="k" style="width:51.2%"></i></div></div>
+          <div class="row"><div class="l"><b>Gas &amp; Transport</b><span><b>$160</b> / $220</span></div><div class="bar"><i class="f" style="width:53.6%"></i><i class="k" style="width:19.1%"></i></div></div>
+          <div class="row"><div class="l"><b>Subscriptions</b><span><b style="color:#FFC542">$64</b> / $60</span></div><div class="bar"><i class="f" style="width:93.3%"></i><i class="o" style="width:6.7%"></i></div></div>
+        </div>
+        <div class="tx"><span class="d" style="background:#FF575F">K</span><div class="t"><b>Trader Joe's</b><span>Groceries · Kaley · Today</span></div><b>−$86.40</b></div>
+        <div class="tx"><span class="d" style="background:#3DD598">F</span><div class="t"><b>Shell</b><span>Gas &amp; Transport · You · Today</span></div><b>−$48.10</b></div>
+      </div>
+      <nav class="tabbar"><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><button type="button" class="home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></button><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a><a href="#duobudget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>You</a></nav>
+    </div></div>
+    <div class="cap"><h3>D · Marvie<small>from your Sketch kit</small></h3><p>Your uploaded kit applied straight: slate ground, the mint color-block card as hero, a progress ring for pace, and the kit's circled-home tab bar. Partner colors map to the kit's mint and coral; amber is its warning.</p>
+      <dl><dt>Type</dt><dd>SF Pro Display (the kit's face; system font on Apple, Instrument Sans elsewhere)</dd><dt>Color</dt><dd><span class="sw"><i style="background:#22343C"></i><i style="background:#30444E"></i><i style="background:#3DD598"></i><i style="background:#FF575F"></i><i style="background:#FFC542"></i></span></dd><dt>Mood</dt><dd>Polished, app-store generic in a good way, dark-mode native</dd></dl>
+      <div class="pick"><b>Pick this if</b> you want to build fast on top of the kit's existing components and ship something that already looks like a finished product.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DailyBrief ═══════════════ -->
+<section class="chapter" id="dailybrief" aria-labelledby="h-brief">
+  <h2 id="h-brief"><small>02 · Morning brief</small>DailyBrief</h2>
+  <p class="lead">Three ways to be read at 7 AM: a printed morning paper, a soft planner that sorts the day into blocks, or a terminal that just tells you what's next.</p>
+  <div class="screens">
+
+    <!-- A Paper -->
+    <div class="shot">
+    <div class="phone"><div class="screen bA">
+      <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="date">Oct 18, 2026 · 7:05 AM</div><div class="day">Sunday</div></div><span class="today">Today</span></div>
+        <div class="week"><div class="on"><span>S</span><b>18</b></div><div><span>M</span><b>19</b></div><div><span>T</span><b>20</b></div><div><span>W</span><b>21</b></div><div><span>T</span><b>22</b></div><div><span>F</span><b>23</b></div><div><span>S</span><b>24</b></div></div>
+        <div class="stats"><span><b>3</b> meetings</span><span><b>2</b> to reply</span><span><b>2 h 40 m</b> free</span></div>
+        <div class="first"><div style="flex:1 1 auto;min-width:0"><div class="ey">Do first · due Tue</div><p>Reply to the <b>landlord</b> about the lease renewal, before your 10:00.</p></div><span class="btn">Mark done</span></div>
+        <div class="tl">
+          <div class="nowline"><span>Now</span></div>
+          <div class="ev reply"><span class="t">8:30</span><b>Reply: district manager</b><span>Friday's sales numbers · 10 min</span></div>
+          <div class="ev now"><span class="t">10:00</span><b>Weekly planning</b><span>Video call · 30 min · starts in 2 h 55 m</span></div>
+          <div class="free">free until 12:30</div>
+          <div class="ev"><span class="t">12:30</span><b>Lunch with Kaley</b><span>Downtown · 1 h</span></div>
+          <div class="ev"><span class="t">15:00</span><b>Site walk</b><span>Store 214 · 45 min</span></div>
+          <div class="ev"><span class="t">18:00</span><b>Gym</b><span>Blocked time</span></div>
+        </div>
+      </div>
+      <nav class="tabbar"><a href="#dailybrief" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+    </div></div>
+    <div class="cap"><h3>A · Paper<small>current direction</small></h3><p>A morning paper. Serif day name, warm off-white, one plum for "now". Time runs down a rail; free time is a handwritten note.</p>
+      <dl><dt>Type</dt><dd>Instrument Serif for the day and notes; Instrument Sans for events</dd><dt>Color</dt><dd><span class="sw"><i style="background:#F7F5F0"></i><i style="background:#1D1B18"></i><i style="background:#8B2F5C"></i><i style="background:#FBF4F8"></i></span></dd><dt>Mood</dt><dd>Quiet, editorial, slow coffee</dd></dl>
+      <div class="pick"><b>Pick this if</b> the brief should feel read, not operated.</div></div>
+    </div>
+
+    <!-- B Blocks -->
+    <div class="shot">
+    <div class="phone"><div class="screen bB">
+      <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="day">Sunday</div><div class="date">October 18 · 3 meetings · 2 replies · 2 h 40 m free</div></div><div class="ring" aria-label="1 of 3 done"><i>1/6</i></div></div>
+        <div class="week"><div><span>S</span><b>17</b></div><div class="on"><span>S</span><b>18</b></div><div><span>M</span><b>19</b></div><div><span>T</span><b>20</b></div><div><span>W</span><b>21</b></div><div><span>T</span><b>22</b></div><div><span>F</span><b>23</b></div></div>
+        <div class="first"><div class="ey">Do first · due Tuesday</div><p>Reply to the landlord about the lease renewal before 10:00</p><div class="act"><span>Open draft</span><span class="g">Done</span></div></div>
+        <div class="grp">
+          <span class="chip m">Morning · 2</span>
+          <div class="ev"><div class="ic" style="background:#FFE8D6;color:#B45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><div class="t"><b>Reply: district manager</b><span>8:30 · 10 min</span></div><span class="chk"></span></div>
+          <div class="ev now"><div class="ic" style="background:#DCEBFF;color:#1D4ED8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="t"><b>Weekly planning</b><span>10:00 · video · 30 min</span></div><span class="when">in 2 h 55 m</span></div>
+        </div>
+        <div class="grp">
+          <span class="chip a">Afternoon · 2</span>
+          <div class="ev"><div class="ic" style="background:#DCEBFF;color:#1D4ED8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg></div><div class="t"><b>Lunch with Kaley</b><span>12:30 · downtown · 1 h</span></div><span class="chk"></span></div>
+          <div class="ev"><div class="ic" style="background:#DCEBFF;color:#1D4ED8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><div class="t"><b>Site walk</b><span>15:00 · Store 214 · 45 min</span></div><span class="chk"></span></div>
+        </div>
+        <div class="grp">
+          <span class="chip e">Evening · 1</span>
+          <div class="ev"><div class="ic" style="background:#E9E2FF;color:#6D28D9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></div><div class="t"><b>Gym</b><span>18:00 · blocked</span></div><span class="chk"></span></div>
+        </div>
+      </div>
+      <nav class="tabbar"><a href="#dailybrief" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+    </div></div>
+    <div class="cap"><h3>B · Blocks<small>soft planner</small></h3><p>The day sorted into Morning / Afternoon / Evening with a tinted chip per block, icon tiles, round checkboxes and a progress ring. Closest to what the top planner apps ship.</p>
+      <dl><dt>Type</dt><dd>Instrument Sans only; bold day name, no serif</dd><dt>Color</dt><dd><span class="sw"><i style="background:#EEF2F7"></i><i style="background:#1D4ED8"></i><i style="background:#FFE8D6"></i><i style="background:#DCEBFF"></i><i style="background:#E9E2FF"></i></span></dd><dt>Mood</dt><dd>Friendly, tappable, familiar</dd></dl>
+      <div class="pick"><b>Pick this if</b> you want the least learning curve and plan to tick things off during the day.</div></div>
+    </div>
+
+    <!-- C Console -->
+    <div class="shot">
+    <div class="phone"><div class="screen bC">
+      <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="date"><b>SUN</b> 18 OCT 2026</div><div class="clock">07:05<small>AM</small></div></div><div class="cnt">3 MEETINGS<br><b>2</b> TO REPLY<br><b>2H40</b> FREE</div></div>
+        <div class="first"><div class="ey">▸ Do first · due Tue</div><p>Reply to the <b>landlord</b> re: lease renewal, before 10:00.</p></div>
+        <div class="nowmark">now 07:05</div>
+        <div class="agenda">
+          <div class="r reply"><span class="t">08:30</span><div class="n">District manager<span>reply · Friday's numbers</span></div><span class="d">10m</span></div>
+          <div class="r now"><span class="t">10:00</span><div class="n">Weekly planning<span>video · in 2h55</span></div><span class="d">30m</span></div>
+          <div class="r dim"><span class="t">10:30</span><div class="n" style="font-family:var(--font-mono);font-weight:400;color:#8A8F98">— free until 12:30 —</div><span class="d">2h</span></div>
+          <div class="r"><span class="t">12:30</span><div class="n">Lunch with Kaley<span>downtown</span></div><span class="d">1h</span></div>
+          <div class="r"><span class="t">15:00</span><div class="n">Site walk<span>store 214</span></div><span class="d">45m</span></div>
+          <div class="r"><span class="t">18:00</span><div class="n">Gym<span>blocked</span></div><span class="d">1h</span></div>
+        </div>
+        <div class="apps"><div>DUOBUDGET<b>$82/day</b></div><div>RETATRACK<b>shot Tue</b></div><div>GOALPULSE<b>4/6</b></div><div>OPSCHECK<b>07:00</b></div></div>
+      </div>
+      <nav class="tabbar"><a href="#dailybrief" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+    </div></div>
+    <div class="cap"><h3>C · Console<small>dark and mono</small></h3><p>A departures board. Big clock, agenda rows with mono timestamps, one amber band for the next thing. Readable at 6 AM with one eye open.</p>
+      <dl><dt>Type</dt><dd>JetBrains Mono for times and labels; Instrument Sans for event names</dd><dt>Color</dt><dd><span class="sw"><i style="background:#0E0F12"></i><i style="background:#1F2228"></i><i style="background:#F5B700"></i><i style="background:#E6E6E6"></i></span></dd><dt>Mood</dt><dd>Terse, glanceable, no decoration</dd></dl>
+      <div class="pick"><b>Pick this if</b> the brief is a widget you glance at, not a page you read, and you like the OpsCheck / ops-floor feel carried across.</div></div>
+    </div>
+
+    <!-- D Marvie -->
+    <div class="shot">
+    <div class="phone"><div class="screen mv">
+      <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+      <div class="body">
+        <div class="top"><div><div class="h">Good morning, Fred</div><div class="sub">Sunday, October 18 · 3 meetings · 2 h 40 m free</div></div></div>
+        <div class="week"><div><span>S</span><b>17</b></div><div class="on"><span>S</span><b>18</b></div><div><span>M</span><b>19</b></div><div><span>T</span><b>20</b></div><div><span>W</span><b>21</b></div><div><span>T</span><b>22</b></div><div><span>F</span><b>23</b></div></div>
+        <div class="block coral">
+          <div class="ey">Do first · due Tuesday</div>
+          <div style="font-size:17px;font-weight:700;line-height:1.3">Reply to the landlord about the lease renewal before your 10:00.</div>
+          <span class="btn">Open draft</span>
+        </div>
+        <div class="card">
+          <div class="ringrow">
+            <div class="ring" style="background:conic-gradient(#3DD598 0 17%,#22343C 17% 100%)"><i>1/6</i></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">Today's progress</b><span style="font-size:13px;color:#96A7AF">1 done · 2 replies waiting · next up at 8:30</span></div>
+          </div>
+        </div>
+        <div class="ev"><div class="ic" style="background:#FFC542"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><div class="t"><b>Reply: district manager</b><span>Friday's sales numbers · 10 min</span></div><span class="tm">8:30</span></div>
+        <div class="ev now"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="t"><b>Weekly planning</b><span>Video call · 30 min · in 2 h 55 m</span></div><span class="tm">10:00</span></div>
+        <div class="free">free until 12:30</div>
+        <div class="ev"><div class="ic" style="background:#755FE2;color:#FFFFFF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg></div><div class="t"><b>Lunch with Kaley</b><span>Downtown · 1 h</span></div><span class="tm">12:30</span></div>
+        <div class="ev"><div class="ic" style="background:#0062FF;color:#FFFFFF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><div class="t"><b>Site walk</b><span>Store 214 · 45 min</span></div><span class="tm">15:00</span></div>
+        <div class="ev"><div class="ic" style="background:#FF575F;color:#FFFFFF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></div><div class="t"><b>Gym</b><span>Blocked time</span></div><span class="tm">18:00</span></div>
+      </div>
+      <nav class="tabbar"><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><button type="button" class="home" aria-label="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button><a href="#dailybrief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+    </div></div>
+    <div class="cap"><h3>D · Marvie<small>from your Sketch kit</small></h3><p>The kit's feed pattern: a coral "Hello!"-style card for the one thing that matters, a progress ring, then event cards with colored icon circles. Mint marks what's next.</p>
+      <dl><dt>Type</dt><dd>SF Pro Display; bold 24px greeting, 14px rows, as the kit's text styles specify</dd><dt>Color</dt><dd><span class="sw"><i style="background:#22343C"></i><i style="background:#3DD598"></i><i style="background:#FF575F"></i><i style="background:#FFC542"></i><i style="background:#755FE2"></i></span></dd><dt>Mood</dt><dd>Lively, consumer-app, matches a dark phone at 7 AM</dd></dl>
+      <div class="pick"><b>Pick this if</b> DailyBrief and DuoBudget should look like siblings from one kit, and you want components you can drop into Sketch today.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>Content is identical across the three columns so only the style varies. The deep dive (three screens per app, interactive) is at <a href="https://claude.ai/artifact/8DS8x6UvB46iqjTNbx9g7N">All four apps</a> and the DuoBudget &amp; DailyBrief page. Source: <code>mockups-v2/styles.html</code> on branch <code>ccr-71c5582f-qgd360</code>.</footer>
+</div>
