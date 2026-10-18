@@ -51,13 +51,18 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
 footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
 
 /* Phone frame. Each screen is a single deliberate look — the app's own palette — so it reads the same in both page themes. */
-.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:48px;padding:10px;background:#0B0B0C;box-shadow:0 20px 50px rgba(0,0,0,.22);justify-self:start}
-.screen{position:relative;border-radius:40px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums}
-.status{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 0;font-weight:600;font-size:14px}
-.status .batt{width:24px;height:11px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.85}
-.status .batt::after{content:"";position:absolute;inset:2px;right:4px;background:currentColor;border-radius:1px}
-.body{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
-.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 22px;font-size:11px;font-weight:600}
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:52px;padding:11px;background:#121214;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #2C2C30,0 24px 60px rgba(0,0,0,.28);justify-self:start}
+.screen{position:relative;border-radius:42px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums}
+.screen::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#0B0B0C;z-index:5}
+.screen::after{content:"";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.28;z-index:5}
+.status{display:flex;justify-content:space-between;align-items:center;height:54px;padding:12px 30px 0 34px;font-weight:600;font-size:16px;letter-spacing:-.01em;flex:0 0 auto}
+.status .sys{display:flex;align-items:center;gap:6px}
+.status .batt{width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.status .batt::after{content:"";position:absolute;inset:2px;right:3px;background:currentColor;border-radius:1.5px}
+.status .batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;opacity:.5}
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none;overscroll-behavior:contain}
+.body::-webkit-scrollbar{display:none}
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 28px;font-size:11px;font-weight:600}
 .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;text-decoration:none;color:inherit;background:none;border:0;font:inherit;padding:4px 0;cursor:pointer}
 .tabbar svg{width:22px;height:22px}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:12px}
@@ -67,7 +72,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 
 /* ── DuoBudget: deep navy, teal for Fred, coral for Kaley ── */
 .duo{background:#0F1B2D;color:#EAF0F6;font-family:var(--font-body)}
-.duo .body{padding:16px 18px 0;gap:12px}
+.duo .body{padding:8px 20px 16px;gap:12px}
 .duo .top{display:flex;justify-content:space-between;align-items:center}
 .duo .top .ey{color:#8FA3B8}
 .duo .brand{font-weight:700;font-size:20px;letter-spacing:-.01em}
@@ -77,7 +82,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .duo .seg{background:#1A2A40}
 .duo .seg button{color:#8FA3B8}
 .duo .seg button[aria-pressed="true"]{background:#EAF0F6;color:#0F1B2D}
-.duo .hero{background:#16263C;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.duo .hero{background:#16263C;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.duo .card,.duo .seg,.duo .top,.duo #duo-tx{flex:0 0 auto}
+.brief .first,.brief .week,.brief .stats,.brief .top{flex:0 0 auto}
+.ops .rail,.ops .top{flex:0 0 auto}
+.reta .hero,.reta .card,.reta .top{flex:0 0 auto}
 .duo .hero .ey{color:#8FA3B8}
 .duo .big{font-size:48px;font-weight:700;line-height:1;letter-spacing:-.02em}
 .duo .big small{font-size:18px;font-weight:500;color:#8FA3B8;letter-spacing:0}
@@ -109,7 +118,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 
 /* ── DailyBrief: warm paper, plum accent, serif day name ── */
 .brief{background:#F7F5F0;color:#1D1B18}
-.brief .body{padding:10px 18px 0;gap:12px}
+.brief .body{padding:4px 20px 16px;gap:12px}
 .brief .top{display:flex;justify-content:space-between;align-items:flex-end}
 .brief .day{font-family:var(--font-display);font-size:44px;line-height:1;letter-spacing:-.01em}
 .brief .date{font-size:12px;color:#6F6B64;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
@@ -129,23 +138,26 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .brief .first button{flex:0 0 auto;border:1px solid #8B2F5C;background:#8B2F5C;color:#FFFFFF;border-radius:10px;min-height:36px;padding:0 12px;font:inherit;font-weight:600;font-size:13px;cursor:pointer}
 .brief .first button[aria-pressed="true"]{background:transparent;color:#C9B2BE;border-color:#4A4541}
 .brief .first.done p{color:#9D978F;text-decoration:line-through}
-.brief .tl{position:relative;display:flex;flex-direction:column;gap:0;padding-left:54px;flex:1 1 auto;min-height:0;overflow:hidden}
-.brief .tl::before{content:"";position:absolute;left:46px;top:6px;bottom:0;width:2px;background:#E6E2DA}
-.brief .ev{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:12px;background:#FFFFFF;border:1px solid #E6E2DA;margin:0 0 8px 12px}
-.brief .ev .t{position:absolute;left:-66px;top:8px;width:50px;text-align:right;font-size:12px;font-weight:600;color:#6F6B64}
-.brief .ev::before{content:"";position:absolute;left:-21px;top:12px;width:10px;height:10px;border-radius:50%;background:#FFFFFF;border:2px solid #C4BDB3}
+.brief .tl{position:relative;display:flex;flex-direction:column;gap:0;padding:14px 0 0 66px;flex:0 0 auto}
+.brief .tl::before{content:"";position:absolute;left:52px;top:14px;bottom:4px;width:2px;background:#E6E2DA;border-radius:1px}
+.brief .ev{position:relative;display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:12px;background:#FFFFFF;border:1px solid #E6E2DA;margin:0 0 8px 14px}
+.brief .ev .t{position:absolute;left:-80px;top:9px;width:44px;text-align:right;font-size:12px;font-weight:600;color:#6F6B64;font-variant-numeric:tabular-nums}
+.brief .ev::before{content:"";position:absolute;left:-33px;top:12px;width:10px;height:10px;border-radius:50%;background:#F7F5F0;border:2px solid #C4BDB3;box-sizing:border-box}
 .brief .ev b{font-size:14px;font-weight:600}.brief .ev span{font-size:12px;color:#6F6B64}
 .brief .ev.now{background:#8B2F5C;color:#FFFFFF;border-color:#8B2F5C}
-.brief .ev.now span,.brief .ev.now .t{color:#F0D4E1}
+.brief .ev.now span{color:#F0D4E1}
+.brief .ev.now .t{color:#8B2F5C}
 .brief .ev.now::before{background:#8B2F5C;border-color:#8B2F5C;box-shadow:0 0 0 4px rgba(139,47,92,.2)}
 .brief .ev.reply{border-style:dashed;border-color:#C9A3B8;background:#FBF4F8}
 .brief .ev.reply::before{border-color:#8B2F5C}
 .brief .ev.long{min-height:64px}
-.brief .free{position:relative;margin:0 0 8px 12px;padding:4px 12px;font-size:12px;color:#8E887F;font-style:italic;font-family:var(--font-display);font-size:15px}
-.brief .nowline{position:relative;height:0;margin:2px 0 10px 0}
-.brief .nowline::before{content:"";position:absolute;left:-8px;right:0;top:0;border-top:2px solid #8B2F5C}
-.brief .nowline span{position:absolute;left:-54px;top:-9px;font-size:11px;font-weight:700;color:#8B2F5C;background:#F7F5F0;padding-right:4px}
-.brief .apps{display:flex;gap:8px;overflow:hidden;padding-bottom:4px;min-width:0;width:100%}
+.brief .free{position:relative;margin:0 0 8px 14px;padding:4px 12px;color:#8E887F;font-style:italic;font-family:var(--font-display);font-size:15px}
+.brief .nowline{position:relative;height:0;margin:4px 0 14px 0}
+.brief .nowline::before{content:"";position:absolute;left:-18px;right:0;top:0;border-top:2px solid #8B2F5C}
+.brief .nowline::after{content:"";position:absolute;left:-18px;top:-4px;width:10px;height:10px;border-radius:50%;background:#8B2F5C}
+.brief .nowline span{position:absolute;left:-66px;top:-9px;width:40px;text-align:right;font-size:11px;font-weight:700;color:#8B2F5C;letter-spacing:.04em;text-transform:uppercase}
+.brief .apps{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;min-width:0;width:100%;scrollbar-width:none;flex:0 0 auto}
+.brief .apps::-webkit-scrollbar{display:none}
 .brief .apps div{flex:0 0 auto;min-width:96px;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px}
 .brief .apps .ey{font-size:10px}.brief .apps b{font-size:16px;font-weight:700}.brief .apps span{font-size:11px;color:#6F6B64}
 .brief .tabbar{background:#FFFFFF;border-top:1px solid #E6E2DA;color:#6F6B64}
@@ -153,7 +165,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 
 /* ── OpsCheck: cool grey floor, high-vis blue, amber for "now" ── */
 .ops{background:#EEF1F4;color:#121A24}
-.ops .body{padding:10px 18px 0;gap:12px}
+.ops .body{padding:4px 20px 0;gap:12px}
 .ops .top{display:flex;justify-content:space-between;align-items:flex-start}
 .ops .top .ey{color:#5B6775}
 .ops .top h2{margin:2px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
@@ -169,7 +181,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .ops .rail b{color:#121A24;font-weight:700;font-size:12px}
 .ops .rail .now b{color:#B45309}
 .ops .rail .now{font-weight:600}
-.ops .card{background:#FFFFFF;border-radius:18px;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;min-height:0;overflow:hidden}
+.ops .card{background:#FFFFFF;border-radius:18px;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;flex:0 0 auto}
+.ops .log{background:#FFFFFF;border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.ops .log .ey{color:#5B6775}
+.ops .log .row{display:flex;align-items:center;gap:10px;font-size:13px}
+.ops .log .row div{display:flex;flex-direction:column;min-width:0}
+.ops .log .row span{font-size:12px;color:#5B6775}
+.ops .log .ok{width:24px;height:24px;flex:0 0 24px;border-radius:50%;background:#DCFCE7;color:#15803D;display:flex;align-items:center;justify-content:center}
+.ops .log .ok svg{width:13px;height:13px}
+.ops .log .n{margin-left:auto;font-weight:700;color:#15803D}
 .ops .ch{display:flex;justify-content:space-between;align-items:center}
 .ops .ch div{display:flex;flex-direction:column}.ops .ch b{font-size:16px}.ops .ch span{font-size:12px;color:#5B6775}
 .ops .cnt{font-size:24px;font-weight:700;color:#1E55E6;letter-spacing:-.02em}
@@ -195,7 +215,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .ops .doneh{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#5B6775;padding:6px 8px 0;border-top:1px dashed #E3E8EE;margin-top:2px}
 .ops .doneh button{border:0;background:none;font:inherit;font-size:12px;font-weight:600;color:#1E55E6;cursor:pointer;padding:4px 0}
 .ops .done .task{background:transparent;padding:6px 8px}
-.ops .actions{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;padding-bottom:18px}
+.ops .actions{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;padding:6px 0 30px;margin-top:auto;flex:0 0 auto}
 .ops .actions button{min-height:48px;border-radius:12px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
 .ops .b2{border:1px solid #D3D9E0;background:#FFFFFF;color:#121A24}
 .ops .b1{border:0;background:#D3D9E0;color:#5B6775}
@@ -203,7 +223,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 
 /* ── RetaTrack: warm off-white, ink hero, clay accent ── */
 .reta{background:#F5F2ED;color:#1B1A19}
-.reta .body{padding:10px 18px 0;gap:10px}
+.reta .body{padding:4px 20px 16px;gap:10px}
 .reta .top{display:flex;justify-content:space-between;align-items:center}
 .reta .top .ey{color:#7A736B}
 .reta .brand{font-weight:700;font-size:20px;letter-spacing:-.01em}
@@ -219,12 +239,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .reta .cycle{height:6px;border-radius:3px;background:#3A3734;overflow:hidden;position:relative}
 .reta .cycle i{position:absolute;left:0;top:0;bottom:0;background:#E8805A;border-radius:3px}
 .reta .cycle em{position:absolute;top:-2px;width:2px;height:10px;background:#F5F2ED;opacity:.5}
-.reta .site{display:flex;align-items:center;gap:12px;font-size:12px;color:#E8E1D8}
-.reta .site .grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:40px}
-.reta .site .grid i{display:block;height:14px;border-radius:3px;background:#3A3734}
+.reta .site{display:flex;align-items:center;gap:12px;font-size:12px;color:#E8E1D8;line-height:1.3}
+.reta .site>div:not(.grid){flex:1 1 auto;min-width:0}
+.reta .site .grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:44px;flex:0 0 44px}
+.reta .site .grid i{display:block;height:17px;border-radius:4px;background:#3A3734}
 .reta .site .grid i.last{background:#6B645C}
-.reta .site .grid i.next{background:#E8805A}
-.reta .site button{margin-left:auto;border:0;border-radius:10px;background:#E8805A;color:#1B1A19;font:inherit;font-weight:700;font-size:13px;min-height:36px;padding:0 14px;cursor:pointer}
+.reta .site .grid i.next{background:#E8805A;box-shadow:0 0 0 2px #1B1A19,0 0 0 3.5px #E8805A}
+.reta .site button{flex:0 0 auto;white-space:nowrap;border:0;border-radius:10px;background:#E8805A;color:#1B1A19;font:inherit;font-weight:700;font-size:13px;min-height:38px;padding:0 14px;cursor:pointer}
 .reta .card{background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 .reta .ch{display:flex;justify-content:space-between;align-items:baseline}
 .reta .ch b{font-size:14px;font-weight:700}
@@ -236,7 +257,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 .reta .wt span{font-size:13px;color:#7A736B}
 .reta .insight{font-size:12px;color:#5F5850;line-height:1.35}
 .reta .insight b{color:#1B1A19}
-.reta .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:4px}
+.reta .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:4px;flex:0 0 auto}
 .reta .tile{background:#FFFFFF;border-radius:14px;padding:10px 10px 8px;display:flex;flex-direction:column;gap:4px}
 .reta .tile .ey{color:#7A736B;font-size:10px}
 .reta .tile b{font-size:17px;font-weight:700;letter-spacing:-.01em}
@@ -263,7 +284,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 <!-- ───────────── DuoBudget ───────────── -->
 <section class="app" id="duobudget" aria-labelledby="h-duo">
 <div class="phone"><div class="screen duo">
-  <div class="status"><span>9:41</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
   <div class="body">
     <div class="top">
       <div><div class="ey">October 2026 · Day 18 of 31</div><div class="brand">DuoBudget</div></div>
@@ -288,9 +309,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
         <text x="10" y="109" font-size="10" fill="#8FA3B8">Oct 1</text>
         <text x="180" y="109" font-size="10" fill="#EAF0F6" text-anchor="middle" font-weight="600">Today</text>
         <text x="310" y="109" font-size="10" fill="#8FA3B8" text-anchor="end">Oct 31</text>
-        <text x="306" y="20" font-size="10" fill="#8FA3B8" text-anchor="end">even pace</text>
+        <text x="236" y="60" font-size="10" fill="#8FA3B8">even pace</text>
+        <text x="310" y="8" font-size="10" fill="#8FA3B8" text-anchor="end">$3,850</text>
       </svg>
-      <div class="pace"><span id="duo-spent">$2,231 of $3,850 flexible</span><span class="pill" id="duo-pill">● On pace · $4 under</span></div>
+      <div class="pace"><span id="duo-spent">$2,186 of $3,850 flexible</span><span class="pill" id="duo-pill">● On pace · $4 under</span></div>
     </div>
     <div class="card">
       <div class="ch"><b>Budgets</b><a href="#duobudget">See all 16</a></div>
@@ -326,7 +348,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 <!-- ───────────── DailyBrief ───────────── -->
 <section class="app" id="dailybrief" aria-labelledby="h-brief">
 <div class="phone"><div class="screen brief">
-  <div class="status"><span>7:05</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
   <div class="body">
     <div class="top"><div><div class="date">Oct 18, 2026 · 7:05 AM</div><div class="day">Sunday</div></div><span class="today">Today</span></div>
     <div class="week" aria-hidden="true">
@@ -379,7 +401,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 <!-- ───────────── OpsCheck ───────────── -->
 <section class="app" id="opscheck" aria-labelledby="h-ops">
 <div class="phone"><div class="screen ops">
-  <div class="status"><span>12:18</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="status"><span>12:18</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
   <div class="body">
     <div class="top">
       <div><div class="ey">Store 214 · Sun Oct 18</div><h2>Midday check</h2></div>
@@ -397,6 +419,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
       <div class="list" id="ops-open" role="group" aria-label="Open tasks"></div>
       <div class="doneh"><span><span id="ops-donecount">3</span> done</span><button type="button" id="ops-toggle" aria-expanded="false">Show</button></div>
       <div class="list done" id="ops-done" role="group" aria-label="Done tasks" hidden></div>
+    </div>
+    <div class="log">
+      <div class="ey">Earlier today</div>
+      <div class="row"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><div><b>Opening check</b><span>Jordan · submitted 6:52 AM · 2 photos</span></div><span class="n">6/6</span></div>
     </div>
     <div class="actions">
       <button type="button" class="b2">Add photo</button>
@@ -425,7 +451,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 <!-- ───────────── RetaTrack ───────────── -->
 <section class="app" id="retatrack" aria-labelledby="h-reta">
 <div class="phone"><div class="screen reta">
-  <div class="status"><span>9:41</span><span class="batt" aria-hidden="true"></span></div>
+  <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
   <div class="body">
     <div class="top">
       <div><div class="ey">Week 8 · Sun Oct 18</div><div class="brand">RetaTrack</div></div>
@@ -439,7 +465,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
       <div class="cycle" aria-hidden="true"><i style="width:77%"></i><em style="left:14.3%"></em><em style="left:28.6%"></em><em style="left:42.9%"></em><em style="left:57.1%"></em><em style="left:71.4%"></em><em style="left:85.7%"></em></div>
       <div class="site">
         <div class="grid" aria-hidden="true"><i class="last"></i><i></i><i></i><i class="next"></i></div>
-        <div>Next site: <b style="color:#FFFFFF">abdomen, lower right</b><br><span style="color:#B8AFA5">Last: upper left · rotated</span></div>
+        <div><span style="color:#B8AFA5">Next site</span><br><b style="color:#FFFFFF;font-size:13px">Abdomen · lower right</b><br><span style="color:#B8AFA5">Last: upper left</span></div>
         <button type="button">Log shot</button>
       </div>
     </div>
@@ -460,20 +486,20 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
     </div>
     <div class="card">
       <div class="ch"><div class="wt"><b>203.6</b><span>lb</span></div><span class="tag">−10.4 lb in 8 wks</span></div>
-      <svg viewBox="0 0 320 110" width="100%" height="110" role="img" aria-label="Weight fell steadily from 214 to 203.6 pounds over eight weeks. Goal line at 185." style="display:block;max-width:100%">
-        <line x1="10" y1="100" x2="310" y2="100" stroke="#9A3412" stroke-width="1" stroke-dasharray="3 4"></line>
-        <text x="10" y="96" font-size="10" fill="#9A3412">goal 185 · est. Feb 14 at this pace</text>
-        <path d="M10 15 L47.5 19.6 L85 24 L122.5 28.7 L160 35.2 L197.5 39 L235 42.2 L272.5 45.4 L272.5 100 L10 100 Z" fill="#E8805A" fill-opacity=".12"></path>
-        <path d="M10 15 L47.5 19.6 L85 24 L122.5 28.7 L160 35.2 L197.5 39 L235 42.2 L272.5 45.4" fill="none" stroke="#E8805A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
-        <path d="M272.5 45.4 L310 48.5" fill="none" stroke="#E8805A" stroke-width="2" stroke-dasharray="3 4"></path>
-        <circle cx="272.5" cy="45.4" r="4.5" fill="#E8805A" stroke="#FFFFFF" stroke-width="2"></circle>
-        <text x="10" y="11" font-size="10" fill="#7A736B">214</text>
-        <text x="10" y="109" font-size="10" fill="#7A736B">Aug 23</text>
-        <text x="272.5" y="109" font-size="10" fill="#1B1A19" text-anchor="middle" font-weight="600">Today</text>
+      <svg viewBox="0 0 320 96" width="100%" height="96" role="img" aria-label="Weight fell steadily from 214 to 203.6 pounds over eight weeks. Goal line at 185, estimated for Feb 14 at this pace." style="display:block;max-width:100%">
+        <line x1="10" y1="36" x2="310" y2="36" stroke="#ECE7E0"></line>
+        <line x1="10" y1="60" x2="310" y2="60" stroke="#ECE7E0"></line>
+        <line x1="10" y1="88" x2="310" y2="88" stroke="#9A3412" stroke-width="1" stroke-dasharray="3 4"></line>
+        <text x="310" y="83" font-size="10" fill="#9A3412" text-anchor="end" font-weight="600">goal 185 · est. Feb 14</text>
+        <path d="M10 14.5 L52.9 18.6 L95.7 22.4 L138.6 26.4 L181.4 32 L224.3 35.3 L267.1 38.1 L310 40.9 L310 88 L10 88 Z" fill="#E8805A" fill-opacity=".12"></path>
+        <path d="M10 14.5 L52.9 18.6 L95.7 22.4 L138.6 26.4 L181.4 32 L224.3 35.3 L267.1 38.1 L310 40.9" fill="none" stroke="#E8805A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+        <circle cx="310" cy="40.9" r="4.5" fill="#E8805A" stroke="#FFFFFF" stroke-width="2"></circle>
+        <text x="10" y="10" font-size="10" fill="#7A736B">214 lb</text>
       </svg>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#7A736B"><span>Aug 23</span><span>Sep 20</span><span style="color:#1B1A19;font-weight:600">Today</span></div>
     </div>
     <div class="tiles">
-      <div class="tile"><span class="ey">Food</span><b>1,140<small> /1,800</small></b><div class="mini"><i style="width:72%"></i></div><span style="font-size:11px;color:#7A736B">94 g protein · 72%</span></div>
+      <div class="tile"><span class="ey">Food</span><b>1,140<small> /1,800</small></b><div class="mini"><i style="width:72%"></i></div><span style="font-size:11px;color:#7A736B">94 g protein</span></div>
       <div class="tile"><span class="ey">Water</span><b><span id="reta-water">1.6</span><small> /2.5 L</small></b><div class="mini b"><i id="reta-waterbar" style="width:64%"></i></div><button type="button" id="reta-add">+ 250 ml</button></div>
       <div class="tile"><span class="ey">Steps</span><b>6,420<small> /8k</small></b><div class="mini g"><i style="width:80%"></i></div><span style="font-size:11px;color:#7A736B">1,580 to go</span></div>
     </div>
@@ -510,10 +536,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
 (function(){
   /* DuoBudget */
   var who='both';
-  var people={both:{scale:1,perday:'$82',left:'$412',pay:'$1,150',spent:'$2,231 of $3,850 flexible'},
-    you:{scale:.56,perday:'$46',left:'$231',pay:'$1,150',spent:'$1,251 of $2,156 flexible'},
-    kaley:{scale:.44,perday:'$36',left:'$181',pay:'$1,980',spent:'$980 of $1,694 flexible'}};
-  var cum=[[1,0],[4,330],[8,890],[12,1420],[15,1880],[18,2231]];
+  var people={both:{scale:1,perday:'$82',left:'$412',pay:'$1,150',spent:'$2,186 of $3,850 flexible'},
+    you:{scale:.56,perday:'$46',left:'$231',pay:'$1,150',spent:'$1,224 of $2,156 flexible'},
+    kaley:{scale:.44,perday:'$36',left:'$181',pay:'$1,980',spent:'$962 of $1,694 flexible'}};
+  var cum=[[1,0],[4,330],[8,890],[12,1420],[15,1880],[18,2186]];
   var cats=[['Groceries',180,232,600],['Dining Out',110,128,250],['Gas & Transport',118,42,220],['Subscriptions',64,0,60]];
   var txns=[['kaley',"Trader Joe's",'Groceries · Kaley · Today','−$86.40'],['you','Shell','Gas & Transport · You · Today','−$48.10'],['kaley','Chipotle','Dining Out · Kaley · Yesterday','−$23.75'],['you','Spotify Duo','Subscriptions · You · Oct 16','−$16.99']];
   function X(d){return 10+(d-1)/30*300} function Y(v){return 100-v/3850*90}
@@ -529,7 +555,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid curre
     document.getElementById('duo-line').setAttribute('d',line);
     document.getElementById('duo-area').setAttribute('d',line+' L'+last[0].toFixed(1)+' 100 L10 100 Z');
     var dot=document.getElementById('duo-dot');dot.setAttribute('cx',last[0]);dot.setAttribute('cy',last[1]);
-    var idealAtToday=3850*p.scale*(17/30), diff=Math.round(idealAtToday-2231*p.scale);
+    var idealAtToday=3850*p.scale*(17/30), diff=Math.round(idealAtToday-2186*p.scale);
     var pill=document.getElementById('duo-pill');
     if(Math.abs(diff)<25){pill.textContent='● On pace · $'+Math.abs(diff)+(diff>=0?' under':' over');pill.style.background='#0F3B36';pill.style.color='#5EEAD4'}
     else if(diff>0){pill.textContent='● $'+diff+' under pace';pill.style.background='#0F3B36';pill.style.color='#5EEAD4'}
