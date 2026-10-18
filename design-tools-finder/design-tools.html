@@ -1,0 +1,222 @@
+<title>Design Tools Finder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centred column; sticky search bar; summary first, then a filterable card grid. */
+:root {
+  --bg: #EEF1F4; --surface: #FFFFFF; --ink: #13202B; --muted: #52606D; --line: #DDE3E9; --chip: #E3E8ED;
+  --accent: #0F766E; --accent-ink: #FFFFFF; --accent-soft: #D5EFEC;
+  --free: #166534; --free-bg: #E7F6EE; --open: #1D4ED8; --open-bg: #E3EBFD; --mac: #52606D; --mac-bg: #EEF1F4;
+  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F171E; --surface: #18232D; --ink: #E7EDF2; --muted: #9AA8B5; --line: #2A3845; --chip: #22303C;
+  --accent: #2DD4BF; --accent-ink: #062B27; --accent-soft: #123B37;
+  --free: #6EE7A0; --free-bg: #143323; --open: #93B4FA; --open-bg: #1A2747; --mac: #B8C4CE; --mac-bg: #22303C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F171E; --surface: #18232D; --ink: #E7EDF2; --muted: #9AA8B5; --line: #2A3845; --chip: #22303C;
+  --accent: #2DD4BF; --accent-ink: #062B27; --accent-soft: #123B37;
+  --free: #6EE7A0; --free-bg: #143323; --open: #93B4FA; --open-bg: #1A2747; --mac: #B8C4CE; --mac-bg: #22303C; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: flex; flex-direction: column; gap: 28px }
+h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em }
+h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.02 }
+h2 { font-size: 22px }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.lede { max-width: 62ch; color: var(--muted); margin: 0 }
+header { display: flex; flex-direction: column; gap: 10px }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+.stat { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.stat b { font-family: var(--display); font-size: 34px; line-height: 1 }
+.stat span { color: var(--muted); font-size: 13px }
+.overview { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px }
+.panel { background: var(--surface); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.bars { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none }
+.bars button { all: unset; cursor: pointer; display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 2.5em; gap: 10px; align-items: center; font-size: 13px; border-radius: 6px; padding: 2px 0 }
+.bars button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px }
+.bars .lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.bars .track { height: 10px; border-radius: 5px; background: var(--chip); overflow: hidden }
+.bars .fill { height: 100%; background: var(--accent); border-radius: 5px }
+.bars .n { text-align: right; color: var(--muted) }
+.picks { display: flex; flex-wrap: wrap; gap: 8px }
+.pick { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 8px 14px; min-height: 40px; font: 600 13px var(--body); cursor: pointer }
+.pick small { color: var(--muted); font-weight: 500 }
+.pick:hover { border-color: var(--accent) }
+.note { font-size: 13px; color: var(--muted); margin: 0 }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--line) }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.search { flex: 1 1 260px; min-width: 0; position: relative }
+.search input { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 15px var(--body); padding: 0 14px 0 40px }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent }
+.search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted) }
+.seg { display: flex; background: var(--chip); padding: 4px; border-radius: 12px; gap: 2px; flex-wrap: wrap }
+.seg button, .tag-btn { border: 0; background: transparent; color: var(--muted); font: 600 14px var(--body); min-height: 38px; padding: 0 12px; border-radius: 9px; cursor: pointer }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,0.12) }
+.tag-btn { border: 1px solid var(--line); background: var(--surface) }
+.tag-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+select { min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px var(--body); padding: 0 10px; max-width: 100% }
+button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.count { color: var(--muted); font-size: 14px }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px }
+.card { background: var(--surface); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; border: 1px solid transparent }
+.card:hover { border-color: var(--line) }
+.card a { color: var(--ink); font-weight: 700; font-size: 16px; text-decoration: none; overflow-wrap: anywhere }
+.card a:hover { color: var(--accent); text-decoration: underline }
+.card p { margin: 0; color: var(--muted); font-size: 14px; overflow-wrap: anywhere }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px }
+.cat { color: var(--muted) }
+.t { font-weight: 700; padding: 2px 8px; border-radius: 999px; font-size: 11px }
+.t-f { color: var(--free); background: var(--free-bg) } .t-o { color: var(--open); background: var(--open-bg) } .t-m { color: var(--mac); background: var(--mac-bg) }
+.more { align-self: center; min-height: 46px; padding: 0 22px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: 700 15px var(--body); cursor: pointer }
+.empty { background: var(--surface); border-radius: 14px; padding: 24px; color: var(--muted); text-align: center }
+@media (max-width: 760px) { .overview { grid-template-columns: minmax(0, 1fr) } .stat b { font-size: 26px } .bars button { grid-template-columns: 8em minmax(0, 1fr) 2.2em } }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Fred's design library</span>
+    <h1>Design Tools Finder</h1>
+    <p class="lede">Every tool, plugin and UI kit from the Awesome Design Tools list, in one searchable place. Filter by type, category, or free and open-source tools.</p>
+  </header>
+
+  <section class="stats" aria-label="What's in the library">
+    <div class="stat"><b id="n-tools">597</b><span>Design tools in 36 categories</span></div>
+    <div class="stat"><b id="n-plugins">1,018</b><span>Plugins for Figma, Sketch and Adobe XD</span></div>
+    <div class="stat"><b id="n-kits">189</b><span>UI kits, from finance to fitness</span></div>
+  </section>
+
+  <section class="overview">
+    <div class="panel">
+      <h2>Biggest categories</h2>
+      <ul class="bars" id="bars"></ul>
+    </div>
+    <div class="panel">
+      <h2>Start here for your apps</h2>
+      <p class="note">Picks that fit DuoBudget, RetaTrack, OpsCheck and the Daily Brief. Tap one to find it below.</p>
+      <div class="picks" id="picks"></div>
+      <p class="note">The list was last curated around 2021, so a few links may be out of date.</p>
+    </div>
+  </section>
+
+  <div class="bar" id="browse">
+    <div class="row">
+      <label class="search" for="q">
+        <span hidden>Search</span>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search tools, e.g. color, icons, prototyping" autocomplete="off" aria-label="Search tools">
+      </label>
+      <div class="seg" id="sections" role="group" aria-label="Type"></div>
+    </div>
+    <div class="row">
+      <select id="cat" aria-label="Category"><option value="">All categories</option></select>
+      <button class="tag-btn" id="t-f" type="button" aria-pressed="false">Free</button>
+      <button class="tag-btn" id="t-o" type="button" aria-pressed="false">Open source</button>
+      <span class="count" id="count" aria-live="polite">Loading the library…</span>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <button class="more" id="more" type="button" hidden>Show more</button>
+</div>
+
+<script>
+(function () {
+  const SECTIONS = ['All', 'Tools', 'Plugins', 'UI Kits'];
+  const PICKS = [
+    ['Coolors', 'palettes'], ['Leonardo', 'accessible colors'], ['Feather Icons', 'icons'], ['unDraw', 'illustrations'],
+    ['Mobbin', 'app screens'], ['Lottie', 'animation'], ['Excalidraw', 'sketching'], ['Google Fonts', 'type'],
+    ['Maze', 'user testing'], ['Finance', 'UI kits'], ['Fitness', 'UI kits'], ['Todos', 'UI kits']
+  ];
+  const PAGE = 60;
+  let data = [], shown = PAGE;
+  const st = { q: '', sec: 'All', cat: '', f: false, o: false };
+  const $ = id => document.getElementById(id);
+  try { const s = JSON.parse(localStorage.getItem('dtf') || '{}'); if (SECTIONS.includes(s.sec)) st.sec = s.sec; } catch (e) {}
+
+  function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+  function renderSections() {
+    const box = $('sections'); box.textContent = '';
+    SECTIONS.forEach(s => {
+      const b = el('button', '', s); b.type = 'button'; b.setAttribute('aria-pressed', String(st.sec === s));
+      b.onclick = () => { st.sec = s; st.cat = ''; try { localStorage.setItem('dtf', JSON.stringify({ sec: s })); } catch (e) {} renderSections(); renderCats(); apply(); };
+      box.appendChild(b);
+    });
+  }
+  function renderCats() {
+    const sel = $('cat'); sel.length = 1;
+    const cats = [...new Set(data.filter(r => st.sec === 'All' || r[0] === st.sec).map(r => (st.sec === 'All' ? r[0] + ' · ' : '') + r[1]))].sort();
+    cats.forEach(c => { const o = el('option', '', c); o.value = c; sel.appendChild(o); });
+    sel.value = st.cat;
+  }
+  function catKey(r) { return (st.sec === 'All' ? r[0] + ' · ' : '') + r[1]; }
+  function matches(r) {
+    if (st.sec !== 'All' && r[0] !== st.sec) return false;
+    if (st.cat && catKey(r) !== st.cat) return false;
+    if (st.f && !r[5].includes('f')) return false;
+    if (st.o && !r[5].includes('o')) return false;
+    if (st.q) { const hay = (r[2] + ' ' + r[1] + ' ' + r[4]).toLowerCase(); return st.q.split(/\s+/).every(w => hay.includes(w)); }
+    return true;
+  }
+  function apply(keep) {
+    if (!keep) shown = PAGE;
+    const list = data.filter(matches);
+    if (st.q) { const q = st.q; list.sort((a, b) => (b[2].toLowerCase().startsWith(q) - a[2].toLowerCase().startsWith(q))); }
+    const grid = $('grid'); grid.textContent = '';
+    list.slice(0, shown).forEach(r => {
+      const c = el('article', 'card');
+      const a = el('a', '', r[2]); a.href = r[3]; a.target = '_blank'; a.rel = 'noopener noreferrer'; c.appendChild(a);
+      if (r[4]) c.appendChild(el('p', '', r[4]));
+      const m = el('div', 'meta'); m.appendChild(el('span', 'cat', r[0] + ' · ' + r[1]));
+      if (r[5].includes('f')) m.appendChild(el('span', 't t-f', 'Free'));
+      if (r[5].includes('o')) m.appendChild(el('span', 't t-o', 'Open source'));
+      if (r[5].includes('m')) m.appendChild(el('span', 't t-m', 'Mac'));
+      c.appendChild(m); grid.appendChild(c);
+    });
+    if (!list.length) grid.appendChild(el('div', 'empty', 'Nothing matches. Try a shorter search or clear the Free and Open source filters.'));
+    $('count').textContent = list.length.toLocaleString() + (list.length === 1 ? ' result' : ' results');
+    $('more').hidden = list.length <= shown;
+    $('more').textContent = 'Show more (' + (list.length - Math.min(shown, list.length)).toLocaleString() + ' left)';
+  }
+  function renderOverview() {
+    const counts = {};
+    data.forEach(r => { const k = r[0] + '|' + r[1]; counts[k] = (counts[k] || 0) + 1; });
+    const top = Object.entries(counts).filter(([k]) => !k.endsWith('|Other')).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    const max = top[0][1], ul = $('bars');
+    top.forEach(([k, n]) => {
+      const [sec, cat] = k.split('|');
+      const li = el('li'), b = el('button'); b.type = 'button'; b.setAttribute('aria-label', cat + ', ' + sec + ', ' + n + ' items');
+      b.appendChild(el('span', 'lab', cat));
+      const tr = el('span', 'track'), f = el('span', 'fill'); f.style.display = 'block'; f.style.width = (n / max * 100) + '%'; tr.appendChild(f); b.appendChild(tr);
+      b.appendChild(el('span', 'n', String(n)));
+      b.onclick = () => { st.sec = sec; renderSections(); renderCats(); st.cat = cat; $('cat').value = cat; apply(); $('browse').scrollIntoView({ behavior: 'smooth' }); };
+      li.appendChild(b); ul.appendChild(li);
+    });
+    const pk = $('picks');
+    PICKS.forEach(([name, what]) => {
+      const b = el('button', 'pick'); b.type = 'button'; b.appendChild(document.createTextNode(name + ' '));
+      b.appendChild(el('small', '', what));
+      b.onclick = () => { st.q = name.toLowerCase(); $('q').value = name; st.sec = 'All'; st.cat = ''; renderSections(); renderCats(); apply(); $('browse').scrollIntoView({ behavior: 'smooth' }); };
+      pk.appendChild(b);
+    });
+  }
+
+  let t; $('q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { st.q = e.target.value.trim().toLowerCase(); apply(); }, 120); });
+  $('cat').addEventListener('change', e => { st.cat = e.target.value; apply(); });
+  ['f', 'o'].forEach(k => $('t-' + k).addEventListener('click', e => { st[k] = !st[k]; e.currentTarget.setAttribute('aria-pressed', String(st[k])); apply(); }));
+  $('more').addEventListener('click', () => { shown += PAGE * 2; apply(true); });
+
+  renderSections();
+  fetch('data.json').then(r => r.json()).then(d => {
+    data = d;
+    const n = s => d.filter(r => r[0] === s).length.toLocaleString();
+    $('n-tools').textContent = n('Tools'); $('n-plugins').textContent = n('Plugins'); $('n-kits').textContent = n('UI Kits');
+    renderOverview(); renderCats(); apply();
+  }).catch(() => { $('count').textContent = 'The library could not load. Reload the page to try again.'; });
+})();
+</script>

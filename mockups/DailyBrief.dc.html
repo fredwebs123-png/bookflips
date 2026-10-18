@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Brief</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#3949AB}a:hover{color:#283593}
+button{font:inherit}
+button:focus-visible{outline:2px solid #3949AB;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #EEF1F4; color: #13202B; font-family: Figtree, 'Segoe UI', system-ui, sans-serif; font-variant-numeric: tabular-nums; padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+  <div style="display: flex; flex-direction: column; gap: 4px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #52606D">Sunday, October 18 · 7:05 AM</span>
+    <h1 style="margin: 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 34px; line-height: 1.05; text-wrap: balance">Good morning, Fred. Three things need you today.</h1>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 26px; color: {{accent}}">3</span>
+      <span style="font-size: 12px; color: #52606D">Meetings</span>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 26px; color: {{accent}}">{{replyCount}}</span>
+      <span style="font-size: 12px; color: #52606D">To reply</span>
+    </div>
+    <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 26px; color: {{accent}}">2h 40m</span>
+      <span style="font-size: 12px; color: #52606D">Free time</span>
+    </div>
+  </div>
+
+  <div role="tablist" aria-label="Brief sections" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #DDE3E9; padding: 4px; border-radius: 12px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+      <button type="button" role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{showSchedule}}" hint-placeholder-val="{{ true }}">
+    <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+      <sc-for list="{{events}}" as="e" hint-placeholder-count="4">
+        <div style="display: flex; gap: 14px; align-items: stretch">
+          <span style="width: 52px; flex: 0 0 52px; font-size: 13px; font-weight: 700; padding-top: 2px">{{e.time}}</span>
+          <div style="{{e.boxStyle}}">
+            <span style="font-weight: 600; font-size: 14px">{{e.title}}</span>
+            <span style="font-size: 12px; color: #52606D">{{e.meta}}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showInbox}}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <sc-for list="{{mail}}" as="m" hint-placeholder-count="3">
+        <div style="background: #FFFFFF; border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start">
+          <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="{{m.titleStyle}}">{{m.from}}</span>
+            <span style="font-size: 13px; color: #52606D">{{m.summary}}</span>
+          </div>
+          <button type="button" onClick="{{m.toggle}}" aria-pressed="{{m.pressed}}" style="{{m.btnStyle}}">{{m.btn}}</button>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showApps}}" hint-placeholder-val="{{ false }}">
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{apps}}" as="a" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+          <span style="{{a.tagStyle}}">{{a.name}}</span>
+          <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 22px">{{a.value}}</span>
+          <span style="font-size: 12px; color: #52606D">{{a.note}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="margin-top: auto; background: #13202B; color: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #B8C4CE">Do first</span>
+    <span style="font-size: 15px; line-height: 1.4">Reply to the landlord about the lease renewal before your 10:00. It is due Tuesday.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#3949AB","options":["#3949AB","#0F766E","#C2410C","#7C3AED"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'schedule', done: {} }; }
+  renderVals() {
+    const accent = this.props.accent ?? '#3949AB';
+    const tab = this.state.tab;
+    const tabs = [['schedule', 'Schedule'], ['inbox', 'Inbox'], ['apps', 'My apps']].map(([id, label]) => {
+      const on = id === tab;
+      return { label, selected: on ? 'true' : 'false', pick: () => this.setState({ tab: id }),
+        style: 'border: 0; border-radius: 9px; min-height: 36px; font-size: 14px; font-weight: 600; cursor: pointer; ' +
+          (on ? 'background: #FFFFFF; color: #13202B; box-shadow: 0 1px 3px rgba(19,32,43,0.12)' : 'background: transparent; color: #52606D') };
+    });
+    const events = [
+      { time: '10:00', title: 'Weekly planning', meta: 'Video call · 30 min', now: true },
+      { time: '12:30', title: 'Lunch with Kaley', meta: 'Downtown · 1 h' },
+      { time: '15:00', title: 'Site walk', meta: 'Store 214 · 45 min' },
+      { time: '18:00', title: 'Gym', meta: 'Blocked time' }
+    ].map(e => ({ ...e, boxStyle: 'flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 10px; background: ' + (e.now ? accent : '#F1F4F7') + '; ' + (e.now ? 'color: #FFFFFF' : '') }));
+    events[0].meta = 'Starts in 2 h 55 min · Video call';
+    const rawMail = [
+      { id: 1, from: 'Landlord', summary: 'Lease renewal terms attached. Needs an answer by Tue.' },
+      { id: 2, from: 'Bank alert', summary: 'Card ending 4421 charged $86.40 at Trader Joe’s.' },
+      { id: 3, from: 'District manager', summary: 'Can you send Friday’s sales numbers?' }
+    ];
+    const done = this.state.done;
+    const mail = rawMail.map(m => {
+      const d = !!done[m.id];
+      return { ...m, pressed: d ? 'true' : 'false', btn: d ? 'Done' : 'Mark done',
+        toggle: () => this.setState({ done: { ...done, [m.id]: !d } }),
+        titleStyle: 'font-weight: 700; font-size: 14px; ' + (d ? 'color: #52606D; text-decoration: line-through' : ''),
+        btnStyle: 'flex: 0 0 auto; min-height: 36px; padding: 0 12px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; ' +
+          (d ? 'border: 1px solid #DDE3E9; background: #F1F4F7; color: #52606D' : 'border: 1px solid ' + accent + '; background: #FFFFFF; color: ' + accent) };
+    });
+    const replyCount = rawMail.filter(m => !done[m.id]).length;
+    const tag = c => 'font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: ' + c;
+    const apps = [
+      { name: 'DuoBudget', value: '$412', note: 'Safe to spend until Fri', tagStyle: tag('#0F766E') },
+      { name: 'RetaTrack', value: 'Tue', note: 'Next shot · 2 mg', tagStyle: tag('#C2410C') },
+      { name: 'GoalPulse', value: '4 of 6', note: 'Goals met yesterday', tagStyle: tag('#7C3AED') },
+      { name: 'OpsCheck', value: '7:00', note: 'Opening check due', tagStyle: tag('#1D4ED8') }
+    ];
+    return { accent, tabs, events, mail, apps, replyCount,
+      showSchedule: tab === 'schedule', showInbox: tab === 'inbox', showApps: tab === 'apps' };
+  }
+}
+</script>
+</body>
+</html>

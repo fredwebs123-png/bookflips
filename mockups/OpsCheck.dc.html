@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpsCheck midday</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+button{font:inherit}
+button:focus-visible{outline:2px solid #1D4ED8;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #EEF1F4; color: #13202B; font-family: Figtree, 'Segoe UI', system-ui, sans-serif; font-variant-numeric: tabular-nums; padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+  <div style="display: flex; flex-direction: column; gap: 2px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #52606D">Store 214 · Sun Oct 18</span>
+    <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 22px">OpsCheck</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+    <sc-for list="{{windows}}" as="w" hint-placeholder-count="4">
+      <div style="{{w.boxStyle}}">
+        <span style="font-size: 12px; font-weight: 700">{{w.name}}</span>
+        <span style="font-size: 11px">{{w.time}}</span>
+        <span style="{{w.pillStyle}}">{{w.status}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-weight: 700; font-size: 17px">Midday check</span>
+        <span style="font-size: 13px; color: #52606D">Due by 1:00 PM · Jordan on shift</span>
+      </div>
+      <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 28px; color: {{accent}}">{{doneCount}}/{{total}}</span>
+    </div>
+    <div style="height: 8px; border-radius: 4px; background: #E6EBEF; display: flex; overflow: hidden">
+      <div style="{{barStyle}}"></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <sc-for list="{{tasks}}" as="t" hint-placeholder-count="6">
+        <button type="button" role="checkbox" aria-checked="{{t.checked}}" onClick="{{t.toggle}}" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 4px; border: 0; background: transparent; text-align: left; cursor: pointer; color: #13202B; border-radius: 10px">
+          <span style="{{t.boxStyle}}">
+            <sc-if value="{{t.done}}" hint-placeholder-val="{{ false }}">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>
+            </sc-if>
+          </span>
+          <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column">
+            <span style="{{t.labelStyle}}">{{t.label}}</span>
+            <span style="font-size: 12px; color: #52606D">{{t.hint}}</span>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="margin-top: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <button type="button" style="min-height: 48px; border-radius: 12px; border: 1px solid #DDE3E9; background: #FFFFFF; color: #13202B; font-weight: 600; font-size: 14px; cursor: pointer">Add photo</button>
+    <button type="button" style="{{submitStyle}}">{{submitLabel}}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#1D4ED8","options":["#1D4ED8","#0F766E","#3949AB","#C2410C"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { done: { 1: true, 2: true, 3: true } }; }
+  renderVals() {
+    const accent = this.props.accent ?? '#1D4ED8';
+    const done = this.state.done;
+    const raw = [
+      { id: 1, label: 'Restrooms clean and stocked', hint: 'Soap, paper, floors' },
+      { id: 2, label: 'Coffee station refilled', hint: 'Cups, lids, creamer' },
+      { id: 3, label: 'Fuel pumps checked', hint: 'Screens, squeegees, trash' },
+      { id: 4, label: 'Roller grill rotated', hint: 'Log temps on the sheet' },
+      { id: 5, label: 'Cooler doors faced', hint: 'Front and fill gaps' },
+      { id: 6, label: 'Lot and entrance swept', hint: 'Note any spills' }
+    ];
+    const tasks = raw.map(t => {
+      const d = !!done[t.id];
+      return { ...t, done: d, checked: d ? 'true' : 'false',
+        toggle: () => this.setState({ done: { ...done, [t.id]: !d } }),
+        boxStyle: 'width: 26px; height: 26px; flex: 0 0 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; ' +
+          (d ? 'background: ' + accent + '; border: 2px solid ' + accent : 'background: #FFFFFF; border: 2px solid #A3B0BC'),
+        labelStyle: 'font-size: 14px; font-weight: 600; ' + (d ? 'color: #52606D; text-decoration: line-through' : '') };
+    });
+    const doneCount = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+    const all = doneCount === total;
+    const win = (name, time, status) => {
+      const map = {
+        Done: ['#E7F6EE', '#166534', '#166534'],
+        Now: [accent, '#FFFFFF', '#FFFFFF'],
+        Later: ['#FFFFFF', '#52606D', '#52606D']
+      }[status];
+      return { name, time, status,
+        boxStyle: 'border-radius: 12px; padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; background: ' + map[0] + '; color: ' + map[1] + '; border: 1px solid ' + (status === 'Later' ? '#DDE3E9' : map[0]),
+        pillStyle: 'font-size: 11px; font-weight: 700; margin-top: 4px; color: ' + map[2] };
+    };
+    const windows = [win('Open', '6–7 AM', 'Done'), win('Midday', '12–1 PM', all ? 'Done' : 'Now'), win('Afternoon', '4–5 PM', 'Later'), win('Close', '10–11 PM', 'Later')];
+    return { accent, tasks, doneCount, total, windows,
+      barStyle: 'width: ' + Math.round(doneCount / total * 100) + '%; background: ' + accent,
+      submitLabel: all ? 'Submit check' : (total - doneCount) + ' left',
+      submitStyle: 'min-height: 48px; border-radius: 12px; border: 0; font-weight: 700; font-size: 14px; cursor: pointer; ' +
+        (all ? 'background: ' + accent + '; color: #FFFFFF' : 'background: #DDE3E9; color: #52606D') };
+  }
+}
+</script>
+</body>
+</html>
