@@ -1,0 +1,294 @@
+<title>DuoBudget Receipt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a spec band, then the three DuoBudget screens (Home, Add purchase, October statement) in the Receipt direction; captions under each. */
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --fg:#1B1B19; --muted:#6B6A64; --line:#DEDCD4;
+  --accent:#0F766E; --accent-ink:#FFFFFF; --chip:#E9E7DF;
+  --font-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+    --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+  --accent:#8FD3BE; --accent-ink:#0F1F19; --chip:#2A2A26; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,5vw,54px);line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.jump a:hover,.jump a:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.spec h3{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);min-width:64px}
+.sw i{display:block;height:36px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}
+.sw b{color:var(--fg);font-weight:600;font-size:12px}
+.type-row{display:flex;flex-direction:column;gap:6px}
+.type-row span{display:block;line-height:1.1}
+.spec p{margin:0;font-size:14px;color:var(--muted)}
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;align-items:start}
+@media (min-width:1240px){.screens{grid-template-columns:repeat(3,390px);justify-content:space-between}}
+.shot{display:flex;flex-direction:column;gap:16px;min-width:0}
+.cap{display:flex;flex-direction:column;gap:8px;max-width:390px}
+.cap h3{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.cap h3 small{color:var(--muted);font-weight:500;margin-left:6px;font-size:14px}
+.cap p{margin:0;color:var(--muted);font-size:14px}
+.cap ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.cap li{padding-left:16px;position:relative}
+.cap li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px;max-width:70ch}
+footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
+
+/* phone frame */
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:52px;padding:11px;background:#121214;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #2C2C30,0 24px 60px rgba(0,0,0,.28)}
+.screen{position:relative;border-radius:42px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums;background:#F3EEE4;color:#1C1917}
+.screen::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#0B0B0C;z-index:5}
+.screen::after{content:"";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.28;z-index:5}
+.status{display:flex;justify-content:space-between;align-items:center;height:54px;padding:12px 30px 0 34px;font-weight:600;font-size:16px;letter-spacing:-.01em;flex:0 0 auto;font-family:var(--font-mono)}
+.status .sys{display:flex;align-items:center;gap:6px}
+.status .batt{width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.status .batt::after{content:"";position:absolute;inset:2px;right:3px;background:currentColor;border-radius:1.5px}
+.status .batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;opacity:.5}
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none;padding:8px 22px 16px;gap:14px}
+.body::-webkit-scrollbar{display:none}
+.body>*{flex:0 0 auto}
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 28px;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#F3EEE4;border-top:2px solid #1C1917;color:#78716C}
+.tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;text-decoration:none;color:inherit;background:none;border:0;font:inherit;padding:4px 0;cursor:pointer}
+.tabbar .on{color:#1C1917}
+.tabbar svg{width:22px;height:22px}
+.tabbar .fab{width:48px;height:48px;border-radius:10px;background:#1C1917;color:#F3EEE4;margin-top:-24px;align-items:center;justify-content:center;min-width:0}
+.mono{font-family:var(--font-mono)}
+.ey{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#78716C}
+/* receipt primitives */
+.top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1C1917;padding-bottom:10px}
+.brand{font-family:var(--font-mono);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.avs{display:flex;gap:4px}.av{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:12px;color:#F3EEE4}
+.seg{display:flex;gap:14px;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#78716C}
+.seg .on{color:#1C1917;border-bottom:2px solid #1C1917;padding-bottom:2px}
+.ln{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:12px;color:#44403C;gap:6px}
+.ln .dots{flex:1 1 auto;border-bottom:1px dotted #A8A29E;transform:translateY(-4px);min-width:12px}
+.ln b{color:#1C1917;font-weight:700;white-space:nowrap}
+.ln .ok{color:#0F766E}.ln .warn{color:#B45309}.ln .bad{color:#B91C1C}
+.rule{border:0;border-top:1px dashed #A8A29E;margin:0}
+.rule.solid{border-top:2px solid #1C1917}
+.rule.dbl{border-top:3px double #1C1917}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sec h4{margin:0;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#78716C;display:flex;justify-content:space-between;align-items:baseline}
+.sec h4 a{color:#1C1917;text-decoration:underline;text-underline-offset:3px}
+.sec h4 span{font-weight:400;text-transform:none;letter-spacing:0}
+.bar{height:4px;background:#E7E0D3;display:flex}.bar i{display:block;height:100%}.f{background:#0F766E}.k{background:#C2410C}.o{background:#B91C1C}.w{background:#B45309}
+.who{display:inline-block;width:16px;height:16px;border-radius:3px;color:#F3EEE4;font-size:10px;text-align:center;line-height:16px;margin-right:6px;vertical-align:1px;font-family:var(--font-mono);font-weight:700}
+.center{text-align:center;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:#78716C;text-transform:uppercase}
+/* slip (white paper with tear edge) */
+.slip{background:#FFFDF8;padding:16px 18px 20px;display:flex;flex-direction:column;gap:12px;position:relative;box-shadow:0 2px 0 rgba(28,25,23,.06);margin:0 -2px}
+.slip.tear{padding-bottom:26px}
+.slip.tear::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:linear-gradient(135deg,#FFFDF8 50%,transparent 50%) 0 0/16px 8px,linear-gradient(225deg,#FFFDF8 50%,transparent 50%) 0 0/16px 8px}
+.slip.torn-top{padding-top:22px}
+.slip.torn-top::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:linear-gradient(45deg,transparent 50%,#FFFDF8 50%) 0 0/16px 8px,linear-gradient(315deg,transparent 50%,#FFFDF8 50%) 0 0/16px 8px}
+/* home */
+.hero{display:flex;flex-direction:column;gap:6px;padding:6px 0 12px;border-bottom:1px dashed #A8A29E}
+.big{font-family:var(--font-mono);font-weight:700;font-size:60px;line-height:1;letter-spacing:-.04em}
+.big small{font-size:16px;font-weight:500;letter-spacing:0;color:#78716C;margin-left:8px}
+.spark{display:flex;align-items:flex-end;gap:3px;height:28px;padding:4px 0 2px}
+.spark i{flex:1 1 auto;background:#D6CEBF;display:block}
+.spark i.on{background:#0F766E}.spark i.today{background:#1C1917}
+.tx{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;padding:7px 0;border-bottom:1px dotted #A8A29E;gap:8px}
+.tx span{color:#78716C}.tx b{font-weight:700}
+/* add purchase */
+.nav{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#78716C}
+.nav b{color:#1C1917;font-weight:700}
+.nav a{text-decoration:underline;text-underline-offset:3px;color:#1C1917}
+.amt{font-family:var(--font-mono);font-weight:700;font-size:58px;letter-spacing:-.04em;line-height:1;text-align:right;padding:4px 0 2px;border-bottom:2px solid #1C1917}
+.amt small{font-size:22px;color:#78716C;font-weight:500;letter-spacing:0;margin-right:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-family:var(--font-mono);font-size:12px;align-items:center}
+.kv span{color:#78716C;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.opts{display:flex;gap:10px;flex-wrap:wrap}
+.opts i{font-style:normal;padding:3px 0;color:#78716C;border-bottom:2px solid transparent}
+.opts i.on{color:#1C1917;border-color:#1C1917;font-weight:700}
+.opts i .who{margin-right:5px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#1C1917;border:1px solid #1C1917;margin-top:auto}
+.pad span{background:#F3EEE4;height:46px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:20px;font-weight:500}
+.cta{background:#1C1917;color:#F3EEE4;font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;min-height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:22px}
+.cta small{font-weight:400;opacity:.7;letter-spacing:.04em}
+/* statement */
+.stmt{display:flex;flex-direction:column;gap:4px}
+.stmt .ln{font-size:13px}
+.stmt .tot{font-size:16px}
+.weeks{display:grid;grid-template-columns:44px 1fr auto;gap:6px 10px;align-items:center;font-family:var(--font-mono);font-size:11px;color:#44403C}
+.weeks .wb{height:10px;background:#E7E0D3;display:flex;position:relative}
+.weeks .wb i{display:block;height:100%}
+.weeks .wb.proj{background:repeating-linear-gradient(90deg,#D6CEBF 0 3px,transparent 3px 6px)}
+.weeks .wb em{position:absolute;top:-3px;bottom:-3px;width:0;border-left:1.5px dashed #1C1917;left:96.6%}
+.weeks b{font-weight:700;color:#1C1917;white-space:nowrap}
+.weeks .lbl{color:#78716C;text-align:right}
+.settle{border:2px solid #1C1917;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:#FFFDF8}
+.settle .big{font-size:34px}
+.settle .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.settle .btns span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;min-height:38px;display:flex;align-items:center;justify-content:center}
+.settle .p{background:#1C1917;color:#F3EEE4}.settle .s{border:2px solid #1C1917}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">designer-fun · mockups v2 · DuoBudget · Receipt direction</div>
+  <h1>DuoBudget as a <em>receipt</em>, all the way through</h1>
+  <p>You picked the Receipt style from the explorations. Here it is carried through the three core screens from the deep dive: Home, Add purchase and the month review. Same data as before; the question is whether the paper-and-mono idea holds up when you have to type an amount or settle up.</p>
+  <nav class="jump" aria-label="Related"><a href="https://claude.ai/artifact/XH2RX462B1PUdG4T1hwTcA">Style explorations ↗</a><a href="https://claude.ai/artifact/RrVe1VNwxC8gkhVwsBZRhv">Deep dive ↗</a><a href="https://claude.ai/artifact/8DS8x6UvB46iqjTNbx9g7N">All four apps ↗</a></nav>
+</header>
+
+<div class="spec" aria-label="Receipt design spec">
+  <div><h3>Palette</h3><div class="swatches">
+    <div class="sw"><i style="background:#F3EEE4"></i><b>Paper</b>#F3EEE4</div>
+    <div class="sw"><i style="background:#FFFDF8"></i><b>Slip</b>#FFFDF8</div>
+    <div class="sw"><i style="background:#1C1917"></i><b>Ink</b>#1C1917</div>
+    <div class="sw"><i style="background:#0F766E"></i><b>Fred</b>#0F766E</div>
+    <div class="sw"><i style="background:#C2410C"></i><b>Kaley</b>#C2410C</div>
+    <div class="sw"><i style="background:#B45309"></i><b>Watch</b>#B45309</div>
+    <div class="sw"><i style="background:#B91C1C"></i><b>Over</b>#B91C1C</div>
+  </div></div>
+  <div><h3>Type</h3><div class="type-row">
+    <span style="font-family:var(--font-mono);font-weight:700;font-size:30px;letter-spacing:-.04em">$82 <small style="font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0">JetBrains Mono 700 · every number</small></span>
+    <span style="font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Labels · mono 11–12 · uppercase · 0.08em</span>
+    <span style="font-size:14px">Instrument Sans · only for sentences people read</span>
+  </div></div>
+  <div><h3>Rules</h3><p>Everything is a line item: label, dotted leader, value. No cards; sections are separated by rules (dashed between, solid at the top, double for totals). The one white surface is a "slip": the thing being printed right now. Partner colors are two inks; status is ink weight and a ▲.</p></div>
+  <div><h3>Idioms</h3><p>Tear-off edges on slips, <span class="mono" style="font-size:12px">*** END OF OCTOBER ***</span> footers, F/K as stamped boxes, a square ink plus button instead of a round FAB. The keypad is a ruled grid, like a calculator from the till.</p></div>
+</div>
+
+<div class="screens">
+
+  <!-- ───────── Home ───────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen">
+    <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body">
+      <div class="top"><div><div class="ey">Oct 2026 · day 18/31</div><div class="brand">DUOBUDGET</div></div><div class="avs"><span class="av" style="background:#0F766E">F</span><span class="av" style="background:#C2410C">K</span></div></div>
+      <div class="seg"><span class="on">Both</span><span>You</span><span>Kaley</span></div>
+      <div class="hero">
+        <div class="ey">Safe to spend / day</div>
+        <div class="big">$82<small>until Fri 23</small></div>
+        <div class="spark" aria-label="Daily spend, last 14 days"><i style="height:40%"></i><i style="height:65%"></i><i style="height:30%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:20%"></i><i style="height:45%"></i><i class="on" style="height:70%"></i><i class="on" style="height:35%"></i><i class="on" style="height:60%"></i><i class="on" style="height:25%"></i><i class="on" style="height:50%"></i><i class="on" style="height:90%"></i><i class="today" style="height:62%"></i></div>
+        <div class="ln"><span>LEFT TO PAYDAY</span><span class="dots"></span><b>$412 · 5d</b></div>
+        <div class="ln"><span>MONTH TO DATE</span><span class="dots"></span><b>$2,186 / $3,850</b></div>
+        <div class="ln"><span>PACE</span><span class="dots"></span><b class="ok">ON PACE · $4 UNDER</b></div>
+      </div>
+      <div class="sec">
+        <h4><span>Budgets</span><a href="#home">all 16</a></h4>
+        <div><div class="ln"><span>GROCERIES</span><span class="dots"></span><b>412 / 600</b></div><div class="bar" style="margin-top:5px"><i class="f" style="width:30%"></i><i class="k" style="width:38.7%"></i></div></div>
+        <div><div class="ln"><span>DINING OUT</span><span class="dots"></span><b class="warn">238 / 250</b></div><div class="bar" style="margin-top:5px"><i class="f" style="width:44%"></i><i class="k" style="width:51.2%"></i></div></div>
+        <div><div class="ln"><span>GAS &amp; TRANSPORT</span><span class="dots"></span><b>160 / 220</b></div><div class="bar" style="margin-top:5px"><i class="f" style="width:53.6%"></i><i class="k" style="width:19.1%"></i></div></div>
+        <div><div class="ln"><span>SUBSCRIPTIONS</span><span class="dots"></span><b class="bad">64 / 60 ▲</b></div><div class="bar" style="margin-top:5px"><i class="f" style="width:93.3%"></i><i class="o" style="width:6.7%"></i></div></div>
+      </div>
+      <div class="sec">
+        <h4><span>Recent</span><span>F = Fred · K = Kaley</span></h4>
+        <div class="tx"><span><i class="who" style="background:#C2410C">K</i>TRADER JOE'S <span>· groceries</span></span><b>−86.40</b></div>
+        <div class="tx"><span><i class="who" style="background:#0F766E">F</i>SHELL <span>· gas</span></span><b>−48.10</b></div>
+        <div class="tx"><span><i class="who" style="background:#C2410C">K</i>CHIPOTLE <span>· dining</span></span><b>−23.75</b></div>
+        <div class="tx"><span><i class="who" style="background:#0F766E">F</i>SPOTIFY DUO <span>· subs</span></span><b>−16.99</b></div>
+      </div>
+      <div class="center">· · · 18 of 31 days · · ·</div>
+    </div>
+    <nav class="tabbar"><a href="#home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><button type="button" class="fab" aria-label="Add a purchase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><a href="#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><a href="#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a></nav>
+  </div></div>
+  <div class="cap"><h3>Home<small>the one you picked, tightened</small></h3><p>Same as the exploration, plus the one thing it was missing: a trace of the month. A 14-day bar strip of daily spend sits under the big number (today in ink, this pay period in green).</p>
+    <ul><li>Status is now in ink weight and color: Dining Out goes amber at 95%, Subscriptions red with a ▲.</li><li>Recent gets a fourth line and the receipt-style page foot "18 of 31 days".</li></ul></div>
+  </div>
+
+  <!-- ───────── Add purchase ───────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen">
+    <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body" style="gap:12px">
+      <div class="nav"><a href="#add">Cancel</a><b>New purchase</b><span>Sun 18 Oct</span></div>
+      <div class="slip tear">
+        <div class="amt"><small>$</small>48.10</div>
+        <div class="kv">
+          <span>Where</span><div class="mono" style="font-size:13px"><b>SHELL</b> · Gas &amp; Transport <i style="font-style:normal;color:#78716C;font-size:11px">· auto</i></div>
+          <span>Paid by</span><div class="opts mono" style="font-size:12px"><i class="on"><span class="who" style="background:#0F766E">F</span>FRED</i><i><span class="who" style="background:#C2410C">K</span>KALEY</i></div>
+          <span>Split</span><div class="opts mono" style="font-size:12px"><i class="on">50/50</i><i>MINE</i><i>KALEY'S</i><i>70/30</i></div>
+        </div>
+        <hr class="rule">
+        <div class="ln"><span><i class="who" style="background:#0F766E">F</i>FRED</span><span class="dots"></span><b>24.05</b></div>
+        <div class="ln"><span><i class="who" style="background:#C2410C">K</i>KALEY</span><span class="dots"></span><b>24.05</b></div>
+        <div class="bar" style="height:6px"><i class="f" style="width:50%"></i><i class="k" style="width:50%"></i></div>
+        <div class="ln"><span>KALEY OWES FRED</span><span class="dots"></span><b>+24.05</b></div>
+        <div class="ln"><span>BALANCE AFTER</span><span class="dots"></span><b class="ok">FRED OWED 155.05</b></div>
+        <hr class="rule">
+        <div class="ln"><span>GAS &amp; TRANSPORT AFTER</span><span class="dots"></span><b class="warn">208 / 220 · 95%</b></div>
+        <div class="bar" style="margin-top:2px"><i class="w" style="width:94.5%"></i></div>
+        <div class="ey" style="font-size:10px">13 days left in October · $12 of this budget remains</div>
+      </div>
+      <div class="pad" aria-label="Keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>.</span><span>0</span><span>⌫</span></div>
+      <div class="cta"><span>Add to Gas &amp; Transport</span><small>$48.10</small></div>
+    </div>
+  </div></div>
+  <div class="cap"><h3>Add purchase<small>the slip being printed</small></h3><p>The form is a white slip with a tear-off edge: as you type, the lines print. Amount at the top right like a till, then Where / Paid by / Split as typed fields, then the computed lines.</p>
+    <ul><li>Who-owes-whom and the balance after are literally line items with leaders: "KALEY OWES FRED ...... +24.05".</li><li>Budget impact prints as its own section with an amber bar and a plain sentence: "$12 of this budget remains".</li><li>Keypad is a ruled grid; the Add bar is ink, with the amount echoed on the right.</li></ul></div>
+  </div>
+
+  <!-- ───────── October statement ───────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen">
+    <div class="status"><span>9:41</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body">
+      <div class="top"><div><div class="ey">Trends · projected to Oct 31</div><div class="brand">OCTOBER STATEMENT</div></div><div class="avs"><span class="av" style="background:#0F766E">F</span><span class="av" style="background:#C2410C">K</span></div></div>
+      <div class="stmt">
+        <div class="ln"><span>SPENT TO DATE</span><span class="dots"></span><b>2,186.00</b></div>
+        <div class="ln"><span>PROJECTED OCT 31</span><span class="dots"></span><b>3,765.00</b></div>
+        <div class="ln"><span>FLEXIBLE BUDGET</span><span class="dots"></span><b>3,850.00</b></div>
+        <hr class="rule dbl" style="margin:4px 0">
+        <div class="ln tot"><span>UNDER, IF NOTHING CHANGES</span><span class="dots"></span><b class="ok">85.00</b></div>
+      </div>
+      <div class="sec">
+        <h4><span>By week</span><span>┊ = $869 even week</span></h4>
+        <div class="weeks">
+          <span class="lbl">1–7</span><div class="wb"><i class="f" style="width:42.2%"></i><i class="k" style="width:33.3%"></i><em></em></div><b>680</b>
+          <span class="lbl">8–14</span><div class="wb"><i class="f" style="width:46.7%"></i><i class="k" style="width:36.7%"></i><em></em></div><b>750</b>
+          <span class="lbl">15–21</span><div class="wb"><i class="f" style="width:47.1%"></i><i class="k" style="width:36.9%"></i><em></em></div><b>756<span style="color:#78716C;font-weight:400"> so far</span></b>
+          <span class="lbl">22–28</span><div class="wb proj"><em></em></div><b style="color:#78716C">~760</b>
+          <span class="lbl">29–31</span><div class="wb proj" style="width:43%"><em style="left:224%"></em></div><b style="color:#78716C">~330</b>
+        </div>
+        <div class="ln" style="font-size:11px"><span><i class="who" style="background:#0F766E">F</i>FRED 1,224 · 56%</span><span class="dots"></span><span><i class="who" style="background:#C2410C">K</i>KALEY 962 · 44%</span></div>
+      </div>
+      <div class="sec">
+        <h4><span>Drift vs September</span></h4>
+        <div class="ln"><span>DINING OUT</span><span class="dots"></span><b class="warn">95% · 8/11 KALEY'S LUNCHES</b></div>
+        <div class="ln"><span>SUBSCRIPTIONS</span><span class="dots"></span><b class="bad">+4 · SPOTIFY DUO ROSE $2</b></div>
+        <div class="ln"><span>GROCERIES</span><span class="dots"></span><b class="ok">69% · $22 LESS THAN SEP</b></div>
+      </div>
+      <div class="settle">
+        <div class="ey">Settle up · shared split 50/50 · since Oct 1</div>
+        <div class="ln"><span>FRED PAID</span><span class="dots"></span><b>1,224.00</b></div>
+        <div class="ln"><span>KALEY PAID</span><span class="dots"></span><b>962.00</b></div>
+        <div class="ln"><span>FAIR SHARE EACH</span><span class="dots"></span><b>1,093.00</b></div>
+        <hr class="rule dbl" style="margin:2px 0">
+        <div class="ln" style="align-items:baseline"><span>KALEY → FRED</span><span class="dots"></span><b class="big" style="font-size:30px">$131.00</b></div>
+        <div class="btns"><span class="p">Request</span><span class="s">Mark settled</span></div>
+      </div>
+      <div class="center">*** end of October (so far) ***</div>
+    </div>
+    <nav class="tabbar"><a href="#stmt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="#stmt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</a><button type="button" class="fab" aria-label="Add a purchase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><a href="#stmt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>Import</a><a href="#stmt" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Trends</a></nav>
+  </div></div>
+  <div class="cap"><h3>October statement<small>month in review</small></h3><p>The review becomes a statement: totals with a double rule, weekly spend as inked bars against a dashed "even week" tick, drift as line items, and settle-up as a boxed sub-receipt.</p>
+    <ul><li>Weeks 22–28 and 29–31 print as hatched projections with ~ amounts.</li><li>Settle-up shows its working: paid, paid, fair share, then "KALEY → FRED $131.00" under a double rule.</li><li>The page ends the way a receipt does.</li></ul></div>
+  </div>
+</div>
+
+<footer>Source: <code>mockups-v2/duobudget-receipt.html</code> on branch <code>ccr-71c5582f-qgd360</code>. The Ledger version of these three screens is in the deep dive for side-by-side comparison.</footer>
+</div>
