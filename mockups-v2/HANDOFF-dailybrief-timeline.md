@@ -5,7 +5,7 @@ Paste this into the session that builds DailyBrief. Two changes, in one pass:
 2. The **Schedule** section becomes a vertical timeline ("rail") and needs-you items get placed on it.
 
 Reference mockups (same copy and data as the live screenshots):
-- Chosen design, full phone + fold + glance: https://claude.ai/artifact/… (DailyBrief Broadsheet)
+- Chosen design, full phone + fold + glance: https://claude.ai/artifact/GCLurB7NFfeuFtsgC5uZ7H (DailyBrief Broadsheet)
 - The six samples it was picked from: https://claude.ai/artifact/VSzYxCdaoXxjhnmkGANgRx
 - Rail mechanics source: https://screensdesign.com/apps/structured-daily-planner/?vs=135555&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens
 
