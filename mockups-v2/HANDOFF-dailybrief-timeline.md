@@ -1,50 +1,76 @@
-# DailyBrief — timeline rail handoff
+# DailyBrief — "dark broadsheet" restyle + timeline rail
 
-Paste this into the session that builds DailyBrief. It describes one change: the **Schedule** card becomes a vertical timeline ("rail") in the app's existing dark system, and items that need you get placed on it. Nothing else about the brief changes.
+Paste this into the session that builds DailyBrief. Two changes, in one pass:
+1. Restyle the brief to the **dark broadsheet** system below (no cards; serif + sans; brass only for needs-you).
+2. The **Schedule** section becomes a vertical timeline ("rail") and needs-you items get placed on it.
 
-Reference mockups (interactive, same data as the live screenshots):
-- Phone + fold, in the real system: https://claude.ai/artifact/5N5ZdJ2b4ej3fjm413kNAj (DailyBrief Dark Timeline)
-- The Structured-style rail mechanics this is based on: https://screensdesign.com/apps/structured-daily-planner/?vs=135555&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens
+Reference mockups (same copy and data as the live screenshots):
+- Chosen design, full phone + fold + glance: https://claude.ai/artifact/… (DailyBrief Broadsheet)
+- The six samples it was picked from: https://claude.ai/artifact/VSzYxCdaoXxjhnmkGANgRx
+- Rail mechanics source: https://screensdesign.com/apps/structured-daily-planner/?vs=135555&utm_source=screensdesign&utm_medium=mcp&utm_content=search_screens
 
-## 1. Keep exactly as is
-- Ground `#0B0B0B`, card `#151515` (radius 22), tile `#1C1C1C` (radius 16)
-- Text `#F2F2F2`, body copy `#C9C9C9`, secondary `#8E8E8E`, hairlines `#222`
-- Labels: 11.5px, uppercase, letter-spacing 0.18em, `#8E8E8E`
-- Greeting 30/600 with the name in `#8E8E8E`; narrative paragraph; the "47% of the day" white progress bar; the three stat tiles
-- Amber `#D9A440` is **only** for "needs you" (dot, TODAY pill text). Do not introduce any other accent.
+## 1. Tokens
+| token | value | used for |
+|---|---|---|
+| ground | `#121212` | screen background (not pure black) |
+| inset | `#1E1E1E` | calendar-event rail nodes only |
+| rule-strong | `#3A3A3A` | around the counts, under section heads |
+| rule | `#2A2A2A` | between rows |
+| ink | `#EDE8DF` | headlines, titles, masthead rule, progress fill, "next" node |
+| body | `#D6D0C5` | the narrative paragraph |
+| secondary | `#9A948A` | labels, times, second lines, counts in section heads |
+| faint | `#5A564F` | hints, footer, checkbox rings, gap dashes |
+| brass | `#C9A66B` | needs-you only: nodes, dots, NEEDS YOU labels, placed times, the needs-you count, and the user's name in the greeting |
 
-## 2. The rail (replaces the collapsed "Day is open" row inside the Schedule card)
-Grid per row: `44px time | 40px node | 1fr text | 22px check`, column gap 12.
+No other color. Progress bar track `#2A2A2A`, fill ink. Remove all card backgrounds, radii and shadows; sections are separated by rules.
 
-- **Time** (left): 12/600 `#8E8E8E`, right-aligned. The current time row is `#F2F2F2`.
-- **Node**: 40px wide capsule, radius 20, icon 18px centered at the top (10px padding). Height encodes duration: `max(40px, minutes × 1.6px)` → 30 min ≈ 48px, 45 min ≈ 72px, 1 h ≈ 96px.
-  - grey `#242424` / icon `#C9C9C9` → calendar event
-  - amber `#D9A440` / icon `#1A1300` → needs-you item placed on the rail
-  - white `#F2F2F2` / icon `#0B0B0B` → the *next* event (at most one)
-  - ring: transparent, 2px `#3A3A3A` border, 40px tall → a text, at the minute it arrived (optional, togglable)
-- **Text**: title 15/600; second line 13 `#8E8E8E`. Needs-you rows get a 10px amber label above the title: `NEEDS YOU · TODAY`.
-- **Check**: 22px circle, 2px `#3A3A3A`; checked = filled `#F2F2F2`. Checking a needs-you capsule marks it done in Needs You and decrements the tile.
-- **Now**: 12px white dot with a 4px `rgba(242,242,242,.14)` halo in the node column, time in white, label `NOW` in the label style.
-- **Gaps**: when the gap to the next item is > 30 min, collapse it to one 34px row: dashed 2px `#2E2E2E` vertical in the node column and italic 13px `#5E5E5E` text: `open until 2:00`, `open evening`.
-- Card header right side reads `Day is open · 3 placed` (or `4 events · 3 placed`) with the existing chevron.
+## 2. Type
+- **Serif: Instrument Serif** (Google Fonts, 400 + italic). Used for: masthead "The Daily Brief" 20px; greeting 38px (34 on fold), name in italic brass; tile numerals 30px; rail times 14px; counts in section heads 16px; gap notes 14px italic; placed times in the Needs You list 15px brass; footer 13px italic.
+- **Sans: Instrument Sans** 400–600. Used for: narrative 14.5/1.5 in body color with a serif drop cap (30px, float left); item titles 14–14.5/600; second lines 12–12.5 secondary; labels 10.5px uppercase 0.16em secondary; hint 12px faint.
+- Rule: if it's a number, a time or a note-to-self, it's serif. If you read it as a sentence, it's sans.
 
-## 3. Placing needs-you items on the rail
-Rule, not AI: each needs-you item gets a suggested slot so it has a time.
-1. Start at `now` rounded up to the next 15 min, plus 15 min.
-2. Place items in priority order (overdue money first), 15 min apart, each at its estimated length (default 10 min; "2 min" for a single tap-to-pay).
-3. Never overlap a calendar event; if a slot collides, jump to 15 min after that event ends.
-4. Prefer slots before the next meeting if there is ≥ 45 min free before it.
-5. Snoozing an item ("not now") moves it to after the next event; "not for me" removes it from the rail and the list.
-Show the chosen time on the Needs You list too: the TODAY pill becomes the time (`12:15`), amber text, same pill.
+## 3. Structure (phone, top to bottom)
+1. **Masthead**: "The Daily Brief" (serif) left, `SUN · OCT 18 · FROM 11:56` (label) right, 2px ink rule beneath.
+2. **Greeting** + full narrative with drop cap.
+3. **Progress**: 3px bar, then `47% of the day` label.
+4. **Counts**: 3 tiles (4 on fold) in one row, 1px rule-strong above and below and between; serif numerals; needs-you numeral in brass.
+5. **Today, in order** (the rail) — section head with serif count on the right ("3 placed").
+6. **Needs you** — rows: 6px brass dot, title, second line, serif brass time on the right (the slot chosen on the rail, replaces the TODAY pill). Hint line in faint beneath.
+7. **Texts** — rows separated by 1px rules, serif count in the head.
+8. **Work** — one section with two "quiet" rows: `Teams … nothing new`, `Slack … nothing new` (italic serif), instead of two empty cards.
+9. **Footer**: italic serif, faint: "A new brief every morning at 6:45. Pull down to refresh."
 
-## 4. Fold / tablet (≥ 700px wide)
-Two columns, 14px gap. Left: greeting card, then the Schedule card with the rail. Right: Needs You card, Texts card. Four stat tiles across the top (Meetings left / Needs you / Texts today / Unread work) with the 3px white mini-bar each. The rail and the Needs You list are the same data; a check on either side updates both.
+## 4. The rail
+Row grid: `40px time | 36px node | 1fr text | 20px check`, column gap 10.
+- Time: serif 14 secondary, right-aligned.
+- Node: 36px capsule, radius 18, icon 16px at the top (9px padding). Height = `max(36px, minutes × 1.45px)` → 30 min ≈ 44, 45 min ≈ 64, 1 h ≈ 88.
+  - inset `#1E1E1E` + 1px rule-strong border, brass icon → calendar event
+  - solid brass, ink icon → needs-you item placed on the rail
+  - solid ink, ink-colored icon dark → the one *next* event
+  - transparent with rule-strong border, secondary icon → a text at its arrival minute (optional toggle), or the 6:45 "Tomorrow's brief" marker
+- Text: 14/600 title; 12 secondary second line; needs-you rows get a 9.5px brass `NEEDS YOU` label above the title.
+- Check: 20px circle, 1.5px faint ring; checked = filled ink. Checking a brass node marks the item done in Needs You and decrements the count tile.
+- Now: 10px ink dot in the node column, serif time in ink, `NOW` label in secondary.
+- Gaps > 30 min collapse to a 28px row: 1px dashed faint vertical in the node column + italic serif note ("open until two", "open evening").
 
-## 5. Acceptance
-- With an open calendar and 3 needs-you items, the Schedule card shows Now + 3 amber capsules + the gaps, not "Day is open".
-- Durations are visible: a 45-min call is visibly taller than a 10-min payment.
-- Nothing on the screen is amber except needs-you nodes, their labels and their time pills.
-- Checking an amber capsule removes it from Needs You and updates the `3` tile.
-- Phone width 390 has no horizontal scroll; fold width 760 shows two columns.
+## 5. Placing needs-you items (rule, not AI)
+1. Start at `now` rounded up to the next :15, plus 15 min.
+2. Place in priority order (overdue money first), 15 min apart, each at its estimated length (default 10 min; 2 min for a tap-to-pay).
+3. Never overlap a calendar event; on collision, jump to 15 min after that event ends.
+4. Prefer slots before the next meeting when ≥ 45 min is free before it.
+5. "Not now" moves the item to after the next event; "not for me" removes it from rail and list.
+Show the chosen time in the Needs You list as the serif brass time.
 
-Recommendation: ship V1 (rail inside the Schedule card) first. V2 (texts on the rail as ring nodes) is a toggle you can add later.
+## 6. Fold / tablet (≥ 700px)
+Masthead and the four counts span the width. Two columns, 28px gutter. Left: greeting, narrative, progress, rail. Right: Needs You, Texts, Work. Footer spans. Rail and Needs You are one dataset; a check on either side updates both.
+
+## 7. Glance (widget / lock screen, optional)
+Masthead line, then four lines: next two brass items (`12:15  Pay Global Lending · $789.10`), the next event, and an italic serif footer `3 need you · 4 texts · 47% of the day`.
+
+## 8. Acceptance
+- No card backgrounds remain; sections are separated by rules only.
+- Nothing is brass except needs-you elements, the needs-you count, and the name in the greeting.
+- Numbers, times and notes render in Instrument Serif; sentences in Instrument Sans.
+- With an open calendar and 3 needs-you items, the rail shows Now + 3 brass capsules + gap notes, not "Day is open".
+- Checking a brass capsule removes the item from Needs You and updates the count.
+- 390px: no horizontal scroll. 760px: two columns with masthead and counts spanning.
