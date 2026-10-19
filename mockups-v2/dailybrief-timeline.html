@@ -1,0 +1,277 @@
+<title>DailyBrief Timeline Variants</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: three phones in a row, each a different fusion of Structured's duration-proportional rail with the Paper/plum aesthetic; a style card under each. */
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --fg:#1B1B19; --muted:#6B6A64; --line:#DEDCD4;
+  --accent:#8B2F5C; --accent-ink:#FFFFFF; --chip:#E9E7DF;
+  --font-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+    --accent:#E9B4CB; --accent-ink:#1A1816; --chip:#2A2A26; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+  --accent:#E9B4CB; --accent-ink:#1A1816; --chip:#2A2A26; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(34px,5vw,54px);line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.jump a:hover,.jump a:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+.keep{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.keep h3{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.keep ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.keep li{padding-left:16px;position:relative}
+.keep li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;align-items:start}
+@media (min-width:1240px){.screens{grid-template-columns:repeat(3,390px);justify-content:space-between}}
+.shot{display:flex;flex-direction:column;gap:16px;min-width:0}
+.cap{display:flex;flex-direction:column;gap:10px;max-width:390px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.cap h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.cap h3 small{color:var(--muted);font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.cap p{margin:0;color:var(--muted);font-size:14px}
+.cap ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.cap li{padding-left:16px;position:relative}
+.cap li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.cap .pick{font-size:13px;padding-top:8px;border-top:1px solid var(--line)}
+.cap .pick b{font-weight:600}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px;max-width:70ch}
+footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
+
+/* phone frame */
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:52px;padding:11px;background:#121214;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #2C2C30,0 24px 60px rgba(0,0,0,.28)}
+.screen{position:relative;border-radius:42px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums;background:#F7F5F0;color:#1D1B18}
+.screen::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#0B0B0C;z-index:5}
+.screen::after{content:"";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.28;z-index:5}
+.status{display:flex;justify-content:space-between;align-items:center;height:54px;padding:12px 30px 0 34px;font-weight:600;font-size:16px;letter-spacing:-.01em;flex:0 0 auto}
+.status .sys{display:flex;align-items:center;gap:6px}
+.status .batt{width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.status .batt::after{content:"";position:absolute;inset:2px;right:3px;background:currentColor;border-radius:1.5px}
+.status .batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;opacity:.5}
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none;padding:4px 20px 16px;gap:12px}
+.body::-webkit-scrollbar{display:none}
+.body>*{flex:0 0 auto}
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;padding:10px 12px 28px;font-size:11px;font-weight:600;background:#FFFFFF;border-top:1px solid #E6E2DA;color:#6F6B64;position:relative}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px;text-decoration:none;color:inherit}
+.tabbar .on{color:#8B2F5C}
+.tabbar svg{width:22px;height:22px}
+.fab{position:absolute;right:20px;bottom:98px;width:54px;height:54px;border-radius:50%;background:#8B2F5C;color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(139,47,92,.35);z-index:4}
+.fab svg{width:24px;height:24px}
+.ey{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+/* shared paper header pieces */
+.top{display:flex;justify-content:space-between;align-items:flex-end}
+.day{font-family:var(--font-display);font-size:44px;line-height:1;letter-spacing:-.01em}
+.day em{font-style:italic;color:#8B2F5C}
+.date{font-size:12px;color:#6F6B64;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.today{font-size:12px;font-weight:600;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:6px 12px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;color:#6F6B64}
+.week div{padding:6px 0 5px;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.week b{font-size:15px;color:#1D1B18;font-weight:600}
+.week .on{background:#8B2F5C;color:#F7E6EE}.week .on b{color:#FFFFFF}
+.week .dots{display:flex;gap:2px;height:4px}
+.week .dots i{width:4px;height:4px;border-radius:50%;background:#C9A3B8}
+.week .on .dots i{background:#F0D4E1}
+.stats{display:flex;gap:6px;font-size:12px;color:#6F6B64}
+.stats span{background:#FFFFFF;border:1px solid #E6E2DA;border-radius:999px;padding:5px 10px}
+.stats b{color:#1D1B18;font-weight:700}
+.first{background:#1D1B18;color:#F7F5F0;border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
+.first .ey{color:#C9B2BE}.first p{margin:2px 0 0;font-size:14px;line-height:1.35}.first p b{color:#FFFFFF}
+.first .btn{flex:0 0 auto;background:#8B2F5C;color:#FFFFFF;border-radius:10px;min-height:36px;padding:0 12px;font-weight:600;font-size:13px;display:flex;align-items:center}
+.ic svg{width:20px;height:20px}
+
+/* ── V1 · Capsule rail (Structured-faithful) ── */
+.v1 .rail{display:flex;flex-direction:column;padding-top:4px}
+.v1 .it{display:grid;grid-template-columns:44px 44px 1fr 28px;gap:0 12px;align-items:start}
+.v1 .t{font-size:12px;font-weight:600;color:#6F6B64;text-align:right;padding-top:12px}
+.v1 .t.now{color:#8B2F5C;font-weight:700}
+.v1 .cap-node{width:44px;border-radius:22px;display:flex;align-items:flex-start;justify-content:center;padding-top:11px;position:relative}
+.v1 .cap-node.plum{background:#8B2F5C;color:#FFFFFF}
+.v1 .cap-node.tint{background:#F0DCE6;color:#8B2F5C}
+.v1 .cap-node.sand{background:#EDE6D8;color:#6F6B64}
+.v1 .cap-node.dash{background:#FBF4F8;color:#8B2F5C;border:2px dashed #C9A3B8;padding-top:9px}
+.v1 .tx{display:flex;flex-direction:column;gap:2px;padding-top:9px;min-width:0}
+.v1 .tx b{font-size:15px;font-weight:600}
+.v1 .tx span{font-size:12px;color:#6F6B64}
+.v1 .tx .ey{color:#8B2F5C;margin-bottom:2px}
+.v1 .chk{width:24px;height:24px;border-radius:50%;border:2px solid #C9A3B8;margin-top:20px}
+.v1 .chk.on{background:#8B2F5C;border-color:#8B2F5C;display:flex;align-items:center;justify-content:center;color:#FFFFFF}
+.v1 .chk svg{width:13px;height:13px}
+.v1 .gap{display:grid;grid-template-columns:44px 44px 1fr;gap:0 12px;align-items:center;height:36px}
+.v1 .gap i{justify-self:center;width:0;height:100%;border-left:2px dashed #D6CFC3}
+.v1 .gap span{font-family:var(--font-display);font-style:italic;font-size:15px;color:#8E887F}
+.v1 .nowdot{display:grid;grid-template-columns:44px 44px 1fr;gap:0 12px;align-items:center;height:22px}
+.v1 .nowdot i{justify-self:center;width:12px;height:12px;border-radius:50%;background:#8B2F5C;box-shadow:0 0 0 4px rgba(139,47,92,.18)}
+.v1 .nowdot span{font-size:11px;font-weight:700;color:#8B2F5C;letter-spacing:.06em;text-transform:uppercase}
+.v1 .nowdot .t{padding-top:0}
+
+/* ── V2 · Card rail (A's cards on Structured's nodes) ── */
+.v2 .rail{position:relative;display:flex;flex-direction:column;gap:0;padding:6px 0 0 0}
+.v2 .rail::before{content:"";position:absolute;left:62px;top:0;bottom:6px;width:2px;background:#E6E2DA}
+.v2 .it{display:grid;grid-template-columns:44px 36px 1fr;gap:0 10px;align-items:start;margin-bottom:8px}
+.v2 .t{font-size:12px;font-weight:600;color:#6F6B64;text-align:right;padding-top:11px}
+.v2 .node{width:36px;border-radius:18px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;position:relative;z-index:1}
+.v2 .node.plum{background:#8B2F5C;color:#FFFFFF}
+.v2 .node.tint{background:#F0DCE6;color:#8B2F5C}
+.v2 .node.sand{background:#EDE6D8;color:#6F6B64}
+.v2 .node.dash{background:#FBF4F8;color:#8B2F5C;border:2px dashed #C9A3B8;padding-top:6px}
+.v2 .node svg{width:18px;height:18px}
+.v2 .card{background:#FFFFFF;border:1px solid #E6E2DA;border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.v2 .card b{font-size:14px;font-weight:600}.v2 .card span{font-size:12px;color:#6F6B64}
+.v2 .card.now{background:#8B2F5C;border-color:#8B2F5C;color:#FFFFFF}.v2 .card.now span{color:#F0D4E1}
+.v2 .card.reply{border-style:dashed;border-color:#C9A3B8;background:#FBF4F8}
+.v2 .card .dur{margin-left:auto;font-size:11px;font-weight:700;color:#8B2F5C;background:#FBF4F8;padding:2px 8px;border-radius:999px}
+.v2 .card.now .dur{background:rgba(255,255,255,.18);color:#FFFFFF}
+.v2 .card .hd{display:flex;align-items:center;gap:8px}
+.v2 .gap{display:grid;grid-template-columns:44px 36px 1fr;gap:0 10px;align-items:center;height:30px;margin-bottom:8px}
+.v2 .gap span{font-family:var(--font-display);font-style:italic;font-size:15px;color:#8E887F;grid-column:3}
+.v2 .nowline{position:relative;height:0;margin:4px 0 14px}
+.v2 .nowline::before{content:"";position:absolute;left:54px;right:0;top:0;border-top:2px solid #8B2F5C}
+.v2 .nowline::after{content:"";position:absolute;left:57px;top:-4px;width:10px;height:10px;border-radius:50%;background:#8B2F5C;box-shadow:0 0 0 4px rgba(139,47,92,.18)}
+.v2 .nowline span{position:absolute;left:0;top:-8px;width:44px;text-align:right;font-size:11px;font-weight:700;color:#8B2F5C;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── V3 · Planner page (hour-ruled, blocks to scale) ── */
+.v3 .grid{position:relative;display:flex;flex-direction:column;margin-top:4px}
+.v3 .hr{height:46px;border-top:1px solid #E6E2DA;display:flex;align-items:flex-start;gap:0}
+.v3 .hr span{width:40px;flex:0 0 40px;font-family:var(--font-display);font-size:15px;color:#8E887F;line-height:1;padding-top:6px;position:relative;z-index:3;background:#F7F5F0;align-self:flex-start;padding-right:4px;width:auto}
+.v3 .hr span small{font-size:10px;font-family:var(--font-body);font-weight:600;letter-spacing:.04em;margin-left:2px;color:#B0A99D}
+.v3 .blk{position:absolute;left:48px;right:0;border-radius:10px;padding:5px 10px;display:flex;flex-direction:column;gap:1px;min-height:22px;overflow:hidden}
+.v3 .blk b{font-size:13px;font-weight:600;line-height:1.2}
+.v3 .blk span{font-size:11px;color:#6F6B64}
+.v3 .blk.plum{background:#8B2F5C;color:#FFFFFF}.v3 .blk.plum span{color:#F0D4E1}
+.v3 .blk.tint{background:#F0DCE6;color:#4A2235;border:1px solid #E3C4D3}.v3 .blk.tint span{color:#8B2F5C}
+.v3 .blk.sand{background:#EDE6D8;border:1px solid #DED5C3}
+.v3 .blk.dash{background:#FBF4F8;border:1.5px dashed #C9A3B8;color:#8B2F5C}.v3 .blk.dash span{color:#8B2F5C;opacity:.8}
+.v3 .blk .ic{position:absolute;right:8px;top:6px;opacity:.8}.v3 .blk .ic svg{width:16px;height:16px}
+.v3 .free{position:absolute;left:48px;right:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-style:italic;font-size:15px;color:#8E887F}
+.v3 .now{position:absolute;left:0;right:0;height:0;border-top:2px solid #B42318;z-index:2}
+.v3 .now::before{content:"";position:absolute;left:38px;top:-5px;width:8px;height:8px;border-radius:50%;background:#B42318}
+.v3 .now span{position:absolute;right:0;top:-16px;font-size:11px;font-weight:700;color:#B42318;background:#F7F5F0;padding:0 4px;border-radius:4px}
+.v3 .legend{display:flex;gap:12px;font-size:11px;color:#6F6B64;padding:2px 0}
+.v3 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">designer-fun · mockups v2 · DailyBrief · timeline variants</div>
+  <h1>Structured's rail, in <em>DailyBrief's</em> paper</h1>
+  <p>You liked Structured's vertical timeline and the current Paper / plum aesthetic. These three keep the paper, serif day name, plum-for-now rule and the ink "Do first" card, and each borrows a different amount of Structured's mechanics: capsules sized by duration, icons on the rail, gaps written as notes, and a plus button for adding.</p>
+  <nav class="jump" aria-label="Related"><a href="https://claude.ai/artifact/XH2RX462B1PUdG4T1hwTcA">Style explorations ↗</a><a href="https://claude.ai/artifact/RrVe1VNwxC8gkhVwsBZRhv">Deep dive ↗</a><a href="https://claude.ai/artifact/8DS8x6UvB46iqjTNbx9g7N">All four apps ↗</a></nav>
+</header>
+
+<div class="keep" aria-label="What is kept and what is borrowed">
+  <div><h3>Kept from Paper</h3><ul><li>Warm off-white, ink, one plum</li><li>Serif day name, italic serif for notes-to-self</li><li>Ink "Do first" card, dashed reply items</li></ul></div>
+  <div><h3>Borrowed from Structured</h3><ul><li>Rail with capsule nodes sized by duration</li><li>Icon per event, inside the node</li><li>Gaps collapsed into one written line</li><li>Plus FAB; week strip with event dots</li></ul></div>
+  <div><h3>What varies below</h3><ul><li>V1 puts the capsule <em>on</em> the rail, titles beside it</li><li>V2 keeps your cards, the capsule becomes the node</li><li>V3 is a ruled planner page, blocks to the hour</li></ul></div>
+</div>
+
+<div class="screens">
+
+  <!-- ─────── V1 Capsule rail ─────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen v1">
+    <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body">
+      <div class="top"><div><div class="date">October 18 · 7:05 AM</div><div class="day">Sunday <em>18</em></div></div><span class="today">Today</span></div>
+      <div class="week" aria-hidden="true">
+        <div class="on"><span>S</span><b>18</b><span class="dots"><i></i><i></i><i></i></span></div><div><span>M</span><b>19</b><span class="dots"><i></i><i></i></span></div><div><span>T</span><b>20</b><span class="dots"><i></i><i style="background:#C2410C"></i></span></div><div><span>W</span><b>21</b><span class="dots"><i></i></span></div><div><span>T</span><b>22</b><span class="dots"><i></i><i></i></span></div><div><span>F</span><b>23</b><span class="dots"><i></i></span></div><div><span>S</span><b>24</b><span class="dots"></span></div>
+      </div>
+      <div class="stats"><span><b>3</b> meetings</span><span><b>2</b> to reply</span><span><b>2 h 40 m</b> free</span></div>
+      <div class="rail" aria-label="Today's timeline">
+        <div class="nowdot"><span class="t now">7:05</span><i></i><span>Now</span></div>
+        <div class="it"><span class="t">7:15</span><div class="cap-node plum" style="height:56px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/></svg></span></div><div class="tx"><span class="ey">Do first · due Tue</span><b>Reply to the landlord</b><span>Lease renewal · 15 min · before your 10:00</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>coffee, 1 h</span></div>
+        <div class="it"><span class="t">8:30</span><div class="cap-node dash" style="height:44px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></span></div><div class="tx"><b>Reply: district manager</b><span>Friday's sales numbers · 10 min</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>free, 1 h 20 m</span></div>
+        <div class="it"><span class="t">10:00</span><div class="cap-node tint" style="height:72px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span></div><div class="tx"><b>Weekly planning</b><span>Video call · 30 min · in 2 h 55 m</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>free until 12:30</span></div>
+        <div class="it"><span class="t">12:30</span><div class="cap-node sand" style="height:100px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg></span></div><div class="tx"><b>Lunch with Kaley</b><span>Downtown · 1 h</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>drive, 1 h 30 m</span></div>
+        <div class="it"><span class="t">15:00</span><div class="cap-node tint" style="height:84px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span></div><div class="tx"><b>Site walk</b><span>Store 214 · 45 min</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>free, 2 h 15 m</span></div>
+        <div class="it"><span class="t">18:00</span><div class="cap-node sand" style="height:100px"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></span></div><div class="tx"><b>Gym</b><span>Blocked · 1 h</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <span class="fab" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+    <nav class="tabbar"><a href="#v1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#v1" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg>Timeline</a><a href="#v1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+  </div></div>
+  <div class="cap"><h3>V1 · Capsule rail<small>most Structured</small></h3><p>The capsule <em>is</em> the rail. Height is duration (1 h ≈ 100 px), the icon sits in the capsule, and the gaps between events become one italic line: "coffee, 1 h", "free until 12:30".</p>
+    <ul><li>"Do first" moves onto the rail as the first plum capsule at 7:15, so the day literally starts with it.</li><li>Three node fills: plum = now/do-first, plum tint = meeting, sand = personal; dashed = a reply slot.</li><li>Week strip gets event dots per day (Tuesday's orange dot is the RetaTrack shot).</li></ul>
+    <div class="pick"><b>Pick this if</b> you want to feel the shape of the day at a glance, and are happy to scroll for the evening.</div></div>
+  </div>
+
+  <!-- ─────── V2 Card rail ─────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen v2">
+    <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body">
+      <div class="top"><div><div class="date">Oct 18, 2026 · 7:05 AM</div><div class="day">Sunday</div></div><span class="today">Today</span></div>
+      <div class="week" aria-hidden="true">
+        <div class="on"><span>S</span><b>18</b><span class="dots"><i></i><i></i><i></i></span></div><div><span>M</span><b>19</b><span class="dots"><i></i><i></i></span></div><div><span>T</span><b>20</b><span class="dots"><i></i><i style="background:#C2410C"></i></span></div><div><span>W</span><b>21</b><span class="dots"><i></i></span></div><div><span>T</span><b>22</b><span class="dots"><i></i><i></i></span></div><div><span>F</span><b>23</b><span class="dots"><i></i></span></div><div><span>S</span><b>24</b><span class="dots"></span></div>
+      </div>
+      <div class="first"><div style="flex:1 1 auto;min-width:0"><div class="ey">Do first · due Tue</div><p>Reply to the <b>landlord</b> about the lease renewal, before your 10:00.</p></div><span class="btn">Mark done</span></div>
+      <div class="rail" aria-label="Today's timeline">
+        <div class="nowline"><span>Now</span></div>
+        <div class="it"><span class="t">8:30</span><div class="node dash" style="height:40px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><div class="card reply"><div class="hd"><b>Reply: district manager</b><span class="dur">10 m</span></div><span>Friday's sales numbers · you have the figure in OpsCheck</span></div></div>
+        <div class="it"><span class="t">10:00</span><div class="node plum" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="card now"><div class="hd"><b>Weekly planning</b><span class="dur">30 m</span></div><span>Video call · starts in 2 h 55 m</span></div></div>
+        <div class="gap"><span>free until 12:30</span></div>
+        <div class="it"><span class="t">12:30</span><div class="node sand" style="height:92px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg></div><div class="card"><div class="hd"><b>Lunch with Kaley</b><span class="dur">1 h</span></div><span>Downtown · table booked</span></div></div>
+        <div class="it"><span class="t">15:00</span><div class="node tint" style="height:76px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><div class="card"><div class="hd"><b>Site walk</b><span class="dur">45 m</span></div><span>Store 214 · bring the midday check</span></div></div>
+        <div class="gap"><span>free, 2 h 15 m</span></div>
+        <div class="it"><span class="t">18:00</span><div class="node sand" style="height:92px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></div><div class="card"><div class="hd"><b>Gym</b><span class="dur">1 h</span></div><span>Blocked time</span></div></div>
+      </div>
+    </div>
+    <span class="fab" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+    <nav class="tabbar"><a href="#v2" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a><a href="#v2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#v2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+  </div></div>
+  <div class="cap"><h3>V2 · Card rail<small>the balanced mix</small></h3><p>Your current cards and the ink "Do first", but each card now hangs off a duration-sized capsule node with its icon. The rail line runs behind the nodes; the Now line stays.</p>
+    <ul><li>Cards gain a duration chip ("30 m") so length is visible twice: in the node and in the text.</li><li>Reply slots keep the dashed treatment on both node and card.</li><li>Second lines get useful: "you have the figure in OpsCheck", "bring the midday check".</li></ul>
+    <div class="pick"><b>Pick this if</b> you want the least change from the current design with the biggest gain in readability. My recommendation.</div></div>
+  </div>
+
+  <!-- ─────── V3 Planner page ─────── -->
+  <div class="shot">
+  <div class="phone"><div class="screen v3">
+    <div class="status"><span>7:05</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+    <div class="body" style="gap:10px">
+      <div class="top"><div><div class="date">Sunday · October 18</div><div class="day">7<em>:05</em></div></div><div class="stats" style="flex-direction:column;gap:4px;align-items:flex-end;font-size:11px"><span><b>3</b> meetings · <b>2</b> replies</span><span><b>2 h 40 m</b> free</span></div></div>
+      <div class="first"><div style="flex:1 1 auto;min-width:0"><div class="ey">Do first · due Tue</div><p>Reply to the <b>landlord</b>, before your 10:00.</p></div><span class="btn">Open</span></div>
+      <div class="legend"><span><i style="background:#8B2F5C"></i>Now / next</span><span><i style="background:#F0DCE6;border:1px solid #E3C4D3"></i>Meeting</span><span><i style="background:#EDE6D8"></i>Personal</span><span><i style="background:#FBF4F8;border:1.5px dashed #C9A3B8"></i>Reply</span></div>
+      <div class="grid" aria-label="Today, hour by hour">
+        <div class="hr"><span>7<small>AM</small></span></div><div class="hr"><span>8</span></div><div class="hr"><span>9</span></div><div class="hr"><span>10</span></div><div class="hr"><span>11</span></div><div class="hr"><span>12<small>PM</small></span></div><div class="hr"><span>1</span></div><div class="hr"><span>2</span></div><div class="hr"><span>3</span></div><div class="hr"><span>4</span></div><div class="hr"><span>5</span></div><div class="hr"><span>6</span></div><div class="hr"><span>7</span></div>
+        <!-- 46px per hour; top = (start − 7:00) × 46 -->
+        <div class="now" style="top:4px"><span>7:05</span></div>
+        <div class="blk plum" style="top:14px;height:20px"><b>Landlord reply · do first</b><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/></svg></span></div>
+        <div class="blk dash" style="top:69px;height:20px"><b>Reply: district manager · 10 m</b></div>
+        <div class="blk tint" style="top:138px;height:23px"><b>Weekly planning · video · 30 m</b><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span></div>
+        <div class="free" style="top:166px;height:84px">free until 12:30</div>
+        <div class="blk sand" style="top:253px;height:46px"><b>Lunch with Kaley</b><span>Downtown · 1 h</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3v8M11 3v8M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg></span></div>
+        <div class="blk tint" style="top:368px;height:34px;justify-content:center"><b>Site walk · Store 214 · 45 m</b><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span></div>
+        <div class="free" style="top:404px;height:100px">free, 2 h 15 m</div>
+        <div class="blk sand" style="top:506px;height:46px"><b>Gym</b><span>Blocked · 1 h</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></span></div>
+      </div>
+    </div>
+    <span class="fab" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+    <nav class="tabbar"><a href="#v3" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</a><a href="#v3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>Inbox</a><a href="#v3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Apps</a></nav>
+  </div></div>
+  <div class="cap"><h3>V3 · Planner page<small>true to the hour</small></h3><p>A ruled paper planner, 7 AM to 7 PM, every block at its real height (46 px per hour). Nothing is compressed, so free time shows as actual empty paper with a note in it.</p>
+    <ul><li>Serif hour numerals down the margin, a thin red-plum "7:05" line across the page like a bookmark ribbon.</li><li>The headline becomes the time itself ("7:05") since the page is about hours.</li><li>Short items (10–15 min) are single-line slivers; long ones get a second line and an icon.</li></ul>
+    <div class="pick"><b>Pick this if</b> you want honesty about how full the day is; busy days will look busy, and that's the point.</div></div>
+  </div>
+</div>
+
+<footer>Same content as the DailyBrief Today screen in the deep dive, so the three can be compared directly. Source: <code>mockups-v2/dailybrief-timeline.html</code> on branch <code>ccr-71c5582f-qgd360</code>.</footer>
+</div>
