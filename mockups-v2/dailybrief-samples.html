@@ -1,0 +1,394 @@
+<title>DailyBrief Design Samples</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: six phones in a 3-up grid, every one the same DailyBrief content in a different visual system; a short caption with swatches under each. */
+:root{
+  --bg:#F4F3EF; --surface:#FFFFFF; --fg:#1B1B19; --muted:#6B6A64; --line:#DEDCD4;
+  --accent:#B8862E; --accent-ink:#FFFFFF; --chip:#E9E7DF;
+  --font-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --font-serif:"Instrument Serif",Georgia,serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --font-poster:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+    --accent:#D9A440; --accent-ink:#1A1816; --chip:#2A2A26; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161614; --surface:#1F1F1C; --fg:#ECEAE2; --muted:#9C9A91; --line:#33332E;
+  --accent:#D9A440; --accent-ink:#1A1816; --chip:#2A2A26; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+header{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-weight:600;font-size:clamp(30px,4.5vw,46px);line-height:1.05;text-wrap:balance;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.jump a:hover,.jump a:focus-visible{background:var(--accent);color:var(--accent-ink);outline:none}
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px 28px;align-items:start}
+@media (min-width:1240px){.screens{grid-template-columns:repeat(3,390px);justify-content:space-between}}
+.shot{display:flex;flex-direction:column;gap:14px;min-width:0}
+.cap{display:flex;flex-direction:column;gap:8px;max-width:390px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.cap h3{margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.cap h3 small{color:var(--muted);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.cap p{margin:0;color:var(--muted);font-size:14px}
+.cap .sw{display:flex;gap:6px}
+.cap .sw i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(127,127,127,.25)}
+.cap .meta{font-size:12.5px;color:var(--muted)}
+.cap .meta b{color:var(--fg);font-weight:600}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px;max-width:70ch}
+footer code{font-size:13px;background:var(--chip);padding:1px 6px;border-radius:4px}
+
+/* ── frame ── */
+.phone{width:min(390px,100%);min-width:0;max-width:100%;border-radius:52px;padding:11px;background:#121214;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px #2C2C30,0 24px 60px rgba(0,0,0,.4)}
+.screen{position:relative;border-radius:42px;overflow:hidden;height:844px;display:flex;flex-direction:column;font-size:14px;line-height:1.35;font-variant-numeric:tabular-nums}
+.screen::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:35px;border-radius:20px;background:#000;z-index:5}
+.screen::after{content:"";position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:currentColor;opacity:.28;z-index:5}
+.status{display:flex;justify-content:space-between;align-items:center;height:54px;padding:12px 30px 0 34px;font-weight:600;font-size:16px;letter-spacing:-.01em;flex:0 0 auto}
+.status .sys{display:flex;align-items:center;gap:6px}
+.status .batt{width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.9}
+.status .batt::after{content:"";position:absolute;inset:2px;right:3px;background:currentColor;border-radius:1.5px}
+.status .batt::before{content:"";position:absolute;right:-4px;top:3.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;opacity:.5}
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none;padding:6px 18px 28px;gap:12px}
+.body::-webkit-scrollbar{display:none}
+.body>*{flex:0 0 auto}
+/* ── shared structure (styled per theme) ── */
+.lbl{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.card{display:flex;flex-direction:column;gap:10px}
+.greet{font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.story{margin:0;font-size:14px;line-height:1.5}
+.prog{height:3px;border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:12px 12px 10px}
+.tile b{font-size:26px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.tile .lbl{font-size:10px}
+.ch{display:flex;justify-content:space-between;align-items:center}
+.rail{display:flex;flex-direction:column}
+.it{display:grid;grid-template-columns:40px 36px 1fr 20px;gap:0 10px;align-items:start}
+.it .tm{font-size:12px;font-weight:600;text-align:right;padding-top:9px}
+.node{width:36px;border-radius:18px;display:flex;align-items:flex-start;justify-content:center;padding-top:9px}
+.node svg{width:16px;height:16px}
+.it .tx{display:flex;flex-direction:column;gap:1px;padding-top:7px;min-width:0}
+.it .tx b{font-size:14px;font-weight:600}
+.it .tx span{font-size:12px}
+.it .chk{width:20px;height:20px;border-radius:50%;border:2px solid currentColor;opacity:.35;margin-top:14px}
+.gap{display:grid;grid-template-columns:40px 36px 1fr;gap:0 10px;align-items:center;height:28px}
+.gap i{justify-self:center;width:0;height:100%;border-left:2px dashed currentColor;opacity:.25}
+.gap span{font-size:12px;font-style:italic;opacity:.55}
+.nowrow{display:grid;grid-template-columns:40px 36px 1fr;gap:0 10px;align-items:center;height:20px}
+.nowrow i{justify-self:center;width:10px;height:10px;border-radius:50%}
+.nowrow .tm{font-size:12px;font-weight:700;text-align:right}
+.nowrow span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.txt{display:flex;flex-direction:column;gap:1px;padding:9px 0}
+.txt b{font-size:14px;font-weight:600}.txt span{font-size:12.5px}
+
+/* ═══ S1 · Slate & Mint (Marvie-derived) ═══ */
+.s1{background:#22343C;color:#FFFFFF}
+.s1 .lbl{color:#96A7AF}
+.s1 .card{background:#30444E;border-radius:16px;padding:14px}
+.s1 .hero{background:#3DD598;color:#22343C;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.s1 .hero .lbl{color:#1A5C44}
+.s1 .greet span{opacity:.6}
+.s1 .story{color:#22343C}
+.s1 .prog{background:rgba(34,52,60,.18)}.s1 .prog i{background:#22343C}
+.s1 .tile{background:#30444E;border-radius:14px}.s1 .tile .lbl{color:#96A7AF}
+.s1 .it .tm{color:#96A7AF}.s1 .it .tx span{color:#96A7AF}
+.s1 .node{background:#22343C;color:#96A7AF}.s1 .node.amber{background:#FF575F;color:#FFFFFF}.s1 .node.white{background:#3DD598;color:#22343C}
+.s1 .nowrow i{background:#3DD598}.s1 .nowrow .tm,.s1 .nowrow span{color:#3DD598}
+.s1 .it .tx .lbl{color:#FF575F;font-size:9.5px}
+.s1 .txt{border-top:1px solid #3B515C}.s1 .txt span{color:#96A7AF}
+.s1 .badge{background:#22343C;border-radius:12px;padding:3px 9px;font-size:12px;font-weight:700}
+
+/* ═══ S2 · Terminal (mono + amber) ═══ */
+.s2{background:#0E0F12;color:#E6E6E6;font-family:var(--font-mono)}
+.s2 .lbl{color:#8A8F98;font-weight:500}
+.s2 .clock{font-size:46px;font-weight:700;line-height:1;letter-spacing:-.04em}
+.s2 .clock small{font-size:12px;color:#8A8F98;margin-left:6px}
+.s2 .story{font-family:var(--font-body);color:#C6C8CC;border-left:2px solid #F5B700;padding-left:10px;font-size:13.5px}
+.s2 .prog{background:#1F2228;border-radius:0}.s2 .prog i{background:#F5B700}
+.s2 .tiles{gap:1px;background:#1F2228;border:1px solid #1F2228}
+.s2 .tile{background:#0E0F12;padding:10px}.s2 .tile b{font-size:22px}.s2 .tile .lbl{font-size:9.5px}
+.s2 .card{border-top:1px solid #1F2228;padding-top:10px}
+.s2 .it{grid-template-columns:48px 1fr auto;gap:0 10px;border-top:1px solid #1F2228;padding:9px 0}
+.s2 .it .tm{padding-top:1px;color:#8A8F98;font-size:12px}
+.s2 .it .tx{padding-top:0}.s2 .it .tx b{font-family:var(--font-body)}.s2 .it .tx span{color:#8A8F98;font-size:11px}
+.s2 .it .dur{font-size:11px;color:#8A8F98;padding-top:2px}
+.s2 .it.amber .tx b::before{content:"▸ ";color:#F5B700}
+.s2 .it.now{background:#F5B700;color:#0E0F12;margin:0 -18px;padding:9px 18px}
+.s2 .it.now .tm,.s2 .it.now .tx span,.s2 .it.now .dur{color:#0E0F12;opacity:.75}
+.s2 .nowmark{display:flex;align-items:center;gap:8px;font-size:10px;color:#F5B700;letter-spacing:.12em;text-transform:uppercase}
+.s2 .nowmark::after{content:"";flex:1 1 auto;border-top:1px dashed #F5B700;opacity:.6}
+.s2 .gapline{font-size:11px;color:#5E636B;padding:6px 0 6px 58px;border-top:1px solid #1F2228}
+.s2 .txt{border-top:1px solid #1F2228}.s2 .txt b{font-family:var(--font-body)}.s2 .txt span{color:#8A8F98;font-size:11.5px}
+
+/* ═══ S3 · Dark broadsheet (serif) ═══ */
+.s3{background:#121212;color:#EDE8DF}
+.s3 .body{padding-top:0}
+.s3 .mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #EDE8DF;padding-bottom:6px}
+.s3 .mast b{font-family:var(--font-serif);font-size:20px;font-weight:400;letter-spacing:.02em}
+.s3 .mast span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9A948A}
+.s3 .lbl{color:#9A948A;font-weight:500}
+.s3 .greet{font-family:var(--font-serif);font-weight:400;font-size:38px;line-height:1;letter-spacing:-.01em}
+.s3 .greet span{font-style:italic;color:#C9A66B}
+.s3 .story{font-size:14.5px;color:#D6D0C5;line-height:1.5}
+.s3 .story::first-letter{font-family:var(--font-serif);font-size:30px;float:left;line-height:.8;padding:4px 6px 0 0;color:#EDE8DF}
+.s3 .prog{background:#2A2A2A;border-radius:0}.s3 .prog i{background:#EDE8DF}
+.s3 .tiles{gap:0;border-top:1px solid #3A3A3A;border-bottom:1px solid #3A3A3A}
+.s3 .tile{padding:10px 8px;border-left:1px solid #3A3A3A}.s3 .tile:first-child{border-left:0}
+.s3 .tile b{font-family:var(--font-serif);font-weight:400;font-size:30px}.s3 .tile .lbl{font-size:9.5px}
+.s3 .card{gap:6px}
+.s3 .ch .lbl{font-size:10.5px}
+.s3 .it .tm{font-family:var(--font-serif);font-size:14px;color:#9A948A;padding-top:7px}
+.s3 .node{background:#1E1E1E;color:#C9A66B;border:1px solid #3A3A3A}
+.s3 .node.amber{background:#C9A66B;color:#121212;border-color:#C9A66B}
+.s3 .node.white{background:#EDE8DF;color:#121212;border-color:#EDE8DF}
+.s3 .it .tx b{font-weight:600}.s3 .it .tx span{color:#9A948A}
+.s3 .it .tx .lbl{color:#C9A66B;font-size:9.5px}
+.s3 .nowrow i{background:#EDE8DF}.s3 .nowrow .tm{font-family:var(--font-serif);font-size:14px;font-weight:400}.s3 .nowrow span{color:#9A948A}
+.s3 .gap span{font-family:var(--font-serif);font-size:14px;color:#9A948A;opacity:1}
+.s3 .txt{border-top:1px solid #2A2A2A}.s3 .txt span{color:#9A948A}
+
+/* ═══ S4 · Glass widgets (iOS-style) ═══ */
+.s4{background:radial-gradient(120% 70% at 20% 0%,#1B2A4A 0%,#0A0F1F 55%,#05070F 100%);color:#F5F7FA}
+.s4 .lbl{color:rgba(245,247,250,.55)}
+.s4 .card,.s4 .tile{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:22px;backdrop-filter:blur(14px);padding:14px}
+.s4 .tile{border-radius:18px;padding:12px}
+.s4 .greet{font-size:26px}.s4 .greet span{color:rgba(245,247,250,.55)}
+.s4 .story{color:rgba(245,247,250,.8)}
+.s4 .prog{background:rgba(255,255,255,.12)}.s4 .prog i{background:#F5F7FA}
+.s4 .tile b{font-size:26px}
+.s4 .tile.on b{color:#FF9F0A}
+.s4 .it .tm{color:rgba(245,247,250,.55)}
+.s4 .node{background:rgba(255,255,255,.12);color:#F5F7FA}.s4 .node.amber{background:#FF9F0A;color:#1A1000}.s4 .node.white{background:#F5F7FA;color:#0A0F1F}
+.s4 .it .tx span{color:rgba(245,247,250,.55)}.s4 .it .tx .lbl{color:#FF9F0A;font-size:9.5px}
+.s4 .nowrow i{background:#F5F7FA;box-shadow:0 0 0 4px rgba(245,247,250,.15)}.s4 .nowrow span{color:rgba(245,247,250,.55)}
+.s4 .txt{border-top:1px solid rgba(255,255,255,.08)}.s4 .txt span{color:rgba(245,247,250,.55)}
+.s4 .pillw{font-size:11px;font-weight:600;background:rgba(255,255,255,.12);padding:4px 10px;border-radius:999px}
+
+/* ═══ S5 · Poster dark (black, yellow blocks) ═══ */
+.s5{background:#000000;color:#FFFFFF}
+.s5 .lbl{color:#9A9A9A;letter-spacing:.1em}
+.s5 .greet{font-family:var(--font-poster);font-weight:800;font-size:38px;letter-spacing:-.03em;line-height:.95}
+.s5 .greet span{color:#FFE600}
+.s5 .story{color:#CFCFCF}
+.s5 .prog{height:6px;border-radius:0;background:#1E1E1E}.s5 .prog i{background:#FFE600}
+.s5 .tiles{gap:6px}
+.s5 .tile{border:2px solid #FFFFFF;border-radius:0;padding:10px}
+.s5 .tile b{font-family:var(--font-poster);font-weight:800;font-size:32px}
+.s5 .tile.on{background:#FFE600;color:#000;border-color:#FFE600}.s5 .tile.on .lbl{color:#000}
+.s5 .card{border-top:2px solid #FFFFFF;padding-top:10px;gap:8px}
+.s5 .ch .lbl{color:#FFFFFF}
+.s5 .it .tm{color:#9A9A9A}
+.s5 .node{border-radius:0;background:#1E1E1E;color:#FFFFFF}.s5 .node.amber{background:#FFE600;color:#000}.s5 .node.white{background:#FFFFFF;color:#000}
+.s5 .it .tx b{font-family:var(--font-poster);font-weight:800;font-size:16px;letter-spacing:-.01em}.s5 .it .tx span{color:#9A9A9A}
+.s5 .it .tx .lbl{color:#FFE600;font-size:9.5px}
+.s5 .it .chk{border-radius:0}
+.s5 .nowrow i{background:#FFE600;border-radius:0}.s5 .nowrow .tm,.s5 .nowrow span{color:#FFE600}
+.s5 .gap i{border-left-style:solid}
+.s5 .txt{border-top:1px solid #333}.s5 .txt b{font-family:var(--font-poster);font-weight:800}.s5 .txt span{color:#9A9A9A}
+
+/* ═══ S6 · Espresso (warm dark, copper) ═══ */
+.s6{background:#1A1512;color:#F1E8DC}
+.s6 .lbl{color:#9C8B7A}
+.s6 .card{background:#241E19;border-radius:20px;padding:14px}
+.s6 .greet{font-family:var(--font-serif);font-weight:400;font-size:36px;line-height:1;letter-spacing:-.01em}
+.s6 .greet span{font-style:italic;color:#C8762D}
+.s6 .story{color:#D8CCBC}
+.s6 .prog{background:#3A3029}.s6 .prog i{background:#C8762D}
+.s6 .tile{background:#241E19;border-radius:14px}.s6 .tile b{font-family:var(--font-serif);font-weight:400;font-size:30px}
+.s6 .it .tm{color:#9C8B7A}
+.s6 .node{background:#3A3029;color:#D8CCBC}.s6 .node.amber{background:#C8762D;color:#1A1512}.s6 .node.white{background:#F1E8DC;color:#1A1512}
+.s6 .it .tx span{color:#9C8B7A}.s6 .it .tx .lbl{color:#C8762D;font-size:9.5px}
+.s6 .nowrow i{background:#F1E8DC;box-shadow:0 0 0 4px rgba(241,232,220,.12)}.s6 .nowrow span{color:#9C8B7A}
+.s6 .gap span{font-family:var(--font-serif);font-size:14px;opacity:.7}
+.s6 .txt{border-top:1px solid #3A3029}.s6 .txt span{color:#9C8B7A}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">designer-fun · mockups v2 · DailyBrief · six samples</div>
+  <h1>Six DailyBrief designs, <em>same brief</em></h1>
+  <p>Same content in every phone: your greeting and narrative, the 47% bar, the three counts, a rail with the money items placed on it before the 2 PM call, and the texts. Only the visual system changes. None of them use purple. Point at one, or at pieces of several.</p>
+  <nav class="jump" aria-label="Related"><a href="https://claude.ai/artifact/5N5ZdJ2b4ej3fjm413kNAj">Your current system + rail ↗</a><a href="https://claude.ai/artifact/FmK7mo5GC4w3EbbWwBx7Xq">Paper variants ↗</a></nav>
+</header>
+
+<div class="screens">
+
+<!-- ═══ S1 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s1">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div class="hero"><div class="lbl">Sunday, October 18 · 47% of the day</div><div class="greet">Good afternoon, <span>Fred</span></div><p class="story">Calendar's clear. Three money things need you; they're on the rail before your 2 PM call.</p><div class="prog"><i style="width:47%"></i></div></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile"><b style="color:#FF575F">3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="ch"><span class="lbl">Today</span><span class="badge">3 placed</span></div>
+      <div class="rail">
+        <div class="nowrow"><span class="tm">11:56</span><i></i><span>Now</span></div>
+        <div class="it"><span class="tm">12:15</span><div class="node amber" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Global Lending</b><span>$789.10 · 7 days past due</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:30</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:40</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Confirm Walgreens</b><span>Experian · yes / no</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>open until 2:00</span></div>
+        <div class="it"><span class="tm">2:00</span><div class="node white" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="tx"><b>SA/SG Tech Alignment Call</b><span>Teams · 45 min</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="lbl">Texts</span><span class="badge">4</span></div>
+      <div class="txt" style="border-top:0;padding-top:0"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S1 · Slate &amp; Mint<small>from your Sketch kit</small></h3><p>Mint hero card carries the greeting; coral is the needs-you color; the next call is mint on the rail. Friendly, consumer-app, matches the kit components you already have.</p><div class="sw"><i style="background:#22343C"></i><i style="background:#30444E"></i><i style="background:#3DD598"></i><i style="background:#FF575F"></i></div><div class="meta"><b>Instrument Sans</b> · kit uses SF Pro</div></div>
+</div>
+
+<!-- ═══ S2 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s2">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div><div class="lbl"><span style="color:#F5B700">SUN</span> 18 OCT · 47% OF THE DAY</div><div class="clock">11:56<small>AM</small></div></div>
+    <p class="story">Calendar's clear and nobody has made plans by text. The things that most need you are money ones; they're placed before the 2 PM call.</p>
+    <div class="prog"><i style="width:47%"></i></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile"><b style="color:#F5B700">3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="nowmark">now 11:56</div>
+      <div class="rail">
+        <div class="it amber"><span class="tm">12:15</span><div class="tx"><b>Pay Global Lending</b><span>$789.10 · 7d past due</span></div><span class="dur">10m</span></div>
+        <div class="it amber"><span class="tm">12:30</span><div class="tx"><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="dur">2m</span></div>
+        <div class="it amber"><span class="tm">12:40</span><div class="tx"><b>Confirm Walgreens</b><span>experian · yes/no</span></div><span class="dur">1m</span></div>
+        <div class="gapline">— open until 14:00 —</div>
+        <div class="it now"><span class="tm">14:00</span><div class="tx"><b>SA/SG Tech Alignment</b><span>teams · next</span></div><span class="dur">45m</span></div>
+        <div class="gapline">— open evening —</div>
+      </div>
+    </div>
+    <div class="card"><div class="lbl">Texts · 4</div>
+      <div class="txt"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S2 · Terminal<small>mono + amber</small></h3><p>A departures board. Big clock, mono timestamps, the narrative as a quoted block, needs-you rows flagged with ▸, one amber band for the next thing. No capsules; rows are the rail.</p><div class="sw"><i style="background:#0E0F12"></i><i style="background:#1F2228"></i><i style="background:#F5B700"></i><i style="background:#E6E6E6"></i></div><div class="meta"><b>JetBrains Mono</b> + Instrument Sans for names</div></div>
+</div>
+
+<!-- ═══ S3 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s3">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div class="mast"><b>The Daily Brief</b><span>Sun · Oct 18 · 11:56</span></div>
+    <div class="greet">Good afternoon, <span>Fred.</span></div>
+    <p class="story">Your calendar is clear and nobody has made plans with you by text. The things that most need you are money ones; they're placed before your 2 PM call.</p>
+    <div class="prog"><i style="width:47%"></i></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile"><b>3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="ch"><span class="lbl">Today, in order</span><span class="lbl">3 placed</span></div>
+      <div class="rail">
+        <div class="nowrow"><span class="tm">11:56</span><i></i><span>Now</span></div>
+        <div class="it"><span class="tm">12:15</span><div class="node amber" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Global Lending</b><span>$789.10 · 7 days past due</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:30</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:40</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Confirm Walgreens</b><span>Experian · yes / no</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>open until two</span></div>
+        <div class="it"><span class="tm">2:00</span><div class="node white" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="tx"><b>SA/SG Tech Alignment Call</b><span>Teams · 45 min</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="lbl">Texts</span><span class="lbl">4</span></div>
+      <div class="txt" style="border-top:0;padding-top:0"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S3 · Dark broadsheet<small>serif on near-black</small></h3><p>A masthead, a serif greeting with your name in italic gold, a drop cap on the narrative, serif numerals in the tiles. The rail stays, in brass. Reads like an evening paper.</p><div class="sw"><i style="background:#121212"></i><i style="background:#1E1E1E"></i><i style="background:#C9A66B"></i><i style="background:#EDE8DF"></i></div><div class="meta"><b>Instrument Serif</b> + Instrument Sans</div></div>
+</div>
+
+<!-- ═══ S4 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s4">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div class="card"><div class="ch"><span class="lbl">Sunday, October 18</span><span class="pillw">47% of the day</span></div><div class="greet">Good afternoon, <span>Fred</span></div><p class="story">Calendar's clear. Three money things need you; they're on the rail before your 2 PM call.</p><div class="prog"><i style="width:47%"></i></div></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile on"><b>3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="ch"><span class="lbl">Up next</span><span class="pillw">3 placed</span></div>
+      <div class="rail">
+        <div class="nowrow"><span class="tm">11:56</span><i></i><span>Now</span></div>
+        <div class="it"><span class="tm">12:15</span><div class="node amber" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Global Lending</b><span>$789.10 · 7 days past due</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:30</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:40</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Confirm Walgreens</b><span>Experian · yes / no</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>open until 2:00</span></div>
+        <div class="it"><span class="tm">2:00</span><div class="node white" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="tx"><b>SA/SG Tech Alignment Call</b><span>Teams · 45 min</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="lbl">Texts</span><span class="pillw">4</span></div>
+      <div class="txt" style="border-top:0;padding-top:0"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S4 · Glass widgets<small>iOS-style</small></h3><p>Frosted translucent cards over a deep navy-to-black gradient, like a stack of lock-screen widgets. iOS orange for needs-you. Feels native and current.</p><div class="sw"><i style="background:#0A0F1F"></i><i style="background:#1B2A4A"></i><i style="background:#FF9F0A"></i><i style="background:#F5F7FA"></i></div><div class="meta"><b>Instrument Sans</b> (SF Pro on device)</div></div>
+</div>
+
+<!-- ═══ S5 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s5">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div class="lbl">Sunday 18 Oct · 11:56</div>
+    <div class="greet">Good<br>afternoon,<br><span>Fred.</span></div>
+    <p class="story">Calendar's clear. Three money things need you; they're on the rail before your 2 PM call.</p>
+    <div class="prog"><i style="width:47%"></i></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile on"><b>3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="ch"><span class="lbl">Today</span><span class="lbl" style="color:#FFE600">3 placed</span></div>
+      <div class="rail">
+        <div class="nowrow"><span class="tm">11:56</span><i></i><span>Now</span></div>
+        <div class="it"><span class="tm">12:15</span><div class="node amber" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Global Lending</b><span>$789.10 · 7 days past due</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:30</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:40</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Confirm Walgreens</b><span>Experian · yes / no</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>open until 2:00</span></div>
+        <div class="it"><span class="tm">2:00</span><div class="node white" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="tx"><b>SA/SG Tech Alignment</b><span>Teams · 45 min</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="lbl">Texts</span><span class="lbl">4</span></div>
+      <div class="txt" style="border-top:0;padding-top:0"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S5 · Poster dark<small>black, yellow, square</small></h3><p>Pure black, heavy grotesque, hard corners, 2px white outlines. Needs-you is a solid yellow block, including the count tile. Loud on purpose; readable from arm's length.</p><div class="sw"><i style="background:#000000"></i><i style="background:#1E1E1E"></i><i style="background:#FFE600"></i><i style="background:#FFFFFF"></i></div><div class="meta"><b>Bricolage Grotesque 800</b> + Instrument Sans</div></div>
+</div>
+
+<!-- ═══ S6 ═══ -->
+<div class="shot"><div class="phone"><div class="screen s6">
+  <div class="status"><span>11:56</span><span class="sys" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx=".8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx=".8" fill="currentColor"/></svg><svg viewBox="0 0 16 12" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0M4 7a6 6 0 0 1 8 0M6.5 9.6a2.5 2.5 0 0 1 3 0"/></svg><span class="batt"></span></span></div>
+  <div class="body">
+    <div class="card"><div class="lbl">Sunday, October 18</div><div class="greet">Good afternoon, <span>Fred</span></div><p class="story">Your calendar is clear and nobody has made plans by text. The things that most need you are money ones; they're placed before your 2 PM call.</p><div class="prog"><i style="width:47%"></i></div><div class="lbl" style="font-size:10px;letter-spacing:.1em;text-transform:none">47% of the day</div></div>
+    <div class="tiles"><div class="tile"><b>0</b><span class="lbl">Meetings</span></div><div class="tile"><b style="color:#C8762D">3</b><span class="lbl">Needs you</span></div><div class="tile"><b>4</b><span class="lbl">Texts</span></div></div>
+    <div class="card">
+      <div class="ch"><span class="lbl">Today</span><span class="lbl">3 placed</span></div>
+      <div class="rail">
+        <div class="nowrow"><span class="tm">11:56</span><i></i><span>Now</span></div>
+        <div class="it"><span class="tm">12:15</span><div class="node amber" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Global Lending</b><span>$789.10 · 7 days past due</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:30</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Pay Affirm</b><span>$119.59 · overdue</span></div><span class="chk"></span></div>
+        <div class="it"><span class="tm">12:40</span><div class="node amber" style="height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tx"><span class="lbl">Needs you</span><b>Confirm Walgreens</b><span>Experian · yes / no</span></div><span class="chk"></span></div>
+        <div class="gap"><span></span><i></i><span>open until two</span></div>
+        <div class="it"><span class="tm">2:00</span><div class="node white" style="height:64px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><div class="tx"><b>SA/SG Tech Alignment Call</b><span>Teams · 45 min</span></div><span class="chk"></span></div>
+      </div>
+    </div>
+    <div class="card"><div class="ch"><span class="lbl">Texts</span><span class="lbl">4</span></div>
+      <div class="txt" style="border-top:0;padding-top:0"><b>Kaley My Honis</b><span>like as soon as you can be ready</span></div>
+      <div class="txt"><b>Curtis Herbsleb</b><span>This is all fantastic. Thanks</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="cap"><h3>S6 · Espresso<small>warm dark, copper</small></h3><p>Your current layout, but the greys are warmed to coffee browns and cream, the greeting goes serif, and needs-you is copper instead of amber. Closest to what you have, with a mood.</p><div class="sw"><i style="background:#1A1512"></i><i style="background:#241E19"></i><i style="background:#C8762D"></i><i style="background:#F1E8DC"></i></div><div class="meta"><b>Instrument Serif</b> + Instrument Sans</div></div>
+</div>
+
+</div>
+
+<footer>Content in every phone comes from the live DailyBrief screenshots; schedule items are sample data where the day was open. Source: <code>mockups-v2/dailybrief-samples.html</code> on branch <code>ccr-71c5582f-qgd360</code>.</footer>
+</div>
