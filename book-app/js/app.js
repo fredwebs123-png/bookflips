@@ -58,7 +58,6 @@ function sens() {
   const k = (settings.sensitivity - 1) / 8;
   return { commit: 0.45 - 0.4 * k, flick: 0.5 - 0.4 * k, gain: 0.6 + 0.8 * k };
 }
-const CHROME_HTML = '<div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div>';
 
 let toastTimer;
 function toast(msg, ms = 1800) {
@@ -228,9 +227,7 @@ $('#installBtn').addEventListener('click', async () => {
 const reader = $('#reader');
 const stage = $('#stage');
 const flow = $('#flow');   // every section, laid out but never painted: used for measuring
-const view = $('#view');   // what's on screen: a clone of the current section and its neighbours
 const scrub = $('#scrub');
-const flipLayer = $('#flipLayer');
 
 const R = {
   book: null, cache: null,
@@ -238,7 +235,7 @@ const R = {
   blocks: [], blockCol: [],
   toc: [], tocStart: [],
   pages: 1, page: 0, firstNum: 0,
-  spread: false, pitch: 1, geo: null, view: null,
+  spread: false, pitch: 1, geo: null,
   words: 0, wordsPerPage: 250,
   anchor: { b: 0, o: 0 }, marks: [], hls: [], secBlocks: [],
 };
@@ -304,8 +301,9 @@ const BLOCK_SEL = 'section,p,h1,h2,h3,h4,h5,h6,li,dt,dd,pre,blockquote,figure,im
 const blocksIn = (root) => $$(BLOCK_SEL, root).filter((el) => el.localName !== 'div' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
 
 async function renderFlow(book) {
-  flow.lang = view.lang = book.language || 'en';
-  R.view = null; view.replaceChildren();
+  flow.lang = book.language || 'en';
+  invalidateViews(true);
+  for (const v of [viewA, viewB, viewC]) v.flow.lang = flow.lang;
   flow.innerHTML = book.sections.map((h, i) => `<section class="chapter epub-doc" id="s-${i}">${h}</section>`).join('');
   // Mark the very end of the text so we can count pages.
   let last = flow.lastElementChild;
@@ -385,19 +383,22 @@ function relayout() {
   R.geo = { W, H, spineX: spread ? spineX : W, colw, gap, vx, vh };
   reader.classList.toggle('is-spread', spread);
   const s = reader.style;
-  for (const [k, v] of Object.entries({ vx, vy: padTop, vw, vh, vbottom: H - padTop - vh, colw, gap, 'spine-x': spineX, fs })) s.setProperty('--' + k, v + 'px');
+  for (const [k, v] of Object.entries({ vx, vy: padTop, vw, vh, vbottom: H - padTop - vh, colw, gap, 'spine-x': spineX, fs, 'stage-w': W, 'stage-h': H })) s.setProperty('--' + k, v + 'px');
   s.setProperty('--lh', lh);
 
-  const cL = $('#chromeL'), cR = $('#chromeR');
-  if (spread) {
-    Object.assign(cL.style, { left: '0px', width: spineX + 'px' });
-    Object.assign(cR.style, { left: spineX + 'px', width: (W - spineX) + 'px', display: '' });
-  } else {
-    Object.assign(cL.style, { left: '0px', width: W + 'px' });
-    cR.style.display = 'none';
+  for (const v of [viewA, viewB, viewC]) {
+    const [cL, cR] = v.chrome;
+    if (!cL) continue;
+    if (spread) {
+      Object.assign(cL.style, { left: '0px', width: spineX + 'px' });
+      Object.assign(cR.style, { left: spineX + 'px', width: (W - spineX) + 'px', display: '' });
+    } else {
+      Object.assign(cL.style, { left: '0px', width: W + 'px' });
+      cR.style.display = 'none';
+    }
   }
   measure();
-  R.view = null;
+  invalidateViews();
   R.page = norm(pageOfAnchor(R.anchor));
   goTo(R.page, { animate: false, keepAnchor: true });
 }
@@ -405,7 +406,7 @@ function relayout() {
 function colOfX(x) { return Math.floor((x - flow.getBoundingClientRect().left + 2) / R.pitch); }
 
 function measure() {
-  view.classList.remove('anim-slide');
+  vflow.classList.remove('anim-slide');
   const left = flow.getBoundingClientRect().left;
   const col = (el) => Math.floor((el.getBoundingClientRect().left - left + 2) / R.pitch);
   R.blockCol = R.blocks.map(col);
@@ -474,17 +475,28 @@ const norm = (p) => { p = clamp(Math.round(p), 0, R.pages - 1); return R.spread 
 const chapterAt = (p) => { let c = -1; R.tocStart.forEach((s, i) => { if (s <= p) c = i; }); return c; };
 const sectionAt = (p) => lastAtOrBefore(R.secStart, p);
 
-/* ───────────────────────── Turning pages ─────────────────────────
-   Moving the whole book as one layer is far too slow on a phone, so the
-   screen shows a clone of just the current section and its neighbours.
-   Sections always start on a fresh column, so the clone lays out exactly
-   like the hidden measuring flow. */
-const tx = (p) => `translate3d(${-(p - R.view.base) * R.pitch}px,0,0)`;
+/* ───────────────────────── Page layers ─────────────────────────
+   Moving the whole book as one layer is far too slow on a phone, and so is
+   cloning a chapter every time a page is lifted. So there are three
+   persistent layers, each holding a window of a few sections laid out
+   exactly like the hidden measuring flow (sections always start on a fresh
+   column): the current spread, the spread being turned to, and the back of
+   the lifted leaf. They are laid out once and reused, and the next spread is
+   prepared while the reader is reading. */
+function mkLayer(id) {
+  const layer = $('#' + id);
+  return { layer, half: $('.half', layer), unrot: $('.unrot', layer), vp: $('.viewport', layer), flow: $('.flow.view', layer), chrome: [$('.chrome-l', layer), $('.chrome-r', layer)], shade: $('.curl-shade', layer), win: null, page: null, stale: false };
+}
+const viewA = mkLayer('layerA'), viewB = mkLayer('layerB'), viewC = mkLayer('layerC');
+const vflow = viewA.flow; // the flow the reader is looking at
 
-function buildView(p) {
+// Make sure a layer's window holds page p's section. If it does but isn't
+// centred on it, mark it stale so it gets re-centred during idle time rather
+// than under the reader's finger.
+function ensureWin(v, p, force = false) {
   const s = sectionAt(p);
   const a = Math.max(0, s - 1), b = Math.min(R.sections.length - 1, s + 1);
-  if (R.view && a >= R.view.a && b <= R.view.b) return false;
+  if (!force && v.win && v.win.a <= s && s <= v.win.b) { v.stale = (s === v.win.a && a < v.win.a) || (s === v.win.b && b > v.win.b); return false; }
   const frag = document.createDocumentFragment();
   for (let i = a; i <= b; i++) {
     const sec = R.sections[i].cloneNode(true);
@@ -495,22 +507,47 @@ function buildView(p) {
     [sec, ...blocksIn(sec)].forEach((el, k) => { if (src[k] !== undefined) el.dataset.b = src[k]; });
     frag.appendChild(sec);
   }
-  view.replaceChildren(frag);
-  R.view = { a, b, base: R.secStart[a] };
+  v.flow.replaceChildren(frag);
+  v.win = { a, b, c: s, base: R.secStart[a] };
+  v.stale = false;
+  if (v.page !== null) v.flow.style.transform = txFor(v, v.page);
   return true;
+}
+const txFor = (v, p) => `translate3d(${-(p - v.win.base) * R.pitch}px,0,0)`;
+function place(v, p) { ensureWin(v, p); v.page = p; v.flow.style.transform = txFor(v, p); }
+function invalidateViews(clear = false) {
+  for (const v of [viewA, viewB, viewC]) { v.win = null; v.page = null; v.stale = false; if (clear) v.flow.replaceChildren(); }
+  viewC.layer.style.transform = 'translate(-200vw, 0)';
 }
 
 function paint(p, fromP = null) {
-  const rebuilt = buildView(p);
-  if (rebuilt && fromP !== null && view.classList.contains('anim-slide')) {
+  const rebuilt = ensureWin(viewA, p);
+  if (rebuilt && fromP !== null && vflow.classList.contains('anim-slide')) {
     // Keep a slide continuous across a rebuild: start from where we were.
-    view.style.transition = 'none';
-    view.style.transform = tx(fromP);
-    void view.offsetWidth;
-    view.style.transition = '';
+    vflow.style.transition = 'none';
+    vflow.style.transform = txFor(viewA, fromP);
+    void vflow.offsetWidth;
+    vflow.style.transition = '';
   }
-  view.style.transform = tx(p);
+  viewA.page = p;
+  vflow.style.transform = txFor(viewA, p);
   updatePageChrome(p);
+  scheduleWarm();
+}
+
+// Lay out the neighbouring spreads while the reader reads, so a turn never
+// has to wait for layout.
+let warmHandle = 0;
+const idle = window.requestIdleCallback ? (fn) => requestIdleCallback(fn, { timeout: 1500 }) : (fn) => setTimeout(fn, 300);
+const cancelIdle = window.cancelIdleCallback || clearTimeout;
+function scheduleWarm() {
+  cancelIdle(warmHandle);
+  warmHandle = idle(() => {
+    if (!R.book || flip || drag) return;
+    if (viewA.stale) ensureWin(viewA, R.page, true);
+    const next = norm(R.page + step());
+    for (const v of [viewB, viewC]) { ensureWin(v, next); if (v.stale) ensureWin(v, next, true); }
+  });
 }
 
 let saveTimer, lastTurnAt = 0;
@@ -522,17 +559,17 @@ function goTo(p, { animate = true, keepAnchor = false } = {}) {
   learnSpeed(prev, p);
   const mode = animate && p !== prev ? settings.turn : 'none';
   if (mode === 'fade') {
-    view.classList.remove('anim-slide', 'anim-fade-in');
-    view.classList.add('anim-fade-out');
+    vflow.classList.remove('anim-slide', 'anim-fade-in');
+    vflow.classList.add('anim-fade-out');
     setTimeout(() => {
       buildView(p);
-      view.style.transform = tx(p);
-      view.classList.replace('anim-fade-out', 'anim-fade-in');
+      vflow.style.transform = tx(p);
+      vflow.classList.replace('anim-fade-out', 'anim-fade-in');
     }, 140);
     updatePageChrome(p);
   } else {
-    view.classList.remove('anim-fade-out', 'anim-fade-in');
-    view.classList.toggle('anim-slide', mode === 'slide' || mode === 'flip');
+    vflow.classList.remove('anim-fade-out', 'anim-fade-in');
+    vflow.classList.toggle('anim-slide', mode === 'slide' || mode === 'flip');
     paint(p, prev);
   }
   if (!keepAnchor) R.anchor = anchorAt(p);
@@ -574,105 +611,75 @@ const prev = () => turn(-1);
 function haptic() { if (settings.haptics) navigator.vibrate?.(6); }
 
 /* Page curl --------------------------------------------------------------
-   The real text flow jumps straight to the destination; a leaf made of
-   cloned pages peels over it. The corner under the finger lifts and the
-   fold line follows the hand, like paper. Geometry is done in a "local"
-   frame: the spine is x = 0, the page extends to x = W away from it, so a
-   turn of the left page is the same maths with x mirrored.
-
-   Each page belongs to exactly one section, so a face only needs a clone
-   of that one section, not the whole book. */
+   The corner under the finger lifts and the fold line follows the hand, like
+   paper. Geometry is done in a "local" frame: the spine is x = 0 and the page
+   extends to x = W away from it, so a turn of the left page is the same maths
+   with x mirrored. On screen: the destination spread sits underneath, the
+   current spread on top clipped where the leaf has lifted, and the back of
+   the leaf (the destination page, mirrored and reflected across the fold)
+   above both. */
 let flip = null;
+const SHADE = 3000, SHADE_W = 120, HALF = 4000;
 
-function makeFace(p, slot) {
-  const g = R.geo;
-  const face = document.createElement('div');
-  face.className = 'face';
-  const slotX = slot === 'R' ? g.spineX : 0;
-  face.style.width = (slot === 'S' ? g.W : slot === 'L' ? g.spineX : g.W - g.spineX) + 'px';
-  if (p >= 0 && p < R.pages) {
-    const s = sectionAt(p);
-    const vp = document.createElement('div');
-    vp.className = 'face-vp';
-    vp.style.left = ((slot === 'R' ? g.vx + g.colw + g.gap : g.vx) - slotX) + 'px';
-    const fl = document.createElement('div');
-    fl.className = 'flow';
-    fl.lang = flow.lang;
-    const sec = R.sections[s].cloneNode(true);
-    sec.removeAttribute('id');
-    sec.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
-    fl.appendChild(sec);
-    fl.style.transform = `translate3d(${-(p - R.secStart[s]) * R.pitch}px,0,0)`;
-    vp.appendChild(fl);
-    face.appendChild(vp);
-  }
-  face.insertAdjacentHTML('beforeend', CHROME_HTML + '<div class="shade"></div>');
-  fillChrome(face, p, slot);
-  return face;
+/* Clipping along the fold without clip-path (which would repaint the text
+   every frame): each layer's content sits inside a huge box that is rotated
+   so its left edge lies on the fold line and clips with overflow: hidden,
+   while an inner wrapper applies the inverse transform so the content itself
+   doesn't move. All of it is transforms, so the compositor does the work. */
+function halfClip(v, mx, my, angle) {
+  v.half.style.transform = `translate(${mx.toFixed(1)}px, ${my.toFixed(1)}px) rotate(${angle.toFixed(2)}deg) translate(0, ${-HALF / 2}px)`;
+  v.unrot.style.transform = `translate(0, ${HALF / 2}px) rotate(${(-angle).toFixed(2)}deg) translate(${(-mx).toFixed(1)}px, ${(-my).toFixed(1)}px)`;
 }
+function idleClip(v) {
+  v.half.style.transform = `translate(${-HALF / 2}px, ${-HALF / 2}px)`;
+  v.unrot.style.transform = `translate(${HALF / 2}px, ${HALF / 2}px)`;
+}
+for (const v of [viewA, viewB, viewC]) idleClip(v);
 
 function startFlip(dir, finger = null) {
   if (flip) endFlip(flip, true);
   const from = R.page, to = norm(from + dir * step());
   if (to === from || !R.geo) return null;
-  const involved = R.spread ? [from, from + 1, to, to + 1] : [from, to];
-  // Very long single-file books would be slow to clone; slide those instead.
-  if (involved.some((p) => p < R.pages && R.sections[sectionAt(p)].textContent.length > 120000)) return null;
+  performance.mark('flip-start');
   const g = R.geo;
   const mirror = R.spread && dir < 0;
+  const singlePrev = !R.spread && dir < 0;
   const W = R.spread ? (mirror ? g.spineX : g.W - g.spineX) : g.W, H = g.H;
-  const f = { from, to, dir, mirror, W, H, raf: 0, watchdog: 0, auto: false, samples: [], slowSince: null };
-  // Local <-> element coordinates (element = the turning page's rectangle).
-  f.toEl = mirror ? (pt) => [W - pt[0], pt[1]] : (pt) => [pt[0], pt[1]];
-  f.toLocalX = mirror ? (sx) => g.spineX - sx : (sx) => sx - (R.spread ? g.spineX : 0);
   const pageLeft = R.spread && !mirror ? g.spineX : 0;
+  const f = { from, to, dir, mirror, W, H, pageLeft, raf: 0, watchdog: 0, auto: false, samples: [], slowSince: null };
+  f.toEl = mirror ? (pt) => [W - pt[0], pt[1]] : (pt) => [pt[0], pt[1]];
+  f.toLocalX = mirror ? (sx) => g.spineX - sx : (sx) => sx - pageLeft;
 
-  flipLayer.replaceChildren();
-  const front = document.createElement('div'); front.className = 'curl-front';
-  const back = document.createElement('div'); back.className = 'curl-back';
-  const backInner = document.createElement('div'); backInner.className = 'curl-mirror';
-  back.appendChild(backInner);
-  for (const el of [front, back]) Object.assign(el.style, { left: pageLeft + 'px', width: W + 'px' });
-  const shade = (cls) => { const d = document.createElement('div'); d.className = 'curl-shade ' + cls; return d; };
-  const frontShade = shade('on-front'), backShade = shade('on-back');
-
+  // Layers. Forward, and backward in a spread: the current spread lifts off
+  // the destination. Backward on a single page: the previous page unfolds
+  // in from the left over the current one.
+  place(viewB, to);
+  fillLayerChrome(viewB, to);
+  if (singlePrev) { f.lift = viewB; f.under = viewA; viewB.layer.style.zIndex = 3; viewC.layer.style.zIndex = 4; }
+  else { f.lift = viewA; f.under = viewB; }
+  idleClip(f.under);
+  // The back of the leaf: the destination page that lands face up.
   if (R.spread) {
-    let still;
-    if (!mirror) {
-      still = makeFace(from, 'L');
-      front.appendChild(makeFace(from + 1, 'R'));
-      backInner.appendChild(makeFace(to, 'L'));
-    } else {
-      still = makeFace(from + 1, 'R'); still.style.left = g.spineX + 'px';
-      front.appendChild(makeFace(from, 'L'));
-      backInner.appendChild(makeFace(to + 1, 'R'));
-    }
-    flipLayer.append(still, front, back);
-    paint(to);
-  } else {
-    // Forward: this page peels off to reveal the next. Backward: the previous
-    // page unfolds in from the left over this one, so the flow stays put.
-    front.appendChild(makeFace(dir > 0 ? from : to, 'S'));
-    backInner.appendChild(Object.assign(document.createElement('div'), { className: 'face' }));
-    flipLayer.append(front, back);
-    if (dir > 0) paint(to);
-  }
-  front.querySelector('.face').style.width = W + 'px';
-  front.appendChild(frontShade); back.appendChild(backShade);
-  flipLayer.hidden = false;
+    place(viewC, to);
+    viewC.vp.classList.remove('off');
+    // Which column of the back layer lands in the page rectangle: the new
+    // left page for a forward turn, the new right page for a backward one.
+    viewC.vp.style.left = (mirror ? g.vx + g.colw + g.gap - g.spineX : g.vx) + 'px';
+  } else viewC.vp.classList.add('off'); // a single page has a blank back
+  Object.assign($('.mirror', viewC.layer).style, { left: pageLeft + 'px', width: W + 'px' });
 
-  // The grabbed corner, and where the finger "holds" the page.
-  // Curl from the bottom corner unless the page was grabbed right at the top.
+  // The grabbed corner (bottom unless the page was grabbed right at the top)
+  // and where the hand holds it.
   f.cy = finger && finger.y < H * 0.2 ? 0 : H;
   f.C = [W, f.cy];
-  const singlePrev = !R.spread && dir < 0;
   f.start = singlePrev ? [-W, f.cy] : [W, f.cy];
   f.end = singlePrev ? [W, f.cy] : [-W, f.cy];
   f.P = [...f.start];
   f.finger0 = finger ? [f.toLocalX(finger.x), finger.y] : null;
-  Object.assign(f, { front, back, frontShade, backShade });
+  f.frontShade = f.lift.shade; f.backShade = viewC.shade;
   flip = f;
   renderFlip(f);
+  performance.measure('startFlip', 'flip-start');
   return f;
 }
 
@@ -702,51 +709,32 @@ function flipFromFinger(f, sx, sy) {
   setFlipPoint(f, f.start[0] + (lx - f.finger0[0]) * g, py);
 }
 
-// Clip a rectangle 0..W × 0..H to the half-plane (X - M)·n ≥ 0 (sign = 1)
-// or ≤ 0 (sign = -1). Returns element-space points.
-function halfPage(f, M, n, sign) {
-  const { W, H } = f;
-  const pts = [[0, 0], [W, 0], [W, H], [0, H]];
-  const side = (pt) => sign * ((pt[0] - M[0]) * n[0] + (pt[1] - M[1]) * n[1]);
-  const out = [];
-  for (let i = 0; i < 4; i++) {
-    const a = pts[i], b = pts[(i + 1) % 4], sa = side(a), sb = side(b);
-    if (sa >= 0) out.push(a);
-    if ((sa >= 0) !== (sb >= 0)) {
-      const k = sa / (sa - sb);
-      out.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]);
-    }
-  }
-  return out.map(f.toEl);
-}
-const polygon = (pts) => (pts.length < 3 ? 'polygon(0 0, 0 0, 0 0)' : `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`);
-
 function renderFlip(f) {
-  const { W, H, C, P, front, back } = f;
+  const { W, C, P } = f;
+  const backLayer = viewC.layer;
   const dx = P[0] - C[0], dy = P[1] - C[1], len = Math.hypot(dx, dy);
   if (len < 1) { // nothing lifted yet
-    front.style.clipPath = 'none'; back.style.clipPath = polygon([]);
+    idleClip(f.lift); backLayer.style.transform = 'translate(-200vw, 0)';
     f.frontShade.style.opacity = 0; f.backShade.style.opacity = 0;
     return;
   }
-  const n = [dx / len, dy / len];                    // unit normal of the fold line
-  const M = [(C[0] + P[0]) / 2, (C[1] + P[1]) / 2];  // a point on the fold line
-  front.style.clipPath = polygon(halfPage(f, M, n, 1));
-  back.style.clipPath = polygon(halfPage(f, M, n, -1));
-  // Reflect the folded part across the fold line (in element coordinates).
-  const [ex, ey] = f.toEl(M), nx = f.mirror ? -n[0] : n[0], ny = n[1];
-  const k = 2 * (ex * nx + ey * ny);
-  back.style.transform = `matrix(${1 - 2 * nx * nx},${-2 * nx * ny},${-2 * nx * ny},${1 - 2 * ny * ny},${k * nx},${k * ny})`;
-  // Shadows: a crease along the fold on the folded part, a soft shadow on the
-  // page it hangs over. Both are gradients aimed along the fold normal.
-  const angle = (Math.atan2(nx, -ny) * 180) / Math.PI;
-  const L = Math.abs(W * Math.sin((angle * Math.PI) / 180)) + Math.abs(H * Math.cos((angle * Math.PI) / 180));
-  const pos = (ex - W / 2) * nx + (ey - H / 2) * ny + L / 2;
+  const n = [dx / len, dy / len];                    // unit normal of the fold line (local)
+  const M = [(C[0] + P[0]) / 2, (C[1] + P[1]) / 2];  // a point on the fold line (local)
+  // Reflect the back layer across the fold line, in stage coordinates.
+  const [ex, ey] = f.toEl(M), mx = ex + f.pageLeft, my = ey, nx = f.mirror ? -n[0] : n[0], ny = n[1];
+  const angle = (Math.atan2(ny, nx) * 180) / Math.PI;
+  // Clip each layer along the fold with a rotated box (see halfClip).
+  halfClip(f.lift, mx, my, angle);
+  halfClip(viewC, mx, my, angle + 180);
+  const k = 2 * (mx * nx + my * ny);
+  backLayer.style.transform = `matrix(${1 - 2 * nx * nx},${-2 * nx * ny},${-2 * nx * ny},${1 - 2 * ny * ny},${k * nx},${k * ny})`;
+  // Shadows are fixed gradients, just moved and rotated to sit on the fold.
   const lift = Math.min(1, len / (W * 0.6));
-  f.backShade.style.background = `linear-gradient(${angle}deg, rgba(0,0,0,0) ${pos - 90}px, rgba(0,0,0,${0.22 * lift}) ${pos - 4}px, rgba(0,0,0,0) ${pos}px)`;
-  f.backShade.style.opacity = 1;
-  f.frontShade.style.background = `linear-gradient(${angle + 180}deg, rgba(0,0,0,0) ${L - pos - 50}px, rgba(0,0,0,${0.16 * lift}) ${L - pos}px)`;
-  f.frontShade.style.opacity = 1;
+  // Thin strips with the fold along one long edge, rotated about a point on the fold.
+  f.frontShade.style.transform = `translate(${mx.toFixed(1)}px, ${(my - SHADE / 2).toFixed(1)}px) rotate(${angle.toFixed(2)}deg)`;
+  f.frontShade.style.opacity = (0.16 * lift).toFixed(3);
+  f.backShade.style.transform = `translate(${(mx - SHADE_W).toFixed(1)}px, ${(my - SHADE / 2).toFixed(1)}px) rotate(${angle.toFixed(2)}deg)`;
+  f.backShade.style.opacity = (0.24 * lift).toFixed(3);
 }
 
 // Animate the held point to the end (commit) or back to the start (cancel).
@@ -778,10 +766,16 @@ function endFlip(f, commit) {
   clearTimeout(f.watchdog);
   clearInterval(f.holdTimer);
   flip = null;
-  flipLayer.hidden = true;
-  flipLayer.replaceChildren();
+  idleClip(f.lift); idleClip(viewC);
+  f.frontShade.style.opacity = 0; f.backShade.style.opacity = 0;
+  // Park the back layer off-screen; nothing swaps, the current layer simply
+  // moves on to the new page while the others stay painted underneath.
+  viewC.layer.style.transform = 'translate(-200vw, 0)';
+  if (f.lift === viewB) { viewB.layer.style.zIndex = 1; viewC.layer.style.zIndex = 3; }
+  performance.mark('flip-end');
   if (commit) { goTo(f.to, { animate: false }); haptic(); }
   else paint(f.from);
+  performance.measure('endFlip', 'flip-end');
 }
 
 /* ───────────────────────── Page chrome ───────────────────────── */
@@ -807,9 +801,13 @@ function fillChrome(el, p, slot) {
   $('.foot-r', el).textContent = slot !== 'L' && exists ? `${Math.round(((p + 1) / R.pages) * 100)}%` : '';
 }
 
+function fillLayerChrome(v, p) {
+  const [cL, cR] = v.chrome;
+  if (R.spread) { fillChrome(cL, p, 'L'); fillChrome(cR, p + 1, 'R'); }
+  else fillChrome(cL, p, 'S');
+}
 function updatePageChrome(p) {
-  if (R.spread) { fillChrome($('#chromeL'), p, 'L'); fillChrome($('#chromeR'), p + 1, 'R'); }
-  else fillChrome($('#chromeL'), p, 'S');
+  fillLayerChrome(viewA, p);
   // Page-edge "thickness" on each side, like the pages of a real book.
   const prog = R.pages > 1 ? p / (R.pages - 1) : 0;
   reader.style.setProperty('--edge-l', R.spread ? (1 + prog * 6).toFixed(1) + 'px' : '0px');
@@ -860,7 +858,7 @@ stage.addEventListener('pointermove', (e) => {
   if (!drag.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
     drag.moved = true;
     stage.setPointerCapture(e.pointerId);
-    view.classList.remove('anim-slide');
+    vflow.classList.remove('anim-slide');
     drag.dir = dx < 0 ? 1 : -1;
     if (settings.turn === 'flip') {
       drag.flip = startFlip(drag.dir, { x: drag.x, y: drag.y });
@@ -885,7 +883,7 @@ stage.addEventListener('pointermove', (e) => {
   } else if (settings.turn === 'slide' || settings.turn === 'flip') {
     // Rubber-band at the ends of the book.
     const atEdge = (dx > 0 && R.page === 0) || (dx < 0 && R.page >= norm(R.pages - 1));
-    view.style.transform = `translate3d(${-(R.page - R.view.base) * R.pitch + (atEdge ? dx * 0.25 : dx)}px,0,0)`;
+    vflow.style.transform = `translate3d(${-(R.page - viewA.win.base) * R.pitch + (atEdge ? dx * 0.25 : dx)}px,0,0)`;
   }
 });
 
@@ -893,9 +891,9 @@ function tapAt(x, e) {
   lastHandled = performance.now();
   if (!$('#hlPop').hidden) { hidePop(); return; }
   const mark = e?.target?.closest?.('mark.hl') || document.elementFromPoint(x, e?.clientY ?? 0)?.closest?.('mark.hl');
-  if (mark && view.contains(mark)) { openHighlight(mark.dataset.hl, mark); return; }
+  if (mark && vflow.contains(mark)) { openHighlight(mark.dataset.hl, mark); return; }
   const link = e?.target?.closest?.('a');
-  if (link && view.contains(link)) {
+  if (link && vflow.contains(link)) {
     if (link.dataset.target) followLink(link);
     return; // external links open on their own
   }
@@ -1165,7 +1163,7 @@ function unwrapHighlight(hl) {
   R.blocks[hl.b]?.normalize();
 }
 function saveHls() { prefs.set(`hl:${R.book.id}`, R.hls); }
-function refreshView() { R.view = null; paint(R.page); }
+function refreshView() { invalidateViews(); paint(R.page); }
 
 // Caret under a point, as (clone block, offset within that block).
 function caretAt(x, y) {
@@ -1173,7 +1171,7 @@ function caretAt(x, y) {
   if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); if (!c) return null; node = c.offsetNode; offset = c.offset; }
   else if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (!r) return null; node = r.startContainer; offset = r.startOffset; }
   else return null;
-  if (node.nodeType !== 3 || !view.contains(node)) return null;
+  if (node.nodeType !== 3 || !vflow.contains(node)) return null;
   const cb = node.parentElement.closest('[data-b]');
   if (!cb) return null;
   const walker = document.createTreeWalker(cb, NodeFilter.SHOW_TEXT);
@@ -1250,7 +1248,7 @@ function openHighlight(id, mark) {
   const hl = R.hls.find((h) => h.id === id);
   if (!hl) return;
   activeHl = hl; pendingSel = null;
-  const rects = [...$$(`mark[data-hl="${id}"]`, view).flatMap((m) => [...m.getClientRects()])];
+  const rects = [...$$(`mark[data-hl="${id}"]`, vflow).flatMap((m) => [...m.getClientRects()])];
   showPop(rects.length ? rects : [...mark.getClientRects()], true);
 }
 function createHighlight(color) {

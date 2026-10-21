@@ -38,10 +38,25 @@
       <div class="book" id="book">
         <div class="paper"></div>
         <div class="spine" aria-hidden="true"></div>
-        <div class="viewport" id="viewport"><div class="flow" id="flow" aria-hidden="true"></div><div class="flow view" id="view"></div></div>
-        <div class="page-chrome" id="chromeL"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
-        <div class="page-chrome" id="chromeR"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
-        <div class="flip-layer" id="flipLayer" hidden></div>
+        <!-- Three persistent page layers: the spread being turned to (under),
+             the current spread (on top) and the back of the lifted leaf. Each
+             is clipped along the fold by a rotated box, so a turn is pure
+             compositor work: no layout, no repaint. -->
+        <div class="layer" id="layerB" style="z-index:1"><div class="half"><div class="unrot">
+          <div class="viewport"><div class="flow view"></div></div>
+          <div class="page-chrome chrome-l"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div><div class="page-chrome chrome-r"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
+          <div class="curl-shade front-shade" aria-hidden="true"></div>
+        </div></div></div>
+        <div class="layer" id="layerA" style="z-index:2"><div class="half"><div class="unrot">
+          <div class="viewport"><div class="flow" id="flow" aria-hidden="true"></div><div class="flow view"></div></div>
+          <div class="page-chrome chrome-l"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div><div class="page-chrome chrome-r"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
+          <div class="curl-shade front-shade" aria-hidden="true"></div>
+        </div></div></div>
+        <div class="layer back" id="layerC" style="z-index:3;transform:translate(-200vw,0)"><div class="half"><div class="unrot">
+          <div class="mirror"><div class="viewport"><div class="flow view"></div></div></div>
+          <div class="curl-shade back-shade" aria-hidden="true"></div>
+        </div></div></div>
+        <div class="edges" aria-hidden="true"></div>
         <div class="sel-layer" id="selLayer" aria-hidden="true"></div>
       </div>
       <div class="hl-pop" id="hlPop" hidden role="toolbar" aria-label="Highlight">

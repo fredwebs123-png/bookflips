@@ -203,11 +203,6 @@ button { font: inherit; color: inherit; }
 .book { position: absolute; inset: 0; }
 .paper, .face { background: var(--paper-bg); }
 .paper { position: absolute; inset: 0; transition: background .3s; }
-.paper::before, .paper::after { /* the edges of the pages you've read / have left */
-  content: ''; position: absolute; top: 3px; bottom: 3px; left: 0; width: var(--edge-l, 0px);
-  background: repeating-linear-gradient(90deg, var(--edge) 0 1px, transparent 1px 2.5px);
-}
-.paper::after { left: auto; right: 0; width: var(--edge-r, 0px); }
 .spine { display: none; }
 #reader.is-spread .spine {
   display: block; position: absolute; z-index: 4; top: 0; bottom: 0; left: var(--spine-x); width: 80px; transform: translateX(-50%);
@@ -245,7 +240,7 @@ button { font: inherit; color: inherit; }
 #reader[data-dropcaps="0"] .flow .sb-ch-open + p::first-letter { float: none !important; font: inherit; color: inherit; padding: 0; }
 #reader[data-runheads="0"] .run-head, #reader[data-folios="0"] .folio, #reader[data-footers="0"] .foot { display: none; }
 #reader[data-spine="0"] .spine { display: none !important; }
-#reader[data-edges="0"] .paper::before, #reader[data-edges="0"] .paper::after { display: none; }
+#reader[data-edges="0"] .edges { display: none; }
 .flow.anim-slide { transition: transform .34s cubic-bezier(.22,.61,.36,1); }
 .flow.anim-fade-out { transition: opacity .14s ease; opacity: 0; }
 .flow.anim-fade-in { transition: opacity .18s ease; opacity: 1; }
@@ -263,15 +258,28 @@ button { font: inherit; color: inherit; }
 .foot-r { right: var(--vx); }
 .blank-head .run-head { visibility: hidden; }
 
-/* Page curl */
-.flip-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
-.face { position: absolute; top: 0; bottom: 0; left: 0; overflow: hidden; }
-.face-vp { position: absolute; top: var(--vy); height: var(--vh); width: var(--colw); overflow: hidden; }
-.curl-front, .curl-back { position: absolute; top: 0; bottom: 0; transform-origin: 0 0; will-change: transform, clip-path; overflow: hidden; }
-.curl-back { background: var(--paper-bg); }
-.curl-mirror { position: absolute; inset: 0; transform: scaleX(-1); }
-.curl-shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
-.shade { display: none; }
+/* Page layers and the curl */
+.layer { position: absolute; inset: 0; overflow: hidden; will-change: transform; contain: layout; }
+.half { position: absolute; left: 0; top: 0; width: 4000px; height: 4000px; overflow: hidden; transform-origin: 0 0; will-change: transform; }
+.unrot { position: absolute; left: 0; top: 0; width: 4000px; height: 4000px; transform-origin: 0 0; will-change: transform; }
+.unrot > .viewport { left: var(--vx); top: var(--vy); }
+/* the page itself: an opaque sheet the size of the stage, inside the clip */
+.unrot::before { content: ''; position: absolute; left: 0; top: 0; width: var(--stage-w); height: var(--stage-h); background: var(--paper-bg); }
+.layer .page-chrome { z-index: 1; top: 0; bottom: auto; height: var(--stage-h); }
+.viewport.off { visibility: hidden; }
+/* the edges of the pages you've read / have left, drawn over the layers */
+.edges { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.edges::before, .edges::after {
+  content: ''; position: absolute; top: 3px; bottom: 3px; left: 0; width: var(--edge-l, 0px);
+  background: repeating-linear-gradient(90deg, var(--edge) 0 1px, transparent 1px 2.5px);
+}
+.edges::after { left: auto; right: 0; width: var(--edge-r, 0px); }
+.layer.back { transform-origin: 0 0; }
+.layer .viewport { position: absolute; overflow: hidden; left: var(--vx); top: var(--vy); width: var(--vw); height: var(--vh); }
+.mirror { position: absolute; top: 0; height: var(--stage-h); overflow: hidden; transform: scaleX(-1); background: var(--paper-bg); }
+.curl-shade { position: absolute; left: 0; top: 0; width: 120px; height: 3000px; pointer-events: none; opacity: 0; will-change: transform, opacity; }
+.front-shade { transform-origin: 0 1500px; background: linear-gradient(90deg, #000, transparent 50px, transparent); }
+.back-shade { transform-origin: 120px 1500px; background: linear-gradient(270deg, #000, transparent 90px, transparent); }
 
 .loading {
   position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; gap: 12px;
