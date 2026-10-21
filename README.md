@@ -1,4 +1,4 @@
-# designer-fun
+# bookflips
 
 Experiments. The main one is **[Spread Books](book-app/)**, an EPUB reader built for the Galaxy Z Fold 7: two-page spreads when the phone is open, one page on the cover screen, with page curls that follow your finger.
 
