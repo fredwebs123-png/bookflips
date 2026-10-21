@@ -2,7 +2,7 @@
 
 An EPUB reader built for the **Galaxy Z Fold 7**: open the phone and you get a real two-page spread with a spine down the fold; close it and the book reflows to one page on the cover screen, keeping you on the same sentence.
 
-The app contains no book content. Books are standard EPUB files that you import. (The first book made for it, an unofficial Kingdom Hearts companion, lives in its own repository: `kingdom-hearts-companion`.)
+The app contains no book content. Books are standard EPUB files that you import. (The first book made for it, an unofficial Kingdom Hearts companion, lives in its own repository: [kingdom-hearts-companion](https://github.com/fredwebs123-png/kingdom-hearts-companion).)
 
 ## Features
 
