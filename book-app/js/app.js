@@ -44,6 +44,17 @@ async function renderLibrary() {
   const hero = books.find((b) => b.featured) || books.find((b) => lastRead(b)) || null;
 
   let html = '';
+  if (!books.length) {
+    html += `<section class="empty">
+      <div class="empty-art" aria-hidden="true"></div>
+      <h1>Your library is empty</h1>
+      <p>Spread reads EPUB files. Import one from your phone, or share an EPUB to Spread from your Files app once the app is installed.</p>
+      <div class="cta"><button class="btn" data-import>Import an EPUB</button></div>
+      <p class="empty-links">Free, DRM-free classics: <a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a> · <a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a></p>
+    </section>`;
+    $('#shelf').innerHTML = html;
+    return;
+  }
   if (hero) {
     const [main, sub] = splitTitle(hero.title);
     const prog = progressOf(hero.id);
@@ -170,7 +181,8 @@ $('#installBtn').addEventListener('click', async () => {
 /* ───────────────────────── Reader state ───────────────────────── */
 const reader = $('#reader');
 const stage = $('#stage');
-const flow = $('#flow');
+const flow = $('#flow');   // every section, laid out but never painted: used for measuring
+const view = $('#view');   // what's on screen: a clone of the current section and its neighbours
 const scrub = $('#scrub');
 const flipLayer = $('#flipLayer');
 
@@ -180,7 +192,7 @@ const R = {
   blocks: [], blockCol: [],
   toc: [], tocStart: [],
   pages: 1, page: 0, firstNum: 0,
-  spread: false, pitch: 1, geo: null,
+  spread: false, pitch: 1, geo: null, view: null,
   words: 0, wordsPerPage: 250,
   anchor: { b: 0, o: 0 }, marks: [],
 };
@@ -241,7 +253,8 @@ function closeBook() {
 const BLOCK_SEL = 'section,p,h1,h2,h3,h4,h5,h6,li,dt,dd,pre,blockquote,figure,img,table,hr,header,aside,div';
 
 async function renderFlow(book) {
-  flow.lang = book.language || 'en';
+  flow.lang = view.lang = book.language || 'en';
+  R.view = null; view.replaceChildren();
   flow.innerHTML = book.sections.map((h, i) => `<section class="chapter epub-doc" id="s-${i}">${h}</section>`).join('');
   // Mark the very end of the text so we can count pages.
   let last = flow.lastElementChild;
@@ -328,6 +341,7 @@ function relayout() {
     cR.style.display = 'none';
   }
   measure();
+  R.view = null;
   R.page = norm(pageOfAnchor(R.anchor));
   goTo(R.page, { animate: false, keepAnchor: true });
 }
@@ -335,7 +349,7 @@ function relayout() {
 function colOfX(x) { return Math.floor((x - flow.getBoundingClientRect().left + 2) / R.pitch); }
 
 function measure() {
-  flow.classList.remove('anim-slide');
+  view.classList.remove('anim-slide');
   const left = flow.getBoundingClientRect().left;
   const col = (el) => Math.floor((el.getBoundingClientRect().left - left + 2) / R.pitch);
   R.blockCol = R.blocks.map(col);
@@ -404,9 +418,39 @@ const norm = (p) => { p = clamp(Math.round(p), 0, R.pages - 1); return R.spread 
 const chapterAt = (p) => { let c = -1; R.tocStart.forEach((s, i) => { if (s <= p) c = i; }); return c; };
 const sectionAt = (p) => lastAtOrBefore(R.secStart, p);
 
-/* ───────────────────────── Turning pages ───────────────────────── */
-function paint(p) {
-  flow.style.transform = `translate3d(${-p * R.pitch}px,0,0)`;
+/* ───────────────────────── Turning pages ─────────────────────────
+   Moving the whole book as one layer is far too slow on a phone, so the
+   screen shows a clone of just the current section and its neighbours.
+   Sections always start on a fresh column, so the clone lays out exactly
+   like the hidden measuring flow. */
+const tx = (p) => `translate3d(${-(p - R.view.base) * R.pitch}px,0,0)`;
+
+function buildView(p) {
+  const s = sectionAt(p);
+  const a = Math.max(0, s - 1), b = Math.min(R.sections.length - 1, s + 1);
+  if (R.view && a >= R.view.a && b <= R.view.b) return false;
+  const frag = document.createDocumentFragment();
+  for (let i = a; i <= b; i++) {
+    const sec = R.sections[i].cloneNode(true);
+    sec.removeAttribute('id');
+    sec.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+    frag.appendChild(sec);
+  }
+  view.replaceChildren(frag);
+  R.view = { a, b, base: R.secStart[a] };
+  return true;
+}
+
+function paint(p, fromP = null) {
+  const rebuilt = buildView(p);
+  if (rebuilt && fromP !== null && view.classList.contains('anim-slide')) {
+    // Keep a slide continuous across a rebuild: start from where we were.
+    view.style.transition = 'none';
+    view.style.transform = tx(fromP);
+    void view.offsetWidth;
+    view.style.transition = '';
+  }
+  view.style.transform = tx(p);
   updatePageChrome(p);
 }
 
@@ -418,19 +462,19 @@ function goTo(p, { animate = true, keepAnchor = false } = {}) {
   R.page = p;
   learnSpeed(prev, p);
   const mode = animate && p !== prev ? settings.turn : 'none';
-  const x = -p * R.pitch;
   if (mode === 'fade') {
-    flow.classList.remove('anim-slide', 'anim-fade-in');
-    flow.classList.add('anim-fade-out');
+    view.classList.remove('anim-slide', 'anim-fade-in');
+    view.classList.add('anim-fade-out');
     setTimeout(() => {
-      flow.style.transform = `translate3d(${x}px,0,0)`;
-      flow.classList.replace('anim-fade-out', 'anim-fade-in');
+      buildView(p);
+      view.style.transform = tx(p);
+      view.classList.replace('anim-fade-out', 'anim-fade-in');
     }, 140);
     updatePageChrome(p);
   } else {
-    flow.classList.remove('anim-fade-out', 'anim-fade-in');
-    flow.classList.toggle('anim-slide', mode === 'slide' || mode === 'flip');
-    paint(p);
+    view.classList.remove('anim-fade-out', 'anim-fade-in');
+    view.classList.toggle('anim-slide', mode === 'slide' || mode === 'flip');
+    paint(p, prev);
   }
   if (!keepAnchor) R.anchor = anchorAt(p);
   clearTimeout(saveTimer);
@@ -635,7 +679,7 @@ stage.addEventListener('pointermove', (e) => {
   if (!drag.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
     drag.moved = true;
     stage.setPointerCapture(e.pointerId);
-    flow.classList.remove('anim-slide');
+    view.classList.remove('anim-slide');
     drag.dir = dx < 0 ? 1 : -1;
     if (settings.turn === 'flip') drag.flip = startFlip(drag.dir);
   }
@@ -648,7 +692,7 @@ stage.addEventListener('pointermove', (e) => {
   } else if (settings.turn === 'slide' || settings.turn === 'flip') {
     // Rubber-band at the ends of the book.
     const atEdge = (dx > 0 && R.page === 0) || (dx < 0 && R.page >= norm(R.pages - 1));
-    flow.style.transform = `translate3d(${-R.page * R.pitch + (atEdge ? dx * 0.25 : dx)}px,0,0)`;
+    view.style.transform = `translate3d(${-(R.page - R.view.base) * R.pitch + (atEdge ? dx * 0.25 : dx)}px,0,0)`;
   }
 });
 
@@ -666,7 +710,7 @@ const endDrag = (e) => {
   }
   if (e.type === 'pointercancel') return;
   const link = e.target.closest?.('a');
-  if (link && flow.contains(link)) {
+  if (link && view.contains(link)) {
     if (link.dataset.target) followLink(link);
     return; // external links open on their own
   }

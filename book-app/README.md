@@ -2,7 +2,7 @@
 
 An EPUB reader built for the **Galaxy Z Fold 7**: open the phone and you get a real two-page spread with a spine down the fold; close it and the book reflows to one page on the cover screen, keeping you on the same sentence.
 
-The app contains no book content. Books are standard EPUB files: the featured book ships in `library/` and is listed in `catalog.json`, and you can import your own.
+The app contains no book content. Books are standard EPUB files that you import. (The first book made for it, an unofficial Kingdom Hearts companion, lives in its own repository: `kingdom-hearts-companion`.)
 
 ## Features
 
@@ -23,10 +23,10 @@ npx http-server book-app -p 8080
 
 To use it on your phone, enable GitHub Pages for this repo (**Settings → Pages → Source: GitHub Actions**). The workflow in `.github/workflows/pages.yml` deploys `book-app/` on every push to `main`. Open the Pages URL in Chrome on the Fold and choose **Add to home screen**.
 
-## Bundled books
+## Bundling a book
 
-The source for each bundled book lives unzipped in `book-sources/<name>/` (plain XHTML chapters, an OPF package and a cover). After editing, run `book-sources/pack.sh` to rebuild `book-app/library/<name>.epub`, then bump that book's `version` in `catalog.json` so installed copies refresh. Classes starting with `sb-` (for example `sb-ch-open`, `sb-pull`, `sb-note`) get Spread's special styling; everything else uses the reader's own typography.
+`catalog.json` lists EPUBs that ship with the app and are copied into the library on first launch (`{ "id", "file", "version", "featured" }`). It is empty by default. If you add one, also add the file to `SHELL` in `sw.js` so it works offline.
 
 ---
 
-Kingdom Hearts and related characters, worlds and music are the property of Disney and Square Enix. The bundled companion is a non-commercial fan project and is not affiliated with or endorsed by either company.
+Spread is an EPUB reader and contains no copyrighted book content.

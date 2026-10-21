@@ -85,6 +85,22 @@ button { font: inherit; color: inherit; }
 .btn { border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 600; cursor: pointer; background: var(--gold); color: #1b1404; }
 .btn.ghost { background: var(--lib-card); color: var(--lib-ink); }
 
+/* Empty library */
+.empty { text-align: center; max-width: 440px; margin: 10vh auto 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.empty-art {
+  width: 120px; height: 160px; border-radius: 4px 12px 12px 4px; background: var(--grain), linear-gradient(160deg, #27408f, #0b1230);
+  box-shadow: 0 1px 0 #ffffff22 inset, 0 30px 50px -20px #000d; position: relative; margin-bottom: 10px;
+}
+.empty-art::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 8%; background: linear-gradient(90deg, #0007, #ffffff1c 45%, transparent); }
+.empty-art::after {
+  content: ''; position: absolute; inset: 0; background: var(--gold);
+  -webkit-mask: url(../icons/icon.svg) center/46% no-repeat; mask: url(../icons/icon.svg) center/46% no-repeat;
+}
+.empty h1 { font-family: var(--display); font-size: 26px; margin: 0; letter-spacing: .04em; }
+.empty p { color: #c4c7e0; line-height: 1.6; margin: 0; }
+.empty-links { font-size: 13px; color: var(--lib-muted); }
+.empty-links a { color: var(--lib-ink); }
+
 /* Your library */
 .mine { border-top: 1px solid #ffffff14; padding-top: 20px; }
 .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
@@ -191,7 +207,6 @@ button { font: inherit; color: inherit; }
   column-width: var(--colw);
   column-gap: var(--gap);
   column-fill: auto;
-  will-change: transform;
   font-family: var(--serif);
   font-size: var(--fs, 18px);
   line-height: var(--lh, 1.6);
@@ -203,6 +218,8 @@ button { font: inherit; color: inherit; }
   orphans: 2; widows: 2;
   color: var(--ink);
 }
+#flow { visibility: hidden; }
+.view { position: absolute; top: 0; left: 0; will-change: transform; }
 #reader[data-face="sans"] .flow { font-family: var(--ui); text-align: left; }
 .flow.anim-slide { transition: transform .34s cubic-bezier(.22,.61,.36,1); }
 .flow.anim-fade-out { transition: opacity .14s ease; opacity: 0; }

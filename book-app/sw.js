@@ -1,9 +1,9 @@
 // Offline support: the app shell and bundled books are cached up front,
 // fonts as they load. Also receives EPUBs shared from other Android apps.
-const VERSION = 'spread-v2';
+const VERSION = 'spread-v3';
 const SHELL = [
   './', 'index.html', 'css/app.css', 'js/app.js', 'js/epub.js', 'js/storage.js', 'catalog.json',
-  'library/kingdom-hearts.epub', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
+  'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
 ];
 
 self.addEventListener('install', (e) => {

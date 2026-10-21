@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kingdom Hearts Companion</title>
+  <meta name="description" content="Download the unofficial Kingdom Hearts fan companion as an EPUB.">
+  <meta name="theme-color" content="#0b1230">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Literata:ital,opsz,wght@0,7..72,400;1,7..72,400&family=Inter:wght@400;600&display=swap">
+  <style>
+    :root { --gold: #f2c14e; --ink: #e8e6f0; --muted: #9aa0c8; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink); font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(circle at 80% -10%, #3b4fae55, transparent 55%), radial-gradient(circle at 0% 110%, #f2c14e22, transparent 50%), linear-gradient(180deg, #070b20, #0b1230 40%, #141c48);
+      display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+    main { display: grid; gap: 32px; align-items: center; justify-items: center; max-width: 900px; width: 100%; }
+    @media (min-width: 720px) { main { grid-template-columns: auto 1fr; justify-items: start; gap: 56px; } .info { text-align: left; } .cta { justify-content: flex-start; } }
+    .cover { width: min(280px, 64vw); aspect-ratio: 2 / 3; border-radius: 4px 12px 12px 4px; box-shadow: 0 1px 0 #ffffff22 inset, 0 40px 70px -25px #000d, 0 12px 24px #0007; display: block; }
+    .info { text-align: center; max-width: 480px; }
+    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+    h1 { font-family: 'Cinzel', Georgia, serif; font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0 0 6px; letter-spacing: .04em; text-wrap: balance; }
+    h2 { font-family: 'Literata', Georgia, serif; font-style: italic; font-weight: 400; font-size: 18px; color: var(--gold); margin: 0 0 16px; }
+    p { color: #c4c7e0; line-height: 1.6; margin: 0 0 20px; }
+    .cta { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .btn { border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 600; cursor: pointer; background: var(--gold); color: #1b1404; text-decoration: none; display: inline-block; }
+    .btn.ghost { background: #ffffff14; color: var(--ink); }
+    .how { margin-top: 20px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .how b { color: var(--ink); font-weight: 600; }
+    footer { font-size: 12px; color: var(--muted); max-width: 640px; text-align: center; line-height: 1.5; margin-top: 8px; }
+    a { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="cover" src="cover.jpg" alt="Book cover: a glowing heart above a palm-tree island at night">
+    <div class="info">
+      <div class="eyebrow">Unofficial fan companion</div>
+      <h1>Kingdom Hearts</h1>
+      <h2>A Journey of Light &amp; Darkness</h2>
+      <p>Three friends on a tiny island. A key shaped like a sword. Twenty-plus years of games, worlds, songs and a story that famously refuses to be simple. This companion walks the whole saga, from the elevator chat that started it to the road toward Kingdom Hearts IV.</p>
+      <div class="cta">
+        <a class="btn" href="kingdom-hearts-companion.epub" download>Download EPUB</a>
+        <a class="btn ghost" href="https://github.com/fredwebs123-png/kingdom-hearts-companion">Source</a>
+      </div>
+      <p class="how"><b>To read it in Spread on your phone:</b> download the file, then open it from your Files app and choose <b>Share → Spread</b>, or use <b>Import EPUB</b> inside Spread. It also opens in Google Play Books, Apple Books and Kobo.</p>
+    </div>
+  </main>
+  <footer>Kingdom Hearts and all related characters, worlds and music are the property of Disney and Square Enix. This is a non-commercial fan work and is not affiliated with or endorsed by either company.</footer>
+</body>
+</html>
