@@ -64,7 +64,11 @@
     <footer class="bar bottom" id="bottomBar">
       <div class="scrub-label" id="scrubLabel"></div>
       <input type="range" id="scrub" min="0" max="1" step="1" value="0" aria-label="Page">
-      <div class="scrub-meta"><span id="pageMeta"></span><span id="leftMeta"></span></div>
+      <div class="scrub-meta">
+        <button class="turn-btn" id="prevBtn" aria-label="Previous page"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span id="pageMeta"></span><span id="leftMeta"></span>
+        <button class="turn-btn" id="nextBtn" aria-label="Next page"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
     </footer>
 
     <!-- Contents drawer -->
@@ -112,6 +116,7 @@
         <label><input type="checkbox" id="hapticChk"> Haptics</label>
         <button class="pill" id="fsBtn">Full screen</button>
       </div>
+      <p class="diag" id="diag"></p>
     </aside>
     <!-- Footnote pop-up -->
     <aside class="sheet note-sheet" id="noteSheet" hidden>

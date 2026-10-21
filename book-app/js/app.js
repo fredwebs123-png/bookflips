@@ -499,6 +499,7 @@ function saveProgress() {
 }
 
 function turn(dir) {
+  diag.turns++;
   if (settings.turn === 'flip') {
     const f = startFlip(dir);
     if (f) { f.auto = true; runFlip(f, 1); return; }
@@ -601,6 +602,7 @@ function renderFlip(f) {
 
 function runFlip(f, target, ms = 560) {
   cancelAnimationFrame(f.raf);
+  clearTimeout(f.watchdog);
   const t0 = f.t, start = performance.now();
   const dur = Math.max(140, ms * Math.abs(target - t0));
   const tick = (now) => {
@@ -611,11 +613,14 @@ function runFlip(f, target, ms = 560) {
     else endFlip(f, target === 1);
   };
   f.raf = requestAnimationFrame(tick);
+  // If animation frames stall (a throttled or embedded page), still finish the turn.
+  f.watchdog = setTimeout(() => { if (flip === f) { diag.note('flip watchdog'); endFlip(f, target === 1); } }, dur + 400);
 }
 
 function endFlip(f, commit) {
   if (!f || flip !== f) return;
   cancelAnimationFrame(f.raf);
+  clearTimeout(f.watchdog);
   flip = null;
   flipLayer.hidden = true;
   flipLayer.replaceChildren();
@@ -668,9 +673,23 @@ function updatePageChrome(p) {
 }
 
 /* ───────────────────────── Input ───────────────────────── */
-let drag = null;
+// Diagnostics shown at the bottom of the settings sheet, for bug reports.
+const diag = {
+  last: 'none', turns: 0, notes: [],
+  note(s) { this.notes.push(s); if (this.notes.length > 4) this.notes.shift(); },
+  text() {
+    const g = R.geo || {};
+    return `${g.W || 0}×${g.H || 0} @${(window.devicePixelRatio || 1).toFixed(2)} · ${R.spread ? 'spread' : 'single'} · page ${R.page + 1}/${R.pages} · ` +
+      `last input: ${this.last} · turns: ${this.turns} · pointer: ${'onpointerdown' in window ? 'yes' : 'no'} · touch: ${navigator.maxTouchPoints || 0}` +
+      (window.viewport?.segments ? ` · segments: ${window.viewport.segments.length}` : '') +
+      (this.notes.length ? ` · ${this.notes.join(', ')}` : '');
+  },
+};
+
+let drag = null, lastHandled = 0;
 stage.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
+  diag.last = `${e.pointerType} down`;
   drag = { x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, moved: false, id: e.pointerId, flip: null };
 });
 stage.addEventListener('pointermove', (e) => {
@@ -696,10 +715,26 @@ stage.addEventListener('pointermove', (e) => {
   }
 });
 
+function tapAt(x, e) {
+  lastHandled = performance.now();
+  const link = e?.target?.closest?.('a');
+  if (link && view.contains(link)) {
+    if (link.dataset.target) followLink(link);
+    return; // external links open on their own
+  }
+  if (reader.classList.contains('chrome-on')) { reader.classList.remove('chrome-on'); return; }
+  const W = stage.clientWidth;
+  if (x < W * 0.25) prev();
+  else if (x > W * 0.75) next();
+  else reader.classList.add('chrome-on');
+}
+
 const endDrag = (e) => {
   if (!drag || e.pointerId !== drag.id) return;
   const d = drag; drag = null;
+  diag.last = `${e.pointerType} ${e.type}${d.moved ? ' swipe' : ' tap'}`;
   if (d.moved) {
+    lastHandled = performance.now();
     const v = (d.dir * -d.dx) / Math.max(1, performance.now() - d.t);
     if (d.flip) return runFlip(d.flip, d.flip.t > 0.33 || v > 0.4 ? 1 : 0, 480);
     const W = stage.clientWidth;
@@ -709,19 +744,18 @@ const endDrag = (e) => {
     return;
   }
   if (e.type === 'pointercancel') return;
-  const link = e.target.closest?.('a');
-  if (link && view.contains(link)) {
-    if (link.dataset.target) followLink(link);
-    return; // external links open on their own
-  }
-  if (reader.classList.contains('chrome-on')) { reader.classList.remove('chrome-on'); return; }
-  const W = stage.clientWidth;
-  if (e.clientX < W * 0.25) prev();
-  else if (e.clientX > W * 0.75) next();
-  else reader.classList.add('chrome-on');
+  tapAt(e.clientX, e);
 };
 stage.addEventListener('pointerup', endDrag);
 stage.addEventListener('pointercancel', endDrag);
+// Fallback: if pointer events never arrived, a plain click still turns the page.
+stage.addEventListener('click', (e) => {
+  if (performance.now() - lastHandled < 600) return;
+  diag.last = 'click (fallback)';
+  tapAt(e.clientX, e);
+});
+$('#prevBtn').addEventListener('click', () => { diag.last = 'button'; prev(); });
+$('#nextBtn').addEventListener('click', () => { diag.last = 'button'; next(); });
 
 // Footnote links pop up the note; other links jump.
 function followLink(link) {
@@ -871,6 +905,7 @@ function applySettings() {
 function setThemeColor(c) { $('meta[name="theme-color"]').setAttribute('content', c); }
 
 function syncSettingsUI() {
+  $('#diag').textContent = diag.text();
   $('#fontOut').textContent = Math.round(settings.fontScale * 100) + '%';
   $$('#setSheet [data-group]').forEach((g) => $$('[data-val]', g).forEach((b) => b.classList.toggle('active', b.dataset.val === settings[g.dataset.group])));
   $('#wakeChk').checked = settings.wake;
