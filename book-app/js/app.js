@@ -9,9 +9,17 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 const splitTitle = (t) => { const i = t.indexOf(': '); return i > 0 ? [t.slice(0, i), t.slice(i + 2)] : [t, '']; };
 const hueOf = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
 
-const DEFAULTS = { v: 2, fontScale: 1, face: 'serif', leading: 'normal', layout: 'auto', margins: 'normal', theme: 'paper', turn: 'flip', sensitivity: 5, immersive: true, wake: false, haptics: true, wpm: 230 };
+const DEFAULTS = {
+  v: 3, fontScale: 1, fontFamily: 'literata', leading: 'normal', align: 'justify', para: 'indent', hyphens: true, dropCaps: true,
+  layout: 'auto', margins: 'normal', runHeads: true, folios: true, footers: true, spine: true, edges: true,
+  theme: 'paper', libraryTheme: false, brightness: 100, warmth: 0,
+  turn: 'flip', sensitivity: 5, tapZones: 'edges', reverseTaps: false, haptics: true,
+  immersive: true, wake: false, wpm: 230,
+};
 const saved = prefs.get('settings', {});
-const settings = { ...DEFAULTS, ...saved, ...(saved.v ? {} : { turn: 'flip' }), v: 2 };
+const settings = { ...DEFAULTS, ...saved, ...(saved.v ? {} : { turn: 'flip' }), v: 3 };
+if (saved.face && !saved.fontFamily) settings.fontFamily = saved.face === 'sans' ? 'inter' : 'literata';
+let bookThemes = prefs.get('bookThemes', {});
 const LEADING = { tight: 1.45, normal: 1.6, loose: 1.8 };
 // Built-in themes; custom ones derive their other colours from these three.
 const THEMES = {
@@ -22,6 +30,28 @@ const THEMES = {
 };
 let customThemes = prefs.get('themes', []);
 const MARGIN = { narrow: 0.6, normal: 1, wide: 1.5 };
+// Typefaces, fetched from Google Fonts only when chosen (the service worker
+// keeps them for offline reading once they've loaded).
+const FONTS = {
+  literata: { name: 'Literata', css: "'Literata', 'Iowan Old Style', Georgia, serif", gf: 'Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400' },
+  crimson: { name: 'Crimson Pro', css: "'Crimson Pro', Georgia, serif", gf: 'Crimson+Pro:ital,wght@0,400;0,600;1,400' },
+  garamond: { name: 'EB Garamond', css: "'EB Garamond', Garamond, Georgia, serif", gf: 'EB+Garamond:ital,wght@0,400;0,600;1,400' },
+  lora: { name: 'Lora', css: "'Lora', Georgia, serif", gf: 'Lora:ital,wght@0,400;0,600;1,400' },
+  merriweather: { name: 'Merriweather', css: "'Merriweather', Georgia, serif", gf: 'Merriweather:ital,wght@0,400;0,700;1,400' },
+  inter: { name: 'Inter', css: "'Inter', system-ui, sans-serif", gf: 'Inter:wght@400;500;600' },
+  atkinson: { name: 'Atkinson Hyperlegible', css: "'Atkinson Hyperlegible', system-ui, sans-serif", gf: 'Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400' },
+  nunito: { name: 'Nunito', css: "'Nunito', system-ui, sans-serif", gf: 'Nunito:ital,wght@0,400;0,700;1,400' },
+};
+const fontsLoaded = new Set(['literata', 'inter']);
+function ensureFont(id) {
+  const f = FONTS[id];
+  if (!f || fontsLoaded.has(id)) return;
+  fontsLoaded.add(id);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${f.gf}&display=swap`;
+  document.head.appendChild(link);
+}
 // Turn sensitivity 1..9: how far (commit), how fast (flick) and how much the
 // corner moves per finger movement (gain).
 function sens() {
@@ -236,6 +266,7 @@ async function openBook(id, showToc) {
       R.anchor = prog?.v === 2 ? prog.anchor : { b: 0, o: 0 };
       R.marks = prefs.get(`marks:${id}`, []);
       R.page = 0;
+      applySettings();
       $('#barTitle').textContent = splitTitle(R.book.title)[0];
       await renderFlow(R.book);
     }
@@ -261,7 +292,7 @@ function closeBook() {
   reader.classList.remove('chrome-on');
   renderLibrary();
   updateWakeLock();
-  setThemeColor('#0b1230');
+  applySettings();
 }
 
 const BLOCK_SEL = 'section,p,h1,h2,h3,h4,h5,h6,li,dt,dd,pre,blockquote,figure,img,table,hr,header,aside,div';
@@ -838,10 +869,14 @@ function tapAt(x, e) {
     return; // external links open on their own
   }
   if (reader.classList.contains('chrome-on')) { reader.classList.remove('chrome-on'); return; }
-  const W = stage.clientWidth;
-  if (x < W * 0.25) prev();
-  else if (x > W * 0.75) next();
-  else reader.classList.add('chrome-on');
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const y = e?.clientY ?? H / 2;
+  let zone;
+  if (settings.tapZones === 'edges') zone = x < W * 0.25 ? 'back' : x > W * 0.75 ? 'next' : 'menu';
+  else if (settings.tapZones === 'kindle') zone = y < H * 0.15 ? 'menu' : x < W * 0.2 ? 'back' : 'next';
+  else zone = y < H * 0.15 ? 'menu' : x < W * 0.5 ? 'back' : 'next';
+  if (settings.reverseTaps && zone !== 'menu') zone = zone === 'back' ? 'next' : 'back';
+  if (zone === 'back') prev(); else if (zone === 'next') next(); else reader.classList.add('chrome-on');
 }
 
 // A slow, deliberate turn: once the page is lifted, moving slowly (or holding)
@@ -1054,16 +1089,30 @@ $('#markList').addEventListener('click', (e) => {
 
 /* ───────────────────────── Settings ───────────────────────── */
 function themeById(id) { return THEMES[id] || customThemes.find((t) => t.id === id) || THEMES.paper; }
+// The theme in force: a per-book choice wins over the global one.
+function currentThemeId() { return (R.book && bookThemes[R.book.id]) || settings.theme; }
 
 function applySettings() {
-  const t = themeDraft || themeById(settings.theme);
-  const builtIn = !themeDraft && THEMES[settings.theme];
-  reader.dataset.theme = builtIn ? settings.theme : 'custom';
+  const id = currentThemeId();
+  const t = themeDraft || themeById(id);
+  const builtIn = !themeDraft && THEMES[id];
+  reader.dataset.theme = builtIn ? id : 'custom';
   reader.dataset.grain = t.grain ? '1' : '0';
   const s = reader.style;
   for (const k of ['paper', 'ink', 'accent']) { if (builtIn) s.removeProperty('--' + k); else s.setProperty('--' + k, t[k]); }
-  reader.dataset.face = settings.face;
-  setThemeColor(t.paper);
+  for (const k of ['align', 'para']) reader.dataset[k] = settings[k];
+  for (const k of ['hyphens', 'dropCaps', 'runHeads', 'folios', 'footers', 'spine', 'edges']) reader.dataset[k.toLowerCase()] = settings[k] ? '1' : '0';
+  ensureFont(settings.fontFamily);
+  s.setProperty('--book-font', (FONTS[settings.fontFamily] || FONTS.literata).css);
+  // Night light
+  $('#dim').style.opacity = (1 - settings.brightness / 100).toFixed(2);
+  $('#warm').style.opacity = (settings.warmth / 100).toFixed(2);
+  // Library colours
+  const lib = $('#library');
+  document.body.dataset.lib = settings.libraryTheme ? 'theme' : 'sky';
+  const lt = themeById(settings.theme);
+  for (const [k, v] of Object.entries({ paper: lt.paper, ink: lt.ink, accent: lt.accent })) lib.style.setProperty('--lt-' + k, settings.libraryTheme ? v : '');
+  setThemeColor(reader.hidden ? (settings.libraryTheme ? lt.paper : '#0b1230') : t.paper);
 }
 function setThemeColor(c) { $('meta[name="theme-color"]').setAttribute('content', c); }
 
@@ -1074,15 +1123,25 @@ function renderSwatches() {
   $('#themeSwatches').innerHTML = Object.entries(THEMES).map(([id, t]) => swatchHtml(id, t)).join('') + customThemes.map((t) => swatchHtml(t.id, t, 'custom')).join('');
 }
 
+const TAP_HELP = {
+  edges: 'Tap the left or right quarter of the screen to turn; tap the middle for the menu.',
+  kindle: 'Tap almost anywhere to go forward; the left strip goes back; the top strip opens the menu.',
+  halves: 'Left half goes back, right half goes forward; the top strip opens the menu.',
+};
 function syncSettingsUI() {
   $('#diag').textContent = diag.text();
   $('#fontOut').textContent = Math.round(settings.fontScale * 100) + '%';
   renderSwatches();
-  $$('#setSheet [data-group]').forEach((g) => $$('[data-val]', g).forEach((b) => b.classList.toggle('active', b.dataset.val === settings[g.dataset.group])));
-  $('#sensRange').value = settings.sensitivity;
-  $('#fsChk').checked = settings.immersive;
-  $('#wakeChk').checked = settings.wake;
-  $('#hapticChk').checked = settings.haptics;
+  if (!$('#fontChips').children.length) {
+    Object.keys(FONTS).forEach(ensureFont);
+    $('#fontChips').innerHTML = Object.entries(FONTS).map(([id, f]) => `<button data-val="${id}" style="font-family:${f.css}">${f.name}</button>`).join('');
+  }
+  const themeId = currentThemeId();
+  $$('#setSheet [data-group]').forEach((g) => $$('[data-val]', g).forEach((b) => b.classList.toggle('active', b.dataset.val === (g.dataset.group === 'theme' ? themeId : settings[g.dataset.group]))));
+  $$('#setSheet [data-setting]').forEach((el) => { if (el.type === 'checkbox') el.checked = !!settings[el.dataset.setting]; else el.value = settings[el.dataset.setting]; });
+  $('#bookThemeChk').checked = !!(R.book && bookThemes[R.book.id]);
+  $('#bookThemeChk').disabled = !R.book;
+  $('#tapHelp').textContent = TAP_HELP[settings.tapZones];
 }
 function saveSettings(relay = true) {
   prefs.set('settings', settings);
@@ -1099,21 +1158,46 @@ $('#setSheet').addEventListener('click', (e) => {
   const val = e.target.closest('[data-val]');
   const group = val?.closest('[data-group]')?.dataset.group;
   if (!group) return;
+  if (group === 'theme' && R.book && $('#bookThemeChk').checked) {
+    bookThemes[R.book.id] = val.dataset.val;
+    prefs.set('bookThemes', bookThemes);
+    return saveSettings(false);
+  }
   settings[group] = val.dataset.val;
-  saveSettings(group !== 'theme' && group !== 'turn');
+  saveSettings(['theme', 'turn', 'tapZones'].includes(group) ? false : true);
 });
-$('#wakeChk').addEventListener('change', (e) => { settings.wake = e.target.checked; saveSettings(false); updateWakeLock(); });
-$('#hapticChk').addEventListener('change', (e) => { settings.haptics = e.target.checked; saveSettings(false); haptic(); });
-$('#sensRange').addEventListener('input', (e) => { settings.sensitivity = +e.target.value; saveSettings(false); });
+// Checkboxes and sliders: data-setting names the key, data-relay="1" means the text reflows.
+const AFTER = {
+  wake: updateWakeLock,
+  haptics: () => haptic(),
+  immersive: () => { if (settings.immersive) enterFullscreen(); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); },
+};
+$('#setSheet').addEventListener('input', (e) => {
+  const key = e.target.dataset.setting;
+  if (!key) return;
+  settings[key] = e.target.type === 'checkbox' ? e.target.checked : +e.target.value;
+  saveSettings(e.target.dataset.relay === '1');
+  AFTER[key]?.();
+});
+$('#bookThemeChk').addEventListener('change', (e) => {
+  if (!R.book) return;
+  if (e.target.checked) bookThemes[R.book.id] = currentThemeId();
+  else delete bookThemes[R.book.id];
+  prefs.set('bookThemes', bookThemes);
+  saveSettings(false);
+});
+$('#resetBtn').addEventListener('click', () => {
+  const keep = { wpm: settings.wpm };
+  for (const k of Object.keys(settings)) delete settings[k];
+  Object.assign(settings, DEFAULTS, keep);
+  saveSettings(true);
+  toast('Settings reset');
+});
 $('#editThemesBtn').addEventListener('click', () => openSheet('theme'));
 
 /* Full screen: the browser only allows it in response to a tap, so when the
    setting is on we ask on the next tap anywhere (and again after the system
    brings the bars back). */
-$('#fsChk').addEventListener('change', (e) => {
-  settings.immersive = e.target.checked; saveSettings(false);
-  if (settings.immersive) enterFullscreen(); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-});
 function enterFullscreen() {
   if (!settings.immersive || document.fullscreenElement || !document.fullscreenEnabled) return;
   document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
@@ -1147,7 +1231,7 @@ $('#themeList').addEventListener('click', (e) => {
   const edit = e.target.closest('[data-edit]')?.dataset.edit;
   const isNew = e.target.closest('#thNew');
   if (!edit && !isNew) return;
-  const t = edit ? customThemes.find((x) => x.id === edit) : { ...themeById(settings.theme), name: '' };
+  const t = edit ? customThemes.find((x) => x.id === edit) : { ...themeById(currentThemeId()), name: '' };
   thEl('thId').value = edit || '';
   thEl('thDelete').hidden = !edit;
   $('#themeList').hidden = true;
@@ -1169,7 +1253,7 @@ $('#themeForm').addEventListener('submit', (e) => {
   if (i >= 0) customThemes[i] = t; else customThemes.push(t);
   prefs.set('themes', customThemes);
   themeDraft = null;
-  settings.theme = id;
+  if (R.book && bookThemes[R.book.id]) { bookThemes[R.book.id] = id; prefs.set('bookThemes', bookThemes); } else settings.theme = id;
   saveSettings(false);
   toast(`Theme “${t.name}” saved`);
   $('#themeForm').hidden = true; $('#themeList').hidden = false; renderThemeList();
@@ -1180,6 +1264,8 @@ $('#thDelete').addEventListener('click', () => {
   customThemes = customThemes.filter((x) => x.id !== id);
   prefs.set('themes', customThemes);
   if (settings.theme === id) settings.theme = 'paper';
+  for (const b of Object.keys(bookThemes)) if (bookThemes[b] === id) delete bookThemes[b];
+  prefs.set('bookThemes', bookThemes);
   themeDraft = null;
   saveSettings(false);
   $('#themeForm').hidden = true; $('#themeList').hidden = false; renderThemeList();

@@ -238,7 +238,14 @@ button { font: inherit; color: inherit; }
 }
 #flow { visibility: hidden; }
 .view { position: absolute; top: 0; left: 0; will-change: transform; }
-#reader[data-face="sans"] .flow { font-family: var(--ui); text-align: left; }
+#reader .flow { font-family: var(--book-font, var(--serif)); }
+#reader[data-align="left"] .flow { text-align: left; }
+#reader[data-hyphens="0"] .flow { hyphens: manual; -webkit-hyphens: manual; }
+#reader[data-para="space"] .flow p { text-indent: 0 !important; margin-bottom: .65em; }
+#reader[data-dropcaps="0"] .flow .sb-ch-open + p::first-letter { float: none !important; font: inherit; color: inherit; padding: 0; }
+#reader[data-runheads="0"] .run-head, #reader[data-folios="0"] .folio, #reader[data-footers="0"] .foot { display: none; }
+#reader[data-spine="0"] .spine { display: none !important; }
+#reader[data-edges="0"] .paper::before, #reader[data-edges="0"] .paper::after { display: none; }
 .flow.anim-slide { transition: transform .34s cubic-bezier(.22,.61,.36,1); }
 .flow.anim-fade-out { transition: opacity .14s ease; opacity: 0; }
 .flow.anim-fade-in { transition: opacity .18s ease; opacity: 1; }
@@ -432,6 +439,27 @@ button { font: inherit; color: inherit; }
 .slider-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
 .slider-wrap input { flex: 1; accent-color: var(--accent); height: 28px; }
 .slider-end { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.sec { font-family: var(--ui); font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin: 22px 0 2px; }
+.sec:first-of-type { margin-top: 10px; }
+.row.col { flex-direction: column; align-items: stretch; }
+.fonts { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 6px; scrollbar-width: none; }
+.fonts::-webkit-scrollbar { display: none; }
+.fonts button { flex: none; border: 1px solid var(--rule); background: transparent; border-radius: 12px; padding: 10px 14px; font-size: 16px; cursor: pointer; color: var(--ink); }
+.fonts button.active { border-color: var(--accent); background: var(--note); color: var(--accent); }
+.tint-dim, .tint-warm { position: fixed; inset: 0; z-index: 15; pointer-events: none; opacity: 0; }
+.tint-dim { background: #000; }
+.tint-warm { background: #ff9a3c; mix-blend-mode: multiply; }
+/* Library in the reading theme's colours */
+body[data-lib="theme"] .sky { display: none; }
+body[data-lib="theme"] { background: var(--lt-paper, var(--night)); }
+body[data-lib="theme"] #library {
+  --lib-ink: var(--lt-ink); --lib-muted: color-mix(in srgb, var(--lt-ink) 55%, var(--lt-paper)); --lib-card: color-mix(in srgb, var(--lt-ink) 8%, transparent);
+  --gold: var(--lt-accent); background: var(--lt-paper); color: var(--lt-ink);
+}
+body[data-lib="theme"] .hero-info p, body[data-lib="theme"] .empty p { color: var(--lib-muted); }
+body[data-lib="theme"] .btn { color: var(--lt-paper); }
+body[data-lib="theme"] .pill-btn.primary { color: var(--lt-paper); }
+body[data-lib="theme"] .mine { border-top-color: var(--lib-card); }
 .theme-list { display: flex; flex-direction: column; }
 .theme-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .theme-item:last-child { border-bottom: 0; padding-top: 14px; }

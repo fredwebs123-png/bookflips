@@ -82,18 +82,34 @@
     <!-- Settings sheet -->
     <aside class="sheet settings" id="setSheet" hidden>
       <div class="sheet-head"><h2>Reading</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+
+      <h3 class="sec">Text</h3>
       <div class="row">
         <span class="row-label">Text size</span>
         <div class="seg"><button data-act="font-" aria-label="Smaller text">A−</button><output id="fontOut">100%</output><button data-act="font+" aria-label="Larger text">A+</button></div>
       </div>
-      <div class="row">
+      <div class="row col">
         <span class="row-label">Typeface</span>
-        <div class="seg" data-group="face"><button data-val="serif">Literata</button><button data-val="sans">Inter</button></div>
+        <div class="fonts" data-group="fontFamily" id="fontChips"></div>
       </div>
       <div class="row">
         <span class="row-label">Line spacing</span>
         <div class="seg" data-group="leading"><button data-val="tight">Tight</button><button data-val="normal">Normal</button><button data-val="loose">Airy</button></div>
       </div>
+      <div class="row">
+        <span class="row-label">Alignment</span>
+        <div class="seg" data-group="align"><button data-val="justify">Justified</button><button data-val="left">Left</button></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Paragraphs</span>
+        <div class="seg" data-group="para"><button data-val="indent">Indented</button><button data-val="space">Spaced</button></div>
+      </div>
+      <div class="row toggles">
+        <label><input type="checkbox" data-setting="hyphens" data-relay="1"> Hyphenation</label>
+        <label><input type="checkbox" data-setting="dropCaps" data-relay="1"> Drop caps</label>
+      </div>
+
+      <h3 class="sec">Page</h3>
       <div class="row">
         <span class="row-label">Layout</span>
         <div class="seg" data-group="layout"><button data-val="auto">Auto</button><button data-val="single">One page</button><button data-val="spread">Spread</button></div>
@@ -102,25 +118,60 @@
         <span class="row-label">Margins</span>
         <div class="seg" data-group="margins"><button data-val="narrow">Narrow</button><button data-val="normal">Normal</button><button data-val="wide">Wide</button></div>
       </div>
+      <div class="row toggles">
+        <label><input type="checkbox" data-setting="runHeads"> Chapter titles at the top</label>
+        <label><input type="checkbox" data-setting="folios"> Page numbers</label>
+        <label><input type="checkbox" data-setting="footers"> Time left and progress</label>
+        <label><input type="checkbox" data-setting="spine"> Spine shadow</label>
+        <label><input type="checkbox" data-setting="edges"> Page edges</label>
+      </div>
+
+      <h3 class="sec">Theme</h3>
       <div class="row">
         <span class="row-label">Theme</span>
         <div class="swatches" data-group="theme" id="themeSwatches"></div>
         <button class="pill" id="editThemesBtn">Edit themes</button>
       </div>
+      <div class="row toggles">
+        <label><input type="checkbox" id="bookThemeChk"> Use this theme only for this book</label>
+        <label><input type="checkbox" data-setting="libraryTheme"> Library matches the theme</label>
+      </div>
+      <div class="row">
+        <span class="row-label">Brightness</span>
+        <div class="slider-wrap"><input type="range" data-setting="brightness" min="40" max="100" step="5" aria-label="Brightness"></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Warmth</span>
+        <div class="slider-wrap"><input type="range" data-setting="warmth" min="0" max="100" step="5" aria-label="Warmth"></div>
+        <p class="row-help">A night-light tint that takes the blue out of the screen.</p>
+      </div>
+
+      <h3 class="sec">Turning pages</h3>
       <div class="row">
         <span class="row-label">Page turn</span>
         <div class="seg" data-group="turn"><button data-val="flip">Flip</button><button data-val="slide">Slide</button><button data-val="fade">Fade</button><button data-val="none">Instant</button></div>
       </div>
       <div class="row">
         <span class="row-label">Turn sensitivity</span>
-        <div class="slider-wrap"><span class="slider-end">Gentle</span><input type="range" id="sensRange" min="1" max="9" step="1" aria-label="Turn sensitivity"><span class="slider-end">Eager</span></div>
+        <div class="slider-wrap"><span class="slider-end">Gentle</span><input type="range" data-setting="sensitivity" min="1" max="9" step="1" aria-label="Turn sensitivity"><span class="slider-end">Eager</span></div>
         <p class="row-help">How far and how fast you have to pull before a page commits to turning.</p>
       </div>
-      <div class="row toggles">
-        <label><input type="checkbox" id="fsChk"> Full screen (hide the status bar)</label>
-        <label><input type="checkbox" id="wakeChk"> Keep screen on</label>
-        <label><input type="checkbox" id="hapticChk"> Haptics</label>
+      <div class="row">
+        <span class="row-label">Tap zones</span>
+        <div class="seg" data-group="tapZones"><button data-val="edges">Edges</button><button data-val="kindle">Mostly next</button><button data-val="halves">Halves</button></div>
+        <p class="row-help" id="tapHelp"></p>
       </div>
+      <div class="row toggles">
+        <label><input type="checkbox" data-setting="reverseTaps"> Swap left and right (left-handed)</label>
+        <label><input type="checkbox" data-setting="haptics"> Haptics</label>
+      </div>
+
+      <h3 class="sec">Display</h3>
+      <div class="row toggles">
+        <label><input type="checkbox" data-setting="immersive"> Full screen (hide the status bar)</label>
+        <label><input type="checkbox" data-setting="wake"> Keep screen on</label>
+      </div>
+      <div class="row"><button class="pill" id="resetBtn">Reset all settings</button></div>
       <p class="diag" id="diag"></p>
     </aside>
     <!-- Theme editor -->
@@ -154,6 +205,8 @@
     </aside>
     <div class="scrim" id="scrim" hidden></div>
   </section>
+  <div class="tint-dim" id="dim" aria-hidden="true"></div>
+  <div class="tint-warm" id="warm" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="js/app.js"></script>
