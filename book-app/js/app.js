@@ -74,7 +74,7 @@ function renderLibrary() {
 $('#shelf').addEventListener('click', (e) => {
   const t = e.target.closest('[data-open]');
   if (!t) return;
-  location.hash = `#/read/${t.dataset.open}${t.hasAttribute('data-toc') ? '/toc' : ''}`;
+  nav(`#/read/${t.dataset.open}${t.hasAttribute('data-toc') ? '/toc' : ''}`);
 });
 
 let installEvt = null;
@@ -106,7 +106,7 @@ const R = {
 
 function openBook(id, showToc) {
   const book = books.find((b) => b.id === id);
-  if (!book) { location.hash = ''; return; }
+  if (!book) { nav(''); return; }
   $('#library').hidden = true;
   reader.hidden = false;
   if (R.book !== book) {
@@ -443,7 +443,7 @@ window.viewport?.addEventListener?.('segmentschange', relayout);
 document.fonts.addEventListener?.('loadingdone', () => relayout());
 
 /* Bars & sheets ---------------------------------------------------------- */
-$('#backBtn').addEventListener('click', () => { location.hash = ''; });
+$('#backBtn').addEventListener('click', () => nav(''));
 $('#tocBtn').addEventListener('click', () => openSheet('toc'));
 $('#setBtn').addEventListener('click', () => openSheet('set'));
 $('#scrim').addEventListener('click', closeSheets);
@@ -588,12 +588,23 @@ function toast(msg) {
 }
 
 /* Routing ---------------------------------------------------------------- */
+// Navigation is held in memory and mirrored to the hash when the host allows
+// it, so the Android back gesture works but nothing depends on the URL.
+let current = location.hash;
+function nav(hash) {
+  current = hash;
+  try { if (location.hash !== hash) location.hash = hash; } catch { /* sandboxed */ }
+  route();
+}
 function route() {
-  const m = location.hash.match(/^#\/read\/([\w-]+)(\/toc)?/);
+  const m = current.match(/^#\/read\/([\w-]+)(\/toc)?/);
   if (m) openBook(m[1], !!m[2]);
   else closeBook();
 }
-window.addEventListener('hashchange', route);
+window.addEventListener('hashchange', () => {
+  const h = location.hash.replace(/^#$/, '');
+  if (h !== current) { current = h; route(); }
+});
 renderLibrary();
 route();
 
