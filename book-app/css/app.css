@@ -238,20 +238,15 @@ button { font: inherit; color: inherit; }
 .foot-r { right: var(--vx); }
 .blank-head .run-head { visibility: hidden; }
 
-/* Page flip */
-.flip-layer { position: absolute; inset: 0; z-index: 3; perspective: 2400px; pointer-events: none; }
+/* Page curl */
+.flip-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
 .face { position: absolute; top: 0; bottom: 0; left: 0; overflow: hidden; }
 .face-vp { position: absolute; top: var(--vy); height: var(--vh); width: var(--colw); overflow: hidden; }
-.leaf { position: absolute; top: 0; bottom: 0; transform-style: preserve-3d; will-change: transform; }
-.leaf.pivot-left { transform-origin: left center; }
-.leaf.pivot-right { transform-origin: right center; }
-.leaf > .face {
-  width: 100% !important; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  box-shadow: 0 0 calc(44px * var(--lift, 0)) rgba(0, 0, 0, calc(.32 * var(--lift, 0)));
-}
-.leaf > .face.backside { transform: rotateY(180deg); }
-.shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(0,0,0,.08), rgba(0,0,0,.5)); }
-.pivot-right > .face:first-child .shade, .pivot-left > .face.backside .shade { background: linear-gradient(270deg, rgba(0,0,0,.08), rgba(0,0,0,.5)); }
+.curl-front, .curl-back { position: absolute; top: 0; bottom: 0; transform-origin: 0 0; will-change: transform, clip-path; overflow: hidden; }
+.curl-back { background: var(--paper-bg); }
+.curl-mirror { position: absolute; inset: 0; transform: scaleX(-1); }
+.curl-shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.shade { display: none; }
 
 .loading {
   position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; gap: 12px;

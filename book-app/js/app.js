@@ -502,7 +502,7 @@ function turn(dir) {
   diag.turns++;
   if (settings.turn === 'flip') {
     const f = startFlip(dir);
-    if (f) { f.auto = true; runFlip(f, 1); return; }
+    if (f) { f.auto = true; runFlip(f, true, 1.6); return; }
   }
   goTo(R.page + dir * step());
 }
@@ -511,11 +511,15 @@ const prev = () => turn(-1);
 
 function haptic() { if (settings.haptics) navigator.vibrate?.(6); }
 
-/* Page flip ---------------------------------------------------------------
-   The real text flow jumps straight to the destination; a "leaf" made of
-   cloned pages rotates over it around the spine (or the left edge on a
-   single page). Each page belongs to exactly one section, so a face only
-   needs a clone of that one section, not the whole book. */
+/* Page curl --------------------------------------------------------------
+   The real text flow jumps straight to the destination; a leaf made of
+   cloned pages peels over it. The corner under the finger lifts and the
+   fold line follows the hand, like paper. Geometry is done in a "local"
+   frame: the spine is x = 0, the page extends to x = W away from it, so a
+   turn of the left page is the same maths with x mirrored.
+
+   Each page belongs to exactly one section, so a face only needs a clone
+   of that one section, not the whole book. */
 let flip = null;
 
 function makeFace(p, slot) {
@@ -545,7 +549,7 @@ function makeFace(p, slot) {
   return face;
 }
 
-function startFlip(dir) {
+function startFlip(dir, finger = null) {
   if (flip) endFlip(flip, true);
   const from = R.page, to = norm(from + dir * step());
   if (to === from || !R.geo) return null;
@@ -553,74 +557,159 @@ function startFlip(dir) {
   // Very long single-file books would be slow to clone; slide those instead.
   if (involved.some((p) => p < R.pages && R.sections[sectionAt(p)].textContent.length > 120000)) return null;
   const g = R.geo;
-  const f = { from, to, dir, t: 0, raf: 0, spread: R.spread, auto: false };
-  const leaf = document.createElement('div');
-  leaf.className = 'leaf';
-  const backside = (face) => { face.classList.add('backside'); return face; };
+  const mirror = R.spread && dir < 0;
+  const W = R.spread ? (mirror ? g.spineX : g.W - g.spineX) : g.W, H = g.H;
+  const f = { from, to, dir, mirror, W, H, raf: 0, watchdog: 0, auto: false, samples: [], slowSince: null };
+  // Local <-> element coordinates (element = the turning page's rectangle).
+  f.toEl = mirror ? (pt) => [W - pt[0], pt[1]] : (pt) => [pt[0], pt[1]];
+  f.toLocalX = mirror ? (sx) => g.spineX - sx : (sx) => sx - (R.spread ? g.spineX : 0);
+  const pageLeft = R.spread && !mirror ? g.spineX : 0;
+
   flipLayer.replaceChildren();
+  const front = document.createElement('div'); front.className = 'curl-front';
+  const back = document.createElement('div'); back.className = 'curl-back';
+  const backInner = document.createElement('div'); backInner.className = 'curl-mirror';
+  back.appendChild(backInner);
+  for (const el of [front, back]) Object.assign(el.style, { left: pageLeft + 'px', width: W + 'px' });
+  const shade = (cls) => { const d = document.createElement('div'); d.className = 'curl-shade ' + cls; return d; };
+  const frontShade = shade('on-front'), backShade = shade('on-back');
+
   if (R.spread) {
     let still;
-    if (dir > 0) {
+    if (!mirror) {
       still = makeFace(from, 'L');
-      leaf.classList.add('pivot-left');
-      Object.assign(leaf.style, { left: g.spineX + 'px', width: g.W - g.spineX + 'px' });
-      leaf.append(makeFace(from + 1, 'R'), backside(makeFace(to, 'L')));
+      front.appendChild(makeFace(from + 1, 'R'));
+      backInner.appendChild(makeFace(to, 'L'));
     } else {
-      still = makeFace(from + 1, 'R');
-      still.style.left = g.spineX + 'px';
-      leaf.classList.add('pivot-right');
-      Object.assign(leaf.style, { left: '0px', width: g.spineX + 'px' });
-      leaf.append(makeFace(from, 'L'), backside(makeFace(to + 1, 'R')));
+      still = makeFace(from + 1, 'R'); still.style.left = g.spineX + 'px';
+      front.appendChild(makeFace(from, 'L'));
+      backInner.appendChild(makeFace(to + 1, 'R'));
     }
-    flipLayer.append(still, leaf);
+    flipLayer.append(still, front, back);
     paint(to);
   } else {
-    leaf.classList.add('pivot-left');
-    Object.assign(leaf.style, { left: '0px', width: g.W + 'px' });
-    const blank = document.createElement('div');
-    blank.className = 'face';
-    blank.innerHTML = '<div class="shade"></div>';
-    leaf.append(makeFace(dir > 0 ? from : to, 'S'), backside(blank));
-    flipLayer.append(leaf);
+    // Forward: this page peels off to reveal the next. Backward: the previous
+    // page unfolds in from the left over this one, so the flow stays put.
+    front.appendChild(makeFace(dir > 0 ? from : to, 'S'));
+    backInner.appendChild(Object.assign(document.createElement('div'), { className: 'face' }));
+    flipLayer.append(front, back);
     if (dir > 0) paint(to);
   }
+  front.querySelector('.face').style.width = W + 'px';
+  front.appendChild(frontShade); back.appendChild(backShade);
   flipLayer.hidden = false;
-  Object.assign(f, { leaf, front: leaf.children[0], back: leaf.children[1] });
+
+  // The grabbed corner, and where the finger "holds" the page.
+  f.cy = finger && finger.y < H / 2 ? 0 : H;
+  f.C = [W, f.cy];
+  const singlePrev = !R.spread && dir < 0;
+  f.start = singlePrev ? [-W, f.cy] : [W, f.cy];
+  f.end = singlePrev ? [W, f.cy] : [-W, f.cy];
+  f.P = [...f.start];
+  f.finger0 = finger ? [f.toLocalX(finger.x), finger.y] : null;
+  Object.assign(f, { front, back, frontShade, backShade });
   flip = f;
   renderFlip(f);
   return f;
 }
 
-function renderFlip(f) {
-  const angle = f.spread ? (f.dir > 0 ? -180 * f.t : 180 * f.t) : (f.dir > 0 ? -180 * f.t : -180 * (1 - f.t));
-  const a = Math.abs(angle) / 180;
-  f.leaf.style.transform = `rotateY(${angle}deg)`;
-  f.front.lastElementChild.style.opacity = (a * 0.55).toFixed(3);
-  f.back.lastElementChild.style.opacity = ((1 - a) * 0.55).toFixed(3);
-  flipLayer.style.setProperty('--lift', Math.sin(a * Math.PI).toFixed(3));
+// How far the turn has got, 0..1.
+const flipProgress = (f) => clamp((f.P[0] - f.start[0]) / (f.end[0] - f.start[0]), 0, 1);
+
+function setFlipPoint(f, x, y) {
+  const { W, H, cy } = f;
+  let px = Math.min(W, x), py = y;
+  // The leaf is hinged at the spine, so the corner can't get further from
+  // the hinge corners than the paper allows.
+  const limit = (ox, oy, max) => {
+    const dx = px - ox, dy = py - oy, d = Math.hypot(dx, dy);
+    if (d > max) { px = ox + (dx * max) / d; py = oy + (dy * max) / d; }
+  };
+  limit(0, cy, W);
+  limit(0, H - cy, Math.hypot(W, H));
+  f.P = [px, py];
 }
 
-function runFlip(f, target, ms = 560) {
+function flipFromFinger(f, sx, sy) {
+  const lx = f.toLocalX(sx);
+  setFlipPoint(f, f.start[0] + (lx - f.finger0[0]), f.start[1] + (sy - f.finger0[1]));
+}
+
+// Clip a rectangle 0..W × 0..H to the half-plane (X - M)·n ≥ 0 (sign = 1)
+// or ≤ 0 (sign = -1). Returns element-space points.
+function halfPage(f, M, n, sign) {
+  const { W, H } = f;
+  const pts = [[0, 0], [W, 0], [W, H], [0, H]];
+  const side = (pt) => sign * ((pt[0] - M[0]) * n[0] + (pt[1] - M[1]) * n[1]);
+  const out = [];
+  for (let i = 0; i < 4; i++) {
+    const a = pts[i], b = pts[(i + 1) % 4], sa = side(a), sb = side(b);
+    if (sa >= 0) out.push(a);
+    if ((sa >= 0) !== (sb >= 0)) {
+      const k = sa / (sa - sb);
+      out.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]);
+    }
+  }
+  return out.map(f.toEl);
+}
+const polygon = (pts) => (pts.length < 3 ? 'polygon(0 0, 0 0, 0 0)' : `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`);
+
+function renderFlip(f) {
+  const { W, H, C, P, front, back } = f;
+  const dx = P[0] - C[0], dy = P[1] - C[1], len = Math.hypot(dx, dy);
+  if (len < 1) { // nothing lifted yet
+    front.style.clipPath = 'none'; back.style.clipPath = polygon([]);
+    f.frontShade.style.opacity = 0; f.backShade.style.opacity = 0;
+    return;
+  }
+  const n = [dx / len, dy / len];                    // unit normal of the fold line
+  const M = [(C[0] + P[0]) / 2, (C[1] + P[1]) / 2];  // a point on the fold line
+  front.style.clipPath = polygon(halfPage(f, M, n, 1));
+  back.style.clipPath = polygon(halfPage(f, M, n, -1));
+  // Reflect the folded part across the fold line (in element coordinates).
+  const [ex, ey] = f.toEl(M), nx = f.mirror ? -n[0] : n[0], ny = n[1];
+  const k = 2 * (ex * nx + ey * ny);
+  back.style.transform = `matrix(${1 - 2 * nx * nx},${-2 * nx * ny},${-2 * nx * ny},${1 - 2 * ny * ny},${k * nx},${k * ny})`;
+  // Shadows: a crease along the fold on the folded part, a soft shadow on the
+  // page it hangs over. Both are gradients aimed along the fold normal.
+  const angle = (Math.atan2(nx, -ny) * 180) / Math.PI;
+  const L = Math.abs(W * Math.sin((angle * Math.PI) / 180)) + Math.abs(H * Math.cos((angle * Math.PI) / 180));
+  const pos = (ex - W / 2) * nx + (ey - H / 2) * ny + L / 2;
+  const lift = Math.min(1, len / (W * 0.6));
+  f.backShade.style.background = `linear-gradient(${angle}deg, rgba(0,0,0,0) ${pos - 90}px, rgba(0,0,0,${0.22 * lift}) ${pos - 4}px, rgba(0,0,0,0) ${pos}px)`;
+  f.backShade.style.opacity = 1;
+  f.frontShade.style.background = `linear-gradient(${angle + 180}deg, rgba(0,0,0,0) ${L - pos - 50}px, rgba(0,0,0,${0.16 * lift}) ${L - pos}px)`;
+  f.frontShade.style.opacity = 1;
+}
+
+// Animate the held point to the end (commit) or back to the start (cancel).
+// `speed` is px/ms along the way; the hand's own speed when it let go.
+function runFlip(f, commit, speed = 0) {
   cancelAnimationFrame(f.raf);
   clearTimeout(f.watchdog);
-  const t0 = f.t, start = performance.now();
-  const dur = Math.max(140, ms * Math.abs(target - t0));
+  const target = commit ? f.end : f.start;
+  const [x0, y0] = f.P, dist = Math.hypot(target[0] - x0, target[1] - y0);
+  const v = speed > 0.15 ? Math.min(speed, 4) : 0.75;
+  const dur = clamp(dist / v, 120, 700);
+  const start = performance.now();
   const tick = (now) => {
     const k = Math.min(1, (now - start) / dur);
-    f.t = t0 + (target - t0) * (1 - Math.pow(1 - k, 3));
+    const e = 1 - Math.pow(1 - k, 2.2);
+    setFlipPoint(f, x0 + (target[0] - x0) * e, y0 + (target[1] - y0) * e);
     renderFlip(f);
     if (k < 1) f.raf = requestAnimationFrame(tick);
-    else endFlip(f, target === 1);
+    else endFlip(f, commit);
   };
   f.raf = requestAnimationFrame(tick);
   // If animation frames stall (a throttled or embedded page), still finish the turn.
-  f.watchdog = setTimeout(() => { if (flip === f) { diag.note('flip watchdog'); endFlip(f, target === 1); } }, dur + 400);
+  f.watchdog = setTimeout(() => { if (flip === f) { diag.note('flip watchdog'); endFlip(f, commit); } }, dur + 400);
 }
 
 function endFlip(f, commit) {
   if (!f || flip !== f) return;
   cancelAnimationFrame(f.raf);
   clearTimeout(f.watchdog);
+  clearInterval(f.holdTimer);
   flip = null;
   flipLayer.hidden = true;
   flipLayer.replaceChildren();
@@ -700,14 +789,26 @@ stage.addEventListener('pointermove', (e) => {
     stage.setPointerCapture(e.pointerId);
     view.classList.remove('anim-slide');
     drag.dir = dx < 0 ? 1 : -1;
-    if (settings.turn === 'flip') drag.flip = startFlip(drag.dir);
+    if (settings.turn === 'flip') {
+      drag.flip = startFlip(drag.dir, { x: drag.x, y: drag.y });
+      if (drag.flip) drag.flip.holdTimer = setInterval(() => checkHold(drag), 100);
+    }
   }
   if (!drag.moved) return;
   drag.dx = dx;
   if (drag.flip) {
-    // The leaf follows the finger.
-    drag.flip.t = clamp((drag.dir * -dx) / (R.geo.W * (R.spread ? 0.5 : 0.7)), 0, 1);
-    renderFlip(drag.flip);
+    const f = drag.flip;
+    // The corner follows the finger; remember recent motion for the release.
+    flipFromFinger(f, e.clientX, e.clientY);
+    const now = performance.now();
+    const last = f.samples[f.samples.length - 1];
+    if (last) {
+      const speed = Math.abs(e.clientX - last.x) / Math.max(1, now - last.t);
+      f.slowSince = speed < 0.08 ? (f.slowSince ?? now) : null;
+    }
+    f.samples.push({ t: now, x: e.clientX });
+    if (f.samples.length > 8) f.samples.shift();
+    renderFlip(f);
   } else if (settings.turn === 'slide' || settings.turn === 'flip') {
     // Rubber-band at the ends of the book.
     const atEdge = (dx > 0 && R.page === 0) || (dx < 0 && R.page >= norm(R.pages - 1));
@@ -729,14 +830,52 @@ function tapAt(x, e) {
   else reader.classList.add('chrome-on');
 }
 
+// A slow, deliberate turn: once the page is lifted, moving slowly (or holding)
+// for a full second finishes the turn on its own.
+function checkHold(d) {
+  const f = d.flip;
+  if (!f || flip !== f) return;
+  const now = performance.now();
+  const last = f.samples[f.samples.length - 1];
+  if (last && now - last.t > 120) f.slowSince ??= last.t; // finger resting
+  if (f.slowSince !== null && now - f.slowSince >= 1000 && flipProgress(f) > 0.08) {
+    clearInterval(f.holdTimer);
+    d.flip = null; d.done = true;
+    diag.note('hold flip');
+    runFlip(f, true, 0.5);
+  }
+}
+
+// Speed of the hand over the last ~100ms, px/ms, positive toward the turn.
+function releaseSpeed(f, dir) {
+  const s = f.samples, last = s[s.length - 1];
+  if (!last) return 0;
+  let i = s.length - 1;
+  while (i > 0 && last.t - s[i - 1].t < 100) i--;
+  const first = s[i];
+  if (first === last) return 0;
+  const sign = f.mirror || (!R.spread && dir < 0) ? 1 : -1; // which screen direction is "toward the turn"
+  return (sign * (last.x - first.x)) / (last.t - first.t);
+}
+
 const endDrag = (e) => {
   if (!drag || e.pointerId !== drag.id) return;
   const d = drag; drag = null;
   diag.last = `${e.pointerType} ${e.type}${d.moved ? ' swipe' : ' tap'}`;
+  if (d.done) return;
   if (d.moved) {
     lastHandled = performance.now();
     const v = (d.dir * -d.dx) / Math.max(1, performance.now() - d.t);
-    if (d.flip) return runFlip(d.flip, d.flip.t > 0.33 || v > 0.4 ? 1 : 0, 480);
+    if (d.flip) {
+      const f = d.flip;
+      clearInterval(f.holdTimer);
+      const u = flipProgress(f), vf = releaseSpeed(f, d.dir), held = performance.now() - d.t;
+      // A flick commits, a flick back cancels; otherwise past halfway commits,
+      // and a slow deliberate pull that got the page moving commits too.
+      const commit = vf > 0.3 ? true : vf < -0.3 ? false : u > 0.25 || (held >= 1000 && u > 0.08);
+      diag.note(`release u=${u.toFixed(2)} v=${vf.toFixed(2)} ${commit ? 'commit' : 'cancel'}`);
+      return runFlip(f, commit, Math.abs(vf));
+    }
     const W = stage.clientWidth;
     if (d.dx < -W * 0.12 || (d.dir > 0 && v > 0.45)) goTo(R.page + step());
     else if (d.dx > W * 0.12 || (d.dir < 0 && v > 0.45)) goTo(R.page - step());
