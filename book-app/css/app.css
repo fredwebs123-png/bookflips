@@ -458,6 +458,7 @@ body[data-lib="theme"] #library {
 }
 body[data-lib="theme"] .hero-info p, body[data-lib="theme"] .empty p { color: var(--lib-muted); }
 body[data-lib="theme"] .btn { color: var(--lt-paper); }
+body[data-lib="theme"] .btn.ghost { color: var(--lt-ink); background: var(--lib-card); border: 1px solid color-mix(in srgb, var(--lt-ink) 18%, transparent); }
 body[data-lib="theme"] .pill-btn.primary { color: var(--lt-paper); }
 body[data-lib="theme"] .mine { border-top-color: var(--lib-card); }
 .theme-list { display: flex; flex-direction: column; }
