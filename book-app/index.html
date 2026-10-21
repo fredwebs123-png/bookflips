@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Spread Books</title>
+  <meta name="description" content="A book reader built for foldables: two-page spreads when open, one page when closed.">
+  <meta name="theme-color" content="#0b1230">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- Library -->
+  <main id="library" class="view">
+    <div class="sky" aria-hidden="true"></div>
+    <header class="lib-head">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Spread Books</div>
+      <button class="icon-btn" id="installBtn" hidden aria-label="Install app">Install</button>
+    </header>
+    <section class="shelf" id="shelf"></section>
+    <p class="lib-foot">Open your Fold for two-page spreads · fold it shut to keep reading on the cover screen.</p>
+  </main>
+
+  <!-- Reader -->
+  <section id="reader" class="view" hidden>
+    <div class="stage" id="stage">
+      <div class="book" id="book">
+        <div class="paper"></div>
+        <div class="spine" aria-hidden="true"></div>
+        <div class="viewport" id="viewport"><div class="flow" id="flow"></div></div>
+        <div class="page-chrome" id="chromeL"><div class="run-head"></div><div class="folio"></div></div>
+        <div class="page-chrome" id="chromeR"><div class="run-head"></div><div class="folio"></div></div>
+      </div>
+    </div>
+
+    <header class="bar top" id="topBar">
+      <button class="icon-btn" id="backBtn" aria-label="Back to library">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="bar-title" id="barTitle"></div>
+      <button class="icon-btn" id="tocBtn" aria-label="Contents">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      </button>
+      <button class="icon-btn" id="markBtn" aria-label="Bookmark this page">
+        <svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+      </button>
+      <button class="icon-btn" id="setBtn" aria-label="Reading settings">
+        <svg viewBox="0 0 24 24"><text x="2" y="18" font-size="15" font-family="Georgia,serif" stroke="none" fill="currentColor">Aa</text></svg>
+      </button>
+    </header>
+
+    <footer class="bar bottom" id="bottomBar">
+      <div class="scrub-label" id="scrubLabel"></div>
+      <input type="range" id="scrub" min="0" max="1" step="1" value="0" aria-label="Page">
+      <div class="scrub-meta"><span id="pageMeta"></span><span id="leftMeta"></span></div>
+    </footer>
+
+    <!-- Contents drawer -->
+    <aside class="sheet drawer" id="tocSheet" hidden>
+      <div class="sheet-head"><h2>Contents</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+      <div class="tabs"><button class="tab active" data-tab="chapters">Chapters</button><button class="tab" data-tab="marks">Bookmarks</button></div>
+      <ol class="toc" id="tocList"></ol>
+      <ol class="toc marks" id="markList" hidden></ol>
+    </aside>
+
+    <!-- Settings sheet -->
+    <aside class="sheet settings" id="setSheet" hidden>
+      <div class="sheet-head"><h2>Reading</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+      <div class="row">
+        <span class="row-label">Text size</span>
+        <div class="seg"><button data-act="font-" aria-label="Smaller text">A−</button><output id="fontOut">100%</output><button data-act="font+" aria-label="Larger text">A+</button></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Typeface</span>
+        <div class="seg" data-group="face"><button data-val="serif">Literata</button><button data-val="sans">Inter</button></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Line spacing</span>
+        <div class="seg" data-group="leading"><button data-val="tight">Tight</button><button data-val="normal">Normal</button><button data-val="loose">Airy</button></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Layout</span>
+        <div class="seg" data-group="layout"><button data-val="auto">Auto</button><button data-val="single">One page</button><button data-val="spread">Spread</button></div>
+      </div>
+      <div class="row">
+        <span class="row-label">Theme</span>
+        <div class="swatches" data-group="theme">
+          <button data-val="paper" class="sw sw-paper" aria-label="Paper"></button>
+          <button data-val="sepia" class="sw sw-sepia" aria-label="Sepia"></button>
+          <button data-val="night" class="sw sw-night" aria-label="Night"></button>
+          <button data-val="heart" class="sw sw-heart" aria-label="Dive to the Heart"></button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="row-label">Page turn</span>
+        <div class="seg" data-group="turn"><button data-val="slide">Slide</button><button data-val="fade">Fade</button><button data-val="none">Instant</button></div>
+      </div>
+      <div class="row toggles">
+        <label><input type="checkbox" id="wakeChk"> Keep screen on</label>
+        <button class="pill" id="fsBtn">Full screen</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
