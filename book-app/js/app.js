@@ -9,11 +9,25 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 const splitTitle = (t) => { const i = t.indexOf(': '); return i > 0 ? [t.slice(0, i), t.slice(i + 2)] : [t, '']; };
 const hueOf = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
 
-const DEFAULTS = { v: 2, fontScale: 1, face: 'serif', leading: 'normal', layout: 'auto', theme: 'paper', turn: 'flip', wake: false, haptics: true, wpm: 230 };
+const DEFAULTS = { v: 2, fontScale: 1, face: 'serif', leading: 'normal', layout: 'auto', margins: 'normal', theme: 'paper', turn: 'flip', sensitivity: 5, immersive: true, wake: false, haptics: true, wpm: 230 };
 const saved = prefs.get('settings', {});
 const settings = { ...DEFAULTS, ...saved, ...(saved.v ? {} : { turn: 'flip' }), v: 2 };
 const LEADING = { tight: 1.45, normal: 1.6, loose: 1.8 };
-const THEME_BAR = { paper: '#f7f2e7', sepia: '#f1e3c6', night: '#14161c', heart: '#0d1638' };
+// Built-in themes; custom ones derive their other colours from these three.
+const THEMES = {
+  paper: { name: 'Paper', paper: '#f7f2e7', ink: '#2a251e', accent: '#9a6a12', grain: true },
+  sepia: { name: 'Sepia', paper: '#f1e3c6', ink: '#3b2e1c', accent: '#8a4b14', grain: true },
+  night: { name: 'Night', paper: '#14161c', ink: '#cfcabd', accent: '#e0b25a', grain: true },
+  heart: { name: 'Dive to the Heart', paper: '#0d1638', ink: '#dfe4ff', accent: '#f2c14e', grain: false },
+};
+let customThemes = prefs.get('themes', []);
+const MARGIN = { narrow: 0.6, normal: 1, wide: 1.5 };
+// Turn sensitivity 1..9: how far (commit), how fast (flick) and how much the
+// corner moves per finger movement (gain).
+function sens() {
+  const k = (settings.sensitivity - 1) / 8;
+  return { commit: 0.45 - 0.4 * k, flick: 0.5 - 0.4 * k, gain: 0.6 + 0.8 * k };
+}
 const CHROME_HTML = '<div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div>';
 
 let toastTimer;
@@ -307,13 +321,13 @@ function relayout() {
   const padBottom = Math.round(clamp(H * 0.065, 44, 68));
   let colw, gap, vx, vw;
   if (spread) {
-    const padX = Math.round(clamp(spineX * 0.085, 22, 56));
+    const padX = Math.round(clamp(spineX * 0.085 * MARGIN[settings.margins], 14, 84));
     colw = Math.floor(spineX - hinge / 2 - padX * 2);
     gap = padX * 2 + hinge;
     vx = padX;
     vw = colw * 2 + gap;
   } else {
-    const padX = Math.round(clamp(W * 0.065, 20, 48));
+    const padX = Math.round(clamp(W * 0.065 * MARGIN[settings.margins], 12, 72));
     colw = Math.min(W - padX * 2, 640);
     gap = padX * 2;
     vx = Math.round((W - colw) / 2);
@@ -631,8 +645,8 @@ function setFlipPoint(f, x, y) {
 }
 
 function flipFromFinger(f, sx, sy) {
-  const lx = f.toLocalX(sx);
-  setFlipPoint(f, f.start[0] + (lx - f.finger0[0]), f.start[1] + (sy - f.finger0[1]));
+  const lx = f.toLocalX(sx), g = sens().gain;
+  setFlipPoint(f, f.start[0] + (lx - f.finger0[0]) * g, f.start[1] + (sy - f.finger0[1]) * g);
 }
 
 // Clip a rectangle 0..W × 0..H to the half-plane (X - M)·n ≥ 0 (sign = 1)
@@ -838,7 +852,7 @@ function checkHold(d) {
   const now = performance.now();
   const last = f.samples[f.samples.length - 1];
   if (last && now - last.t > 120) f.slowSince ??= last.t; // finger resting
-  if (f.slowSince !== null && now - f.slowSince >= 1000 && flipProgress(f) > 0.08) {
+  if (f.slowSince !== null && now - f.slowSince >= 1000 && flipProgress(f) > sens().commit * 0.3) {
     clearInterval(f.holdTimer);
     d.flip = null; d.done = true;
     diag.note('hold flip');
@@ -872,7 +886,8 @@ const endDrag = (e) => {
       const u = flipProgress(f), vf = releaseSpeed(f, d.dir), held = performance.now() - d.t;
       // A flick commits, a flick back cancels; otherwise past halfway commits,
       // and a slow deliberate pull that got the page moving commits too.
-      const commit = vf > 0.3 ? true : vf < -0.3 ? false : u > 0.25 || (held >= 1000 && u > 0.08);
+      const S = sens();
+      const commit = vf > S.flick ? true : vf < -S.flick ? false : u > S.commit || (held >= 1000 && u > S.commit * 0.3);
       diag.note(`release u=${u.toFixed(2)} v=${vf.toFixed(2)} ${commit ? 'commit' : 'cancel'}`);
       return runFlip(f, commit, Math.abs(vf));
     }
@@ -959,12 +974,14 @@ function openSheet(which) {
   $('#scrim').hidden = false;
   if (which === 'toc') { renderToc(); renderMarks(); $('#tocSheet').hidden = false; $('#tocList .current')?.scrollIntoView({ block: 'center' }); }
   else if (which === 'note') $('#noteSheet').hidden = false;
+  else if (which === 'theme') { renderThemeList(); $('#themeSheet').hidden = false; }
   else { syncSettingsUI(); $('#setSheet').hidden = false; }
 }
 function closeSheets() {
   const open = !$('#scrim').hidden;
   $('#scrim').hidden = true;
-  for (const id of ['#tocSheet', '#setSheet', '#noteSheet']) $(id).hidden = true;
+  for (const id of ['#tocSheet', '#setSheet', '#noteSheet', '#themeSheet']) $(id).hidden = true;
+  if (themeDraft) { themeDraft = null; applySettings(); }
   return open;
 }
 
@@ -1036,17 +1053,34 @@ $('#markList').addEventListener('click', (e) => {
 });
 
 /* ───────────────────────── Settings ───────────────────────── */
+function themeById(id) { return THEMES[id] || customThemes.find((t) => t.id === id) || THEMES.paper; }
+
 function applySettings() {
-  reader.dataset.theme = settings.theme;
+  const t = themeDraft || themeById(settings.theme);
+  const builtIn = !themeDraft && THEMES[settings.theme];
+  reader.dataset.theme = builtIn ? settings.theme : 'custom';
+  reader.dataset.grain = t.grain ? '1' : '0';
+  const s = reader.style;
+  for (const k of ['paper', 'ink', 'accent']) { if (builtIn) s.removeProperty('--' + k); else s.setProperty('--' + k, t[k]); }
   reader.dataset.face = settings.face;
-  setThemeColor(THEME_BAR[settings.theme]);
+  setThemeColor(t.paper);
 }
 function setThemeColor(c) { $('meta[name="theme-color"]').setAttribute('content', c); }
+
+function swatchHtml(id, t, cls = '') {
+  return `<button data-val="${id}" class="sw ${cls}" style="background:radial-gradient(circle at 50% 70%, ${t.accent}, ${t.paper} 58%)" aria-label="${esc(t.name)}" title="${esc(t.name)}"></button>`;
+}
+function renderSwatches() {
+  $('#themeSwatches').innerHTML = Object.entries(THEMES).map(([id, t]) => swatchHtml(id, t)).join('') + customThemes.map((t) => swatchHtml(t.id, t, 'custom')).join('');
+}
 
 function syncSettingsUI() {
   $('#diag').textContent = diag.text();
   $('#fontOut').textContent = Math.round(settings.fontScale * 100) + '%';
+  renderSwatches();
   $$('#setSheet [data-group]').forEach((g) => $$('[data-val]', g).forEach((b) => b.classList.toggle('active', b.dataset.val === settings[g.dataset.group])));
+  $('#sensRange').value = settings.sensitivity;
+  $('#fsChk').checked = settings.immersive;
   $('#wakeChk').checked = settings.wake;
   $('#hapticChk').checked = settings.haptics;
 }
@@ -1070,9 +1104,85 @@ $('#setSheet').addEventListener('click', (e) => {
 });
 $('#wakeChk').addEventListener('change', (e) => { settings.wake = e.target.checked; saveSettings(false); updateWakeLock(); });
 $('#hapticChk').addEventListener('change', (e) => { settings.haptics = e.target.checked; saveSettings(false); haptic(); });
-$('#fsBtn').addEventListener('click', () => {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => toast('Full screen isn’t available here'));
+$('#sensRange').addEventListener('input', (e) => { settings.sensitivity = +e.target.value; saveSettings(false); });
+$('#editThemesBtn').addEventListener('click', () => openSheet('theme'));
+
+/* Full screen: the browser only allows it in response to a tap, so when the
+   setting is on we ask on the next tap anywhere (and again after the system
+   brings the bars back). */
+$('#fsChk').addEventListener('change', (e) => {
+  settings.immersive = e.target.checked; saveSettings(false);
+  if (settings.immersive) enterFullscreen(); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+});
+function enterFullscreen() {
+  if (!settings.immersive || document.fullscreenElement || !document.fullscreenEnabled) return;
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}
+document.addEventListener('pointerup', () => enterFullscreen(), { capture: true });
+document.addEventListener('keyup', () => enterFullscreen(), { capture: true });
+
+/* Theme editor ----------------------------------------------------------- */
+let themeDraft = null;
+const thEl = (id) => $('#' + id);
+function renderThemeList() {
+  const list = $('#themeList');
+  list.innerHTML = customThemes.map((t) => `<div class="theme-item">
+      ${swatchHtml(t.id, t)}<span class="theme-name">${esc(t.name)}</span>
+      <button class="pill" data-edit="${t.id}">Edit</button>
+    </div>`).join('') + `<div class="theme-item"><button class="btn small" id="thNew">New theme</button></div>`;
+  $('#themeForm').hidden = true;
+}
+function fillThemeForm(t) {
+  thEl('thName').value = t.name || '';
+  thEl('thPaper').value = t.paper; thEl('thInk').value = t.ink; thEl('thAccent').value = t.accent;
+  thEl('thGrain').checked = !!t.grain;
+  previewTheme();
+}
+function previewTheme() {
+  themeDraft = { name: thEl('thName').value.trim(), paper: thEl('thPaper').value, ink: thEl('thInk').value, accent: thEl('thAccent').value, grain: thEl('thGrain').checked };
+  for (const k of ['Paper', 'Ink', 'Accent']) thEl('th' + k + 'Hex').textContent = thEl('th' + k).value;
+  applySettings();
+}
+$('#themeList').addEventListener('click', (e) => {
+  const edit = e.target.closest('[data-edit]')?.dataset.edit;
+  const isNew = e.target.closest('#thNew');
+  if (!edit && !isNew) return;
+  const t = edit ? customThemes.find((x) => x.id === edit) : { ...themeById(settings.theme), name: '' };
+  thEl('thId').value = edit || '';
+  thEl('thDelete').hidden = !edit;
+  $('#themeList').hidden = true;
+  $('#themeForm').hidden = false;
+  fillThemeForm(t);
+  thEl('thName').focus();
+});
+$('#thPresets').addEventListener('click', (e) => {
+  const id = e.target.closest('[data-preset]')?.dataset.preset;
+  if (id) fillThemeForm({ ...THEMES[id], name: thEl('thName').value });
+});
+for (const id of ['thPaper', 'thInk', 'thAccent', 'thGrain']) thEl(id).addEventListener('input', previewTheme);
+$('#themeForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  previewTheme();
+  const id = thEl('thId').value || 't-' + Date.now().toString(36);
+  const t = { ...themeDraft, id, name: themeDraft.name || 'My theme' };
+  const i = customThemes.findIndex((x) => x.id === id);
+  if (i >= 0) customThemes[i] = t; else customThemes.push(t);
+  prefs.set('themes', customThemes);
+  themeDraft = null;
+  settings.theme = id;
+  saveSettings(false);
+  toast(`Theme “${t.name}” saved`);
+  $('#themeForm').hidden = true; $('#themeList').hidden = false; renderThemeList();
+});
+$('#thCancel').addEventListener('click', () => { themeDraft = null; applySettings(); $('#themeForm').hidden = true; $('#themeList').hidden = false; });
+$('#thDelete').addEventListener('click', () => {
+  const id = thEl('thId').value;
+  customThemes = customThemes.filter((x) => x.id !== id);
+  prefs.set('themes', customThemes);
+  if (settings.theme === id) settings.theme = 'paper';
+  themeDraft = null;
+  saveSettings(false);
+  $('#themeForm').hidden = true; $('#themeList').hidden = false; renderThemeList();
 });
 
 let wakeLock = null;

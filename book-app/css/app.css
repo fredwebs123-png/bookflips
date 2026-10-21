@@ -178,6 +178,24 @@ button { font: inherit; color: inherit; }
     radial-gradient(ellipse at 50% -20%, #f2c14e14, transparent 50%), linear-gradient(var(--paper), var(--paper));
 }
 
+/* Custom themes: three colours in, the rest derived */
+#reader[data-theme="custom"] {
+  --muted: color-mix(in srgb, var(--ink) 55%, var(--paper));
+  --rule: color-mix(in srgb, var(--ink) 14%, transparent);
+  --note: color-mix(in srgb, var(--accent) 9%, transparent);
+  --shade: color-mix(in srgb, var(--ink) 14%, transparent);
+  --stage: color-mix(in srgb, var(--paper) 90%, var(--ink));
+  --bar: color-mix(in srgb, var(--paper) 90%, transparent);
+  --bar-ink: var(--ink);
+  --edge: color-mix(in srgb, var(--ink) 20%, transparent);
+  --paper-bg: var(--grain), linear-gradient(var(--paper), var(--paper));
+}
+#reader[data-grain="0"] { --paper-bg: linear-gradient(var(--paper), var(--paper)); }
+#reader[data-theme="heart"][data-grain="0"] {
+  --paper-bg: radial-gradient(ellipse at 50% 120%, #3b5bdb33, transparent 60%),
+    radial-gradient(ellipse at 50% -20%, #f2c14e14, transparent 50%), linear-gradient(var(--paper), var(--paper));
+}
+
 /* ───────────────────────── Book geometry ─────────────────────────
    JS sets: --vx --vy --vw --vh --vbottom (text box), --colw --gap (columns),
             --spine-x, --fs, --lh, --edge-l/--edge-r (page stack)        */
@@ -407,11 +425,23 @@ button { font: inherit; color: inherit; }
 .seg button { border: 0; background: transparent; padding: 8px 12px; border-radius: 9px; cursor: pointer; font-size: 13px; min-width: 44px; min-height: 36px; }
 .seg button.active { background: var(--paper); color: var(--accent); font-weight: 600; box-shadow: 0 1px 3px #0003; }
 .seg output { min-width: 52px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
-.swatches { display: flex; gap: 10px; }
-.sw { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--rule); cursor: pointer; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.sw { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--rule); cursor: pointer; flex: none; }
 .sw.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--note); }
-.sw-paper { background: #f7f2e7; } .sw-sepia { background: #f1e3c6; } .sw-night { background: #14161c; }
-.sw-heart { background: radial-gradient(circle at 50% 70%, #3b5bdb, #0d1638 70%); }
+.row-help { flex-basis: 100%; margin: 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
+.slider-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
+.slider-wrap input { flex: 1; accent-color: var(--accent); height: 28px; }
+.slider-end { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.theme-list { display: flex; flex-direction: column; }
+.theme-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.theme-item:last-child { border-bottom: 0; padding-top: 14px; }
+.theme-name { flex: 1; font-size: 14px; }
+.theme-form input[type="text"] { font: inherit; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--note); color: var(--ink); min-width: 180px; }
+.color-pick { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.color-pick input { width: 44px; height: 36px; border: 1px solid var(--rule); border-radius: 10px; padding: 2px; background: transparent; cursor: pointer; }
+.theme-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-top: 14px; }
+.btn.small { padding: 9px 16px; font-size: 13px; }
+.pill.danger { color: #c0392b; border-color: #c0392b55; margin-left: auto; }
 .toggles label { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .toggles input { width: 20px; height: 20px; accent-color: var(--accent); }
 .pill { border: 1px solid var(--rule); background: transparent; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: 13px; color: var(--ink); }

@@ -99,25 +99,53 @@
         <div class="seg" data-group="layout"><button data-val="auto">Auto</button><button data-val="single">One page</button><button data-val="spread">Spread</button></div>
       </div>
       <div class="row">
+        <span class="row-label">Margins</span>
+        <div class="seg" data-group="margins"><button data-val="narrow">Narrow</button><button data-val="normal">Normal</button><button data-val="wide">Wide</button></div>
+      </div>
+      <div class="row">
         <span class="row-label">Theme</span>
-        <div class="swatches" data-group="theme">
-          <button data-val="paper" class="sw sw-paper" aria-label="Paper"></button>
-          <button data-val="sepia" class="sw sw-sepia" aria-label="Sepia"></button>
-          <button data-val="night" class="sw sw-night" aria-label="Night"></button>
-          <button data-val="heart" class="sw sw-heart" aria-label="Dive to the Heart"></button>
-        </div>
+        <div class="swatches" data-group="theme" id="themeSwatches"></div>
+        <button class="pill" id="editThemesBtn">Edit themes</button>
       </div>
       <div class="row">
         <span class="row-label">Page turn</span>
         <div class="seg" data-group="turn"><button data-val="flip">Flip</button><button data-val="slide">Slide</button><button data-val="fade">Fade</button><button data-val="none">Instant</button></div>
       </div>
+      <div class="row">
+        <span class="row-label">Turn sensitivity</span>
+        <div class="slider-wrap"><span class="slider-end">Gentle</span><input type="range" id="sensRange" min="1" max="9" step="1" aria-label="Turn sensitivity"><span class="slider-end">Eager</span></div>
+        <p class="row-help">How far and how fast you have to pull before a page commits to turning.</p>
+      </div>
       <div class="row toggles">
+        <label><input type="checkbox" id="fsChk"> Full screen (hide the status bar)</label>
         <label><input type="checkbox" id="wakeChk"> Keep screen on</label>
         <label><input type="checkbox" id="hapticChk"> Haptics</label>
-        <button class="pill" id="fsBtn">Full screen</button>
       </div>
       <p class="diag" id="diag"></p>
     </aside>
+    <!-- Theme editor -->
+    <aside class="sheet settings theme-sheet" id="themeSheet" hidden>
+      <div class="sheet-head"><h2>Themes</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+      <div id="themeList" class="theme-list"></div>
+      <form id="themeForm" class="theme-form" hidden>
+        <input type="hidden" id="thId">
+        <div class="row"><span class="row-label">Name</span><input type="text" id="thName" maxlength="24" placeholder="My theme" required></div>
+        <div class="row"><span class="row-label">Start from</span>
+          <div class="seg" id="thPresets"><button type="button" data-preset="paper">Paper</button><button type="button" data-preset="sepia">Sepia</button><button type="button" data-preset="night">Night</button><button type="button" data-preset="heart">Heart</button></div>
+        </div>
+        <div class="row"><span class="row-label">Paper</span><label class="color-pick"><input type="color" id="thPaper"><span id="thPaperHex"></span></label></div>
+        <div class="row"><span class="row-label">Text</span><label class="color-pick"><input type="color" id="thInk"><span id="thInkHex"></span></label></div>
+        <div class="row"><span class="row-label">Accent</span><label class="color-pick"><input type="color" id="thAccent"><span id="thAccentHex"></span></label></div>
+        <div class="row toggles"><label><input type="checkbox" id="thGrain" checked> Paper texture</label></div>
+        <p class="row-help">The page behind this panel previews your theme as you change it.</p>
+        <div class="theme-actions">
+          <button type="submit" class="btn small">Save theme</button>
+          <button type="button" class="pill" id="thCancel">Cancel</button>
+          <button type="button" class="pill danger" id="thDelete" hidden>Delete</button>
+        </div>
+      </form>
+    </aside>
+
     <!-- Footnote pop-up -->
     <aside class="sheet note-sheet" id="noteSheet" hidden>
       <div class="sheet-head"><h2>Note</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
