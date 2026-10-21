@@ -21,10 +21,14 @@
     <div class="sky" aria-hidden="true"></div>
     <header class="lib-head">
       <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Spread Books</div>
-      <button class="icon-btn" id="installBtn" hidden aria-label="Install app">Install</button>
+      <div class="lib-actions">
+        <button class="pill-btn" id="installBtn" hidden>Install</button>
+        <button class="pill-btn primary" id="importBtn"><span aria-hidden="true">+</span> Import EPUB</button>
+      </div>
+      <input type="file" id="importInput" accept=".epub,application/epub+zip" multiple hidden>
     </header>
     <section class="shelf" id="shelf"></section>
-    <p class="lib-foot">Open your Fold for two-page spreads · fold it shut to keep reading on the cover screen.</p>
+    <p class="lib-foot">Open your Fold for two-page spreads. Fold it shut to keep reading on the cover screen.</p>
   </main>
 
   <!-- Reader -->
@@ -34,9 +38,11 @@
         <div class="paper"></div>
         <div class="spine" aria-hidden="true"></div>
         <div class="viewport" id="viewport"><div class="flow" id="flow"></div></div>
-        <div class="page-chrome" id="chromeL"><div class="run-head"></div><div class="folio"></div></div>
-        <div class="page-chrome" id="chromeR"><div class="run-head"></div><div class="folio"></div></div>
+        <div class="page-chrome" id="chromeL"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
+        <div class="page-chrome" id="chromeR"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
+        <div class="flip-layer" id="flipLayer" hidden></div>
       </div>
+      <div class="loading" id="loading" hidden><span class="spinner" aria-hidden="true"></span>Opening book…</div>
     </div>
 
     <header class="bar top" id="topBar">
@@ -99,16 +105,23 @@
       </div>
       <div class="row">
         <span class="row-label">Page turn</span>
-        <div class="seg" data-group="turn"><button data-val="slide">Slide</button><button data-val="fade">Fade</button><button data-val="none">Instant</button></div>
+        <div class="seg" data-group="turn"><button data-val="flip">Flip</button><button data-val="slide">Slide</button><button data-val="fade">Fade</button><button data-val="none">Instant</button></div>
       </div>
       <div class="row toggles">
         <label><input type="checkbox" id="wakeChk"> Keep screen on</label>
+        <label><input type="checkbox" id="hapticChk"> Haptics</label>
         <button class="pill" id="fsBtn">Full screen</button>
       </div>
     </aside>
+    <!-- Footnote pop-up -->
+    <aside class="sheet note-sheet" id="noteSheet" hidden>
+      <div class="sheet-head"><h2>Note</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+      <div class="note-body" id="noteBody"></div>
+      <button class="pill" id="noteGo">Go to note</button>
+    </aside>
     <div class="scrim" id="scrim" hidden></div>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="js/app.js"></script>
 </body>

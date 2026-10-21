@@ -1,16 +1,17 @@
 # Spread Books
 
-A book-reader web app built for the **Galaxy Z Fold 7**: open the phone and you get a real two-page spread with a spine down the fold; close it and the same book reflows to one page on the cover screen, keeping you on the same sentence.
+An EPUB reader built for the **Galaxy Z Fold 7**: open the phone and you get a real two-page spread with a spine down the fold; close it and the book reflows to one page on the cover screen, keeping you on the same sentence.
 
-First book: **Kingdom Hearts: A Journey of Light & Darkness**, an unofficial fan companion covering the whole saga (17 chapters, from the 2002 original to Kingdom Hearts IV, plus characters, worlds, music, a timeline and a glossary).
+The app contains no book content. Books are standard EPUB files: the featured book ships in `library/` and is listed in `catalog.json`, and you can import your own.
 
 ## Features
 
-- **Auto spread / single page.** Spread when the screen is wide and close to square (the Fold's inner display), single page otherwise. Can be forced in settings.
-- **Fold-aware.** Re-paginates on fold/unfold/rotate and resumes at the exact character you were reading. Uses the Viewport Segments API to line the spine up with a hinge on devices that report one.
-- **Book typography.** Justified Literata text, drop caps, chapter openers, running heads, page numbers, pull quotes and sidebars.
-- **Reading controls.** Swipe or tap the edges to turn pages; tap the middle for contents, bookmarks, a page scrubber and settings (text size, typeface, line spacing, four themes including a "Dive to the Heart" night theme, page-turn style, keep-screen-on, full screen).
-- **Installable + offline.** A PWA with a service worker; add it to your home screen from Chrome.
+- **Two-page spreads** on the open Fold, single page on the cover screen, re-paginated on fold/unfold/rotate without losing your place. Uses the Viewport Segments API to align the spine with a hinge where one is reported.
+- **Page flip** that follows your finger (or Slide, Fade, Instant), with page-edge thickness, paper texture and a light haptic tick.
+- **Import any DRM-free EPUB** with the Import button or drag and drop. Once installed on Android, you can also **Share → Spread** from the Files app.
+- **Kindle-style reading:** "min left in chapter" that learns your reading speed, % read, contents, bookmarks, footnote pop-ups, a page scrubber.
+- **Reading settings:** text size, Literata or Inter, line spacing, layout, four themes, keep screen on, full screen.
+- **Offline-ready PWA.** Books are stored in IndexedDB on the device.
 
 ## Run it
 
@@ -20,12 +21,12 @@ No build step. Serve the folder and open it:
 npx http-server book-app -p 8080
 ```
 
-To put it on your phone, enable GitHub Pages for this repo (**Settings → Pages → Source: GitHub Actions**). The workflow in `.github/workflows/pages.yml` deploys `book-app/` on every push to `main`. Then open the Pages URL in Chrome on the Fold and choose **Add to home screen**.
+To use it on your phone, enable GitHub Pages for this repo (**Settings → Pages → Source: GitHub Actions**). The workflow in `.github/workflows/pages.yml` deploys `book-app/` on every push to `main`. Open the Pages URL in Chrome on the Fold and choose **Add to home screen**.
 
-## Add a book
+## Bundled books
 
-Create `book-app/books/<id>.js` exporting `{ id, title, subtitle, author, edition, blurb, theme, chapters: [{ kicker, title, sub, html }] }` (see `kingdom-hearts.js`), list it in `book-app/books/index.js`, and add the file to `SHELL` in `book-app/sw.js` (bump `VERSION`).
+The source for each bundled book lives unzipped in `book-sources/<name>/` (plain XHTML chapters, an OPF package and a cover). After editing, run `book-sources/pack.sh` to rebuild `book-app/library/<name>.epub`, then bump that book's `version` in `catalog.json` so installed copies refresh. Classes starting with `sb-` (for example `sb-ch-open`, `sb-pull`, `sb-note`) get Spread's special styling; everything else uses the reader's own typography.
 
 ---
 
-Kingdom Hearts and related characters, worlds and music are the property of Disney and Square Enix. This is a non-commercial fan project and is not affiliated with or endorsed by either company.
+Kingdom Hearts and related characters, worlds and music are the property of Disney and Square Enix. The bundled companion is a non-commercial fan project and is not affiliated with or endorsed by either company.
