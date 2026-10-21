@@ -97,6 +97,7 @@ async function renderLibrary() {
       <p class="empty-links">Free, DRM-free classics: <a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a> · <a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a></p>
     </section>`;
     $('#shelf').innerHTML = html;
+    renderStatsStrip();
     return;
   }
   if (hero) {
@@ -140,6 +141,7 @@ async function renderLibrary() {
     </div>
   </section>`;
   $('#shelf').innerHTML = html;
+  renderStatsStrip();
 }
 
 $('#shelf').addEventListener('click', async (e) => {
@@ -238,7 +240,7 @@ const R = {
   pages: 1, page: 0, firstNum: 0,
   spread: false, pitch: 1, geo: null, view: null,
   words: 0, wordsPerPage: 250,
-  anchor: { b: 0, o: 0 }, marks: [],
+  anchor: { b: 0, o: 0 }, marks: [], hls: [], secBlocks: [],
 };
 let openToken = 0;
 
@@ -265,6 +267,7 @@ async function openBook(id, showToc) {
       const prog = progressOf(id);
       R.anchor = prog?.v === 2 ? prog.anchor : { b: 0, o: 0 };
       R.marks = prefs.get(`marks:${id}`, []);
+      R.hls = prefs.get(`hl:${id}`, []);
       R.page = 0;
       applySettings();
       $('#barTitle').textContent = splitTitle(R.book.title)[0];
@@ -284,7 +287,9 @@ async function openBook(id, showToc) {
 
 function closeBook() {
   openToken++;
+  statsTick(false);
   closeSheets();
+  hidePop();
   endFlip(flip, true);
   saveProgress();
   reader.hidden = true;
@@ -296,6 +301,7 @@ function closeBook() {
 }
 
 const BLOCK_SEL = 'section,p,h1,h2,h3,h4,h5,h6,li,dt,dd,pre,blockquote,figure,img,table,hr,header,aside,div';
+const blocksIn = (root) => $$(BLOCK_SEL, root).filter((el) => el.localName !== 'div' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
 
 async function renderFlow(book) {
   flow.lang = view.lang = book.language || 'en';
@@ -307,7 +313,12 @@ async function renderFlow(book) {
   (last || flow).insertAdjacentHTML('beforeend', '<span class="end-mark"></span>');
 
   R.sections = $$('.flow > section');
-  R.blocks = $$(BLOCK_SEL, flow).filter((el) => el.localName !== 'div' || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+  R.blocks = blocksIn(flow);
+  // Which blocks belong to which section, in document order (the section
+  // element itself first), so a clone's blocks can be matched to the flow's.
+  R.secBlocks = R.sections.map(() => []);
+  R.blocks.forEach((el, i) => { const si = R.sections.indexOf(el.closest('.flow > section')); if (si >= 0) R.secBlocks[si].push(i); });
+  for (const hl of R.hls) wrapHighlight(hl);
   let toc = book.toc.map((t) => ({ ...t, el: document.getElementById(t.target) })).filter((t) => t.el);
   if (!toc.length) {
     toc = R.sections.map((s, i) => ({ title: s.querySelector('h1,h2,h3')?.textContent.trim() || `Section ${i + 1}`, depth: 0, el: s }))
@@ -479,6 +490,9 @@ function buildView(p) {
     const sec = R.sections[i].cloneNode(true);
     sec.removeAttribute('id');
     sec.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+    // Tag each cloned block with its index in the flow, for highlighting.
+    const src = R.secBlocks[i];
+    [sec, ...blocksIn(sec)].forEach((el, k) => { if (src[k] !== undefined) el.dataset.b = src[k]; });
     frag.appendChild(sec);
   }
   view.replaceChildren(frag);
@@ -522,6 +536,7 @@ function goTo(p, { animate = true, keepAnchor = false } = {}) {
     paint(p, prev);
   }
   if (!keepAnchor) R.anchor = anchorAt(p);
+  if (p !== prev) statsTurn(Math.abs(p - prev));
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveProgress, 300);
 }
@@ -540,7 +555,9 @@ function learnSpeed(prev, p) {
 function saveProgress() {
   if (!R.book) return;
   const lastPage = norm(R.pages - 1);
-  prefs.set(`progress:${R.book.id}`, { v: 2, anchor: R.anchor, pct: lastPage ? R.page / lastPage : 0, at: Date.now() });
+  const pct = lastPage ? R.page / lastPage : 0;
+  prefs.set(`progress:${R.book.id}`, { v: 2, anchor: R.anchor, pct, at: Date.now() });
+  if (pct >= 0.98) statsFinished(R.book.id, splitTitle(R.book.title)[0]);
 }
 
 function turn(dir) {
@@ -829,11 +846,17 @@ let drag = null, lastHandled = 0;
 stage.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
   diag.last = `${e.pointerType} down`;
-  drag = { x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, moved: false, id: e.pointerId, flip: null };
+  drag = { x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, moved: false, id: e.pointerId, flip: null, sel: null };
+  if (!$('#hlPop').hidden || $('#scrim').hidden === false) return;
+  // Press and hold on a word to start selecting text.
+  drag.press = setTimeout(() => { if (drag && !drag.moved) beginSelect(drag, e.clientX, e.clientY, e.pointerId); }, 450);
 });
+stage.addEventListener('contextmenu', (e) => e.preventDefault());
 stage.addEventListener('pointermove', (e) => {
   if (!drag || e.pointerId !== drag.id) return;
+  if (drag.sel) { updateSelect(drag.sel, e.clientX, e.clientY); return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) > 8) clearTimeout(drag.press);
   if (!drag.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
     drag.moved = true;
     stage.setPointerCapture(e.pointerId);
@@ -868,6 +891,9 @@ stage.addEventListener('pointermove', (e) => {
 
 function tapAt(x, e) {
   lastHandled = performance.now();
+  if (!$('#hlPop').hidden) { hidePop(); return; }
+  const mark = e?.target?.closest?.('mark.hl') || document.elementFromPoint(x, e?.clientY ?? 0)?.closest?.('mark.hl');
+  if (mark && view.contains(mark)) { openHighlight(mark.dataset.hl, mark); return; }
   const link = e?.target?.closest?.('a');
   if (link && view.contains(link)) {
     if (link.dataset.target) followLink(link);
@@ -915,7 +941,9 @@ function releaseSpeed(f, dir) {
 const endDrag = (e) => {
   if (!drag || e.pointerId !== drag.id) return;
   const d = drag; drag = null;
+  clearTimeout(d.press);
   diag.last = `${e.pointerType} ${e.type}${d.moved ? ' swipe' : ' tap'}`;
+  if (d.sel) { lastHandled = performance.now(); finishSelect(d.sel); return; }
   if (d.done) return;
   if (d.moved) {
     lastHandled = performance.now();
@@ -1017,13 +1045,14 @@ function openSheet(which) {
   $('#scrim').hidden = false;
   if (which === 'toc') { renderToc(); renderMarks(); $('#tocSheet').hidden = false; $('#tocList .current')?.scrollIntoView({ block: 'center' }); }
   else if (which === 'note') $('#noteSheet').hidden = false;
+  else if (which === 'hlnote') $('#hlNoteSheet').hidden = false;
   else if (which === 'theme') { renderThemeList(); $('#themeSheet').hidden = false; }
   else { syncSettingsUI(); $('#setSheet').hidden = false; }
 }
 function closeSheets() {
   const open = !$('#scrim').hidden;
   $('#scrim').hidden = true;
-  for (const id of ['#tocSheet', '#setSheet', '#noteSheet', '#themeSheet']) $(id).hidden = true;
+  for (const id of ['#tocSheet', '#setSheet', '#noteSheet', '#themeSheet', '#hlNoteSheet']) $(id).hidden = true;
   if (themeDraft) { themeDraft = null; applySettings(); }
   return open;
 }
@@ -1045,6 +1074,8 @@ $$('.tab').forEach((t) => t.addEventListener('click', () => {
   $$('.tab').forEach((x) => x.classList.toggle('active', x === t));
   $('#tocList').hidden = t.dataset.tab !== 'chapters';
   $('#markList').hidden = t.dataset.tab !== 'marks';
+  $('#hlPane').hidden = t.dataset.tab !== 'hls';
+  if (t.dataset.tab === 'hls') renderHlList();
 }));
 
 /* ───────────────────────── Bookmarks ───────────────────────── */
@@ -1093,6 +1124,309 @@ $('#markList').addEventListener('click', (e) => {
   closeSheets(); reader.classList.remove('chrome-on');
   R.anchor = { ...m.anchor };
   goTo(pageOfAnchor(m.anchor), { animate: false, keepAnchor: true });
+});
+
+/* ───────────────────────── Highlights & notes ─────────────────────────
+   A highlight is { b: block index, s, e: character offsets in that block }
+   plus a colour and an optional note. Marks are wrapped into the hidden
+   flow, so the on-screen clones and the curl faces pick them up. */
+const HL_COLORS = { yellow: '#ffd84d', green: '#8fe39b', blue: '#8ec8ff', pink: '#ffa8c8' };
+let pendingSel = null, activeHl = null;
+
+function textPieces(block, s, e) {
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  const pieces = [];
+  let off = 0, n;
+  while ((n = walker.nextNode())) {
+    const a = Math.max(s, off), z = Math.min(e, off + n.length);
+    if (a < z) pieces.push({ node: n, from: a - off, to: z - off });
+    off += n.length;
+    if (off >= e) break;
+  }
+  return pieces;
+}
+function wrapHighlight(hl) {
+  const block = R.blocks[hl.b];
+  if (!block) return;
+  for (const { node, from, to } of textPieces(block, hl.s, hl.e)) {
+    let n = node;
+    if (to < n.length) n.splitText(to);
+    if (from > 0) n = n.splitText(from);
+    const mark = document.createElement('mark');
+    mark.className = 'hl' + (hl.note ? ' has-note' : '');
+    mark.dataset.hl = hl.id;
+    mark.style.setProperty('--hl', HL_COLORS[hl.color] || HL_COLORS.yellow);
+    n.parentNode.insertBefore(mark, n);
+    mark.appendChild(n);
+  }
+}
+function unwrapHighlight(hl) {
+  for (const m of $$(`mark[data-hl="${hl.id}"]`, flow)) m.replaceWith(...m.childNodes);
+  R.blocks[hl.b]?.normalize();
+}
+function saveHls() { prefs.set(`hl:${R.book.id}`, R.hls); }
+function refreshView() { R.view = null; paint(R.page); }
+
+// Caret under a point, as (clone block, offset within that block).
+function caretAt(x, y) {
+  let node, offset;
+  if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); if (!c) return null; node = c.offsetNode; offset = c.offset; }
+  else if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (!r) return null; node = r.startContainer; offset = r.startOffset; }
+  else return null;
+  if (node.nodeType !== 3 || !view.contains(node)) return null;
+  const cb = node.parentElement.closest('[data-b]');
+  if (!cb) return null;
+  const walker = document.createTreeWalker(cb, NodeFilter.SHOW_TEXT);
+  let off = 0, n;
+  while ((n = walker.nextNode())) { if (n === node) return { cb, b: +cb.dataset.b, off: off + offset }; off += n.length; }
+  return null;
+}
+function wordBounds(text, i) {
+  let s = i, e = i;
+  while (s > 0 && /\S/.test(text[s - 1])) s--;
+  while (e < text.length && /\S/.test(text[e])) e++;
+  return [s, e];
+}
+function rangeInBlock(block, s, e) {
+  const pieces = textPieces(block, s, e);
+  if (!pieces.length) return null;
+  const r = document.createRange();
+  r.setStart(pieces[0].node, pieces[0].from);
+  r.setEnd(pieces[pieces.length - 1].node, pieces[pieces.length - 1].to);
+  return r;
+}
+function drawSelection(sel) {
+  const layer = $('#selLayer');
+  const r = sel && rangeInBlock(sel.cb, sel.s, sel.e);
+  if (!r) { layer.replaceChildren(); return []; }
+  const base = stage.getBoundingClientRect();
+  const rects = [...r.getClientRects()];
+  layer.innerHTML = rects.map((q) => `<i class="sel-rect" style="left:${q.left - base.left}px;top:${q.top - base.top}px;width:${q.width}px;height:${q.height}px"></i>`).join('');
+  return rects;
+}
+function beginSelect(d, x, y, pointerId) {
+  const c = caretAt(x, y);
+  if (!c) return;
+  const text = c.cb.textContent;
+  const [s, e] = wordBounds(text, Math.min(c.off, text.length - 1));
+  if (e <= s) return;
+  d.sel = { cb: c.cb, b: c.b, text, a0: s, a1: e, s, e };
+  try { stage.setPointerCapture(pointerId); } catch { /* fine */ }
+  drawSelection(d.sel);
+  haptic();
+  diag.last = 'long-press select';
+}
+function updateSelect(sel, x, y) {
+  const c = caretAt(x, y);
+  if (!c || c.cb !== sel.cb) return;
+  const [ws, we] = wordBounds(sel.text, Math.min(c.off, sel.text.length - 1));
+  sel.s = Math.min(sel.a0, ws); sel.e = Math.max(sel.a1, we);
+  drawSelection(sel);
+}
+function finishSelect(sel) {
+  const rects = drawSelection(sel);
+  if (!rects.length) return;
+  pendingSel = { b: sel.b, s: sel.s, e: sel.e, text: sel.text.slice(sel.s, sel.e).trim() };
+  activeHl = null;
+  showPop(rects, false);
+}
+function showPop(rects, existing) {
+  const pop = $('#hlPop');
+  pop.hidden = false;
+  $('[data-act="delete"]', pop).hidden = !existing;
+  const base = stage.getBoundingClientRect();
+  const first = rects[0], last = rects[rects.length - 1];
+  const cx = (first.left + last.right) / 2 - base.left;
+  const above = first.top - base.top > 70;
+  pop.style.left = clamp(cx - pop.offsetWidth / 2, 8, base.width - pop.offsetWidth - 8) + 'px';
+  pop.style.top = (above ? first.top - base.top - pop.offsetHeight - 10 : last.bottom - base.top + 10) + 'px';
+}
+function hidePop() {
+  $('#hlPop').hidden = true;
+  $('#selLayer').replaceChildren();
+  pendingSel = null; activeHl = null;
+}
+function openHighlight(id, mark) {
+  const hl = R.hls.find((h) => h.id === id);
+  if (!hl) return;
+  activeHl = hl; pendingSel = null;
+  const rects = [...$$(`mark[data-hl="${id}"]`, view).flatMap((m) => [...m.getClientRects()])];
+  showPop(rects.length ? rects : [...mark.getClientRects()], true);
+}
+function createHighlight(color) {
+  const c = chapterAt(R.page + (R.spread ? 1 : 0));
+  const hl = { id: 'h-' + Date.now().toString(36), ...pendingSel, color, note: '', chapter: c >= 0 ? R.toc[c].title : '', at: Date.now() };
+  R.hls.push(hl); saveHls(); wrapHighlight(hl); refreshView();
+  return hl;
+}
+function recolorHighlight(hl, color) { hl.color = color; saveHls(); unwrapHighlight(hl); wrapHighlight(hl); refreshView(); }
+function deleteHighlight(hl) { R.hls = R.hls.filter((h) => h !== hl); saveHls(); unwrapHighlight(hl); refreshView(); }
+
+$('#hlPop').addEventListener('click', (e) => {
+  const color = e.target.closest('[data-color]')?.dataset.color;
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (color) {
+    if (activeHl) recolorHighlight(activeHl, color); else if (pendingSel) createHighlight(color);
+    haptic(); hidePop(); toast('Highlighted');
+  } else if (act === 'copy') {
+    const text = activeHl ? activeHl.text : pendingSel?.text;
+    navigator.clipboard?.writeText(text || '').then(() => toast('Copied'), () => toast('Couldn’t copy'));
+    hidePop();
+  } else if (act === 'delete') {
+    if (activeHl) deleteHighlight(activeHl);
+    hidePop(); toast('Highlight removed');
+  } else if (act === 'note') {
+    $('#hlQuote').textContent = activeHl ? activeHl.text : pendingSel?.text || '';
+    $('#hlNoteText').value = activeHl?.note || '';
+    $('#hlPop').hidden = true;
+    openSheet('hlnote');
+    $('#hlNoteText').focus();
+  }
+});
+$('#hlNoteSave').addEventListener('click', () => {
+  const note = $('#hlNoteText').value.trim();
+  let hl = activeHl;
+  if (!hl && pendingSel) hl = createHighlight('yellow');
+  if (hl) { hl.note = note; saveHls(); unwrapHighlight(hl); wrapHighlight(hl); refreshView(); }
+  closeSheets(); hidePop(); toast(note ? 'Note saved' : 'Note removed');
+});
+
+function renderHlList() {
+  const list = [...R.hls].sort((a, b) => a.b - b.b || a.s - b.s);
+  $('#hlCount').textContent = list.length ? `${list.length} highlight${list.length > 1 ? 's' : ''}` : '';
+  $('#hlList').innerHTML = list.length
+    ? list.map((h) => `<li><button data-hl-id="${h.id}" style="--hl:${HL_COLORS[h.color] || HL_COLORS.yellow}">
+        ${h.chapter ? `<span class="t-kick">${esc(h.chapter)}</span>` : ''}
+        <span class="t-title hl-snip">${esc(h.text)}</span>
+        <span class="t-page"><span class="del" data-del-hl="${h.id}" role="button" aria-label="Delete highlight">✕</span></span>
+        ${h.note ? `<span class="hl-note">${esc(h.note)}</span>` : ''}
+      </button></li>`).join('')
+    : '<li class="empty">No highlights yet. Press and hold a word, then drag to select; let go to choose a colour or add a note.</li>';
+}
+$('#hlList').addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del-hl]')?.dataset.delHl;
+  if (del) { const hl = R.hls.find((h) => h.id === del); if (hl) deleteHighlight(hl); renderHlList(); return; }
+  const id = e.target.closest('[data-hl-id]')?.dataset.hlId;
+  const hl = id && R.hls.find((h) => h.id === id);
+  if (!hl) return;
+  closeSheets(); reader.classList.remove('chrome-on');
+  jumpTo(R.blocks[hl.b]);
+});
+$('#hlCopyAll').addEventListener('click', () => {
+  const text = [...R.hls].sort((a, b) => a.b - b.b || a.s - b.s)
+    .map((h) => `“${h.text}”${h.chapter ? ` — ${h.chapter}` : ''}${h.note ? `\n  Note: ${h.note}` : ''}`).join('\n\n');
+  navigator.clipboard?.writeText(`${R.book.title}\n\n${text}`).then(() => toast('All highlights copied'), () => toast('Couldn’t copy'));
+});
+
+/* ───────────────────────── Reading stats ─────────────────────────
+   Time is counted while a book is open, the app is visible and a page has
+   been turned in the last five minutes. */
+let stats = prefs.get('stats', { days: {}, books: {}, goal: 20 });
+let tickAt = null;
+const pad2 = (n) => String(n).padStart(2, '0');
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const dayRec = (k) => (stats.days[k] ??= { ms: 0, pages: 0 });
+const bookRec = (id) => (stats.books[id] ??= { ms: 0, pages: 0 });
+const readingActive = () => !!R.book && !reader.hidden && document.visibilityState === 'visible' && Date.now() - lastTurnAt < 5 * 60 * 1000;
+function statsTick(active = readingActive()) {
+  const now = Date.now();
+  if (tickAt && active && R.book) {
+    const dt = Math.min(now - tickAt, 60000);
+    dayRec(dayKey()).ms += dt; bookRec(R.book.id).ms += dt;
+    prefs.set('stats', stats);
+  }
+  tickAt = active ? now : null;
+}
+function statsTurn(pages) {
+  if (!R.book) return;
+  statsTick(true);
+  dayRec(dayKey()).pages += pages; bookRec(R.book.id).pages += pages;
+}
+function statsFinished(id, title) {
+  const b = bookRec(id);
+  if (b.finishedAt) return;
+  b.finishedAt = Date.now(); prefs.set('stats', stats);
+  toast(`You finished “${title}”`, 3000);
+}
+setInterval(() => statsTick(), 15000);
+document.addEventListener('visibilitychange', () => statsTick(document.visibilityState === 'visible' && readingActive()));
+
+const fmtTime = (ms) => { const m = Math.round(ms / 60000); if (ms > 0 && m === 0) return 'under a minute'; return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${pad2(m % 60)}`; };
+function streak() {
+  let n = 0; const d = new Date();
+  if (!((stats.days[dayKey(d)]?.ms || 0) >= 60000)) d.setDate(d.getDate() - 1);
+  while ((stats.days[dayKey(d)]?.ms || 0) >= 60000) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function lastDays(n) {
+  const out = []; const d = new Date(); d.setDate(d.getDate() - n + 1);
+  for (let i = 0; i < n; i++, d.setDate(d.getDate() + 1)) out.push({ key: dayKey(d), label: 'SMTWTFS'[d.getDay()], ms: stats.days[dayKey(d)]?.ms || 0 });
+  return out;
+}
+function ringSvg(frac, size, label) {
+  const r = (size - 8) / 2, c = 2 * Math.PI * r;
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width="8"/>
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - clamp(frac, 0, 1))}" transform="rotate(-90 ${size / 2} ${size / 2})"/>
+    ${label ? `<text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="currentColor" font-size="${size * 0.2}" font-weight="600">${label}</text>` : ''}
+  </svg>`;
+}
+function renderStatsStrip() {
+  const strip = $('#statsStrip');
+  const todayMs = stats.days[dayKey()]?.ms || 0, goalMs = stats.goal * 60000;
+  const any = Object.keys(stats.days).length > 0;
+  strip.hidden = !any;
+  if (!any) return;
+  const sk = streak();
+  strip.innerHTML = `<button class="stats-card" id="statsOpen">
+    ${ringSvg(todayMs / goalMs, 56, Math.round(todayMs / 60000))}
+    <div class="stats-text"><b>${fmtTime(todayMs)} today</b><span>Goal ${stats.goal} min · ${sk ? `${sk}-day streak` : 'Start a streak today'}</span></div>
+    <span class="stats-more">Stats ›</span>
+  </button>`;
+}
+$('#statsStrip').addEventListener('click', (e) => { if (e.target.closest('#statsOpen')) openStats(); });
+async function openStats() {
+  const books = await shelf.all().catch(() => []);
+  const titles = Object.fromEntries(books.map((b) => [b.id, splitTitle(b.title)[0]]));
+  const todayMs = stats.days[dayKey()]?.ms || 0, goalMs = stats.goal * 60000;
+  const week = lastDays(7), max = Math.max(goalMs, ...week.map((d) => d.ms));
+  const totalMs = Object.values(stats.days).reduce((a, d) => a + d.ms, 0);
+  const totalPages = Object.values(stats.days).reduce((a, d) => a + d.pages, 0);
+  const finished = Object.values(stats.books).filter((b) => b.finishedAt).length;
+  const perBook = Object.entries(stats.books).filter(([id]) => titles[id]).sort((a, b) => b[1].ms - a[1].ms);
+  $('#statsBody').innerHTML = `
+    <section class="stats-hero">
+      ${ringSvg(todayMs / goalMs, 150, `${Math.round(todayMs / 60000)}`)}
+      <div>
+        <div class="eyebrow">Today</div>
+        <h2>${fmtTime(todayMs)} <small>of ${stats.goal} min</small></h2>
+        <div class="goal-row"><span>Daily goal</span><button class="pill" data-goal="-5" aria-label="Lower goal">−</button><b>${stats.goal} min</b><button class="pill" data-goal="5" aria-label="Raise goal">+</button></div>
+      </div>
+    </section>
+    <section class="stats-tiles">
+      <div class="tile-stat"><b>${streak()}</b><span>day streak</span></div>
+      <div class="tile-stat"><b>${fmtTime(totalMs)}</b><span>all time</span></div>
+      <div class="tile-stat"><b>${totalPages}</b><span>pages turned</span></div>
+      <div class="tile-stat"><b>${finished}</b><span>books finished</span></div>
+      <div class="tile-stat"><b>${settings.wpm}</b><span>words / min</span></div>
+    </section>
+    <section>
+      <h3 class="sec-title">This week</h3>
+      <div class="week">${week.map((d) => `<div class="day ${d.key === dayKey() ? 'today' : ''}"><i style="height:${Math.max(4, (d.ms / max) * 100)}%"></i><span>${d.label}</span></div>`).join('')}</div>
+      <div class="week-goal" style="bottom:${(goalMs / max) * 100}%"></div>
+    </section>
+    <section>
+      <h3 class="sec-title">By book</h3>
+      ${perBook.length ? perBook.map(([id, b]) => `<div class="book-stat"><span class="book-stat-title">${esc(titles[id])}${b.finishedAt ? ' <em>finished</em>' : ''}</span><span>${fmtTime(b.ms)} · ${b.pages} pages</span></div>`).join('') : '<p class="stats-empty">Nothing read yet.</p>'}
+    </section>`;
+  $('#statsView').hidden = false;
+}
+$('#statsBack').addEventListener('click', () => { $('#statsView').hidden = true; renderStatsStrip(); });
+$('#statsBody').addEventListener('click', (e) => {
+  const g = e.target.closest('[data-goal]')?.dataset.goal;
+  if (!g) return;
+  stats.goal = clamp(stats.goal + +g, 5, 180); prefs.set('stats', stats); openStats();
 });
 
 /* ───────────────────────── Settings ───────────────────────── */

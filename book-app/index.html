@@ -27,6 +27,7 @@
       </div>
       <input type="file" id="importInput" accept=".epub,application/epub+zip" multiple hidden>
     </header>
+    <section class="stats-strip" id="statsStrip" hidden></section>
     <section class="shelf" id="shelf"></section>
     <p class="lib-foot">Open your Fold for two-page spreads. Fold it shut to keep reading on the cover screen.</p>
   </main>
@@ -41,6 +42,16 @@
         <div class="page-chrome" id="chromeL"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
         <div class="page-chrome" id="chromeR"><div class="run-head"></div><div class="folio"></div><div class="foot foot-l"></div><div class="foot foot-r"></div></div>
         <div class="flip-layer" id="flipLayer" hidden></div>
+        <div class="sel-layer" id="selLayer" aria-hidden="true"></div>
+      </div>
+      <div class="hl-pop" id="hlPop" hidden role="toolbar" aria-label="Highlight">
+        <button class="hl-dot" data-color="yellow" aria-label="Yellow"></button>
+        <button class="hl-dot" data-color="green" aria-label="Green"></button>
+        <button class="hl-dot" data-color="blue" aria-label="Blue"></button>
+        <button class="hl-dot" data-color="pink" aria-label="Pink"></button>
+        <button class="hl-act" data-act="note">Note</button>
+        <button class="hl-act" data-act="copy">Copy</button>
+        <button class="hl-act danger" data-act="delete" hidden>Delete</button>
       </div>
       <div class="loading" id="loading" hidden><span class="spinner" aria-hidden="true"></span>Opening book…</div>
     </div>
@@ -74,9 +85,13 @@
     <!-- Contents drawer -->
     <aside class="sheet drawer" id="tocSheet" hidden>
       <div class="sheet-head"><h2>Contents</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
-      <div class="tabs"><button class="tab active" data-tab="chapters">Chapters</button><button class="tab" data-tab="marks">Bookmarks</button></div>
+      <div class="tabs"><button class="tab active" data-tab="chapters">Chapters</button><button class="tab" data-tab="marks">Bookmarks</button><button class="tab" data-tab="hls">Highlights</button></div>
       <ol class="toc" id="tocList"></ol>
       <ol class="toc marks" id="markList" hidden></ol>
+      <div id="hlPane" hidden>
+        <div class="hl-tools"><button class="pill" id="hlCopyAll">Copy all</button><span class="hl-count" id="hlCount"></span></div>
+        <ol class="toc marks" id="hlList"></ol>
+      </div>
     </aside>
 
     <!-- Settings sheet -->
@@ -197,6 +212,14 @@
       </form>
     </aside>
 
+    <!-- Highlight note -->
+    <aside class="sheet note-sheet" id="hlNoteSheet" hidden>
+      <div class="sheet-head"><h2>Note</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
+      <blockquote class="hl-quote" id="hlQuote"></blockquote>
+      <textarea id="hlNoteText" rows="4" placeholder="Write a note…"></textarea>
+      <div class="theme-actions"><button class="btn small" id="hlNoteSave">Save note</button><button class="pill" data-close>Cancel</button></div>
+    </aside>
+
     <!-- Footnote pop-up -->
     <aside class="sheet note-sheet" id="noteSheet" hidden>
       <div class="sheet-head"><h2>Note</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></div>
@@ -204,6 +227,11 @@
       <button class="pill" id="noteGo">Go to note</button>
     </aside>
     <div class="scrim" id="scrim" hidden></div>
+  </section>
+  <!-- Reading stats -->
+  <section class="stats-view" id="statsView" hidden>
+    <header class="stats-head"><button class="icon-btn" id="statsBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1>Reading</h1></header>
+    <div class="stats-body" id="statsBody"></div>
   </section>
   <div class="tint-dim" id="dim" aria-hidden="true"></div>
   <div class="tint-warm" id="warm" aria-hidden="true"></div>
