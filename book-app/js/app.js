@@ -645,7 +645,8 @@ function startFlip(dir, finger = null) {
   flipLayer.hidden = false;
 
   // The grabbed corner, and where the finger "holds" the page.
-  f.cy = finger && finger.y < H / 2 ? 0 : H;
+  // Curl from the bottom corner unless the page was grabbed right at the top.
+  f.cy = finger && finger.y < H * 0.2 ? 0 : H;
   f.C = [W, f.cy];
   const singlePrev = !R.spread && dir < 0;
   f.start = singlePrev ? [-W, f.cy] : [W, f.cy];
@@ -677,7 +678,11 @@ function setFlipPoint(f, x, y) {
 
 function flipFromFinger(f, sx, sy) {
   const lx = f.toLocalX(sx), g = sens().gain;
-  setFlipPoint(f, f.start[0] + (lx - f.finger0[0]) * g, f.start[1] + (sy - f.finger0[1]) * g);
+  // Sideways movement turns the page; up-and-down only tilts the fold a little,
+  // so a swipe across the middle of the page gives a near-vertical fold.
+  const dy = (sy - f.finger0[1]) * 0.25 * g;
+  const py = f.cy === 0 ? clamp(f.start[1] + dy, 0, f.H * 0.35) : clamp(f.start[1] + dy, f.H * 0.65, f.H);
+  setFlipPoint(f, f.start[0] + (lx - f.finger0[0]) * g, py);
 }
 
 // Clip a rectangle 0..W × 0..H to the half-plane (X - M)·n ≥ 0 (sign = 1)
@@ -922,7 +927,10 @@ const endDrag = (e) => {
       // A flick commits, a flick back cancels; otherwise past halfway commits,
       // and a slow deliberate pull that got the page moving commits too.
       const S = sens();
-      const commit = vf > S.flick ? true : vf < -S.flick ? false : u > S.commit || (held >= 1000 && u > S.commit * 0.3);
+      // A page that's mostly over stays over unless flicked back hard; otherwise
+      // a flick forward commits, a flick back cancels, and past the threshold commits.
+      const commit = u > 0.7 ? vf > -0.9
+        : vf > S.flick ? true : vf < -S.flick ? false : u > S.commit || (held >= 1000 && u > S.commit * 0.3);
       diag.note(`release u=${u.toFixed(2)} v=${vf.toFixed(2)} ${commit ? 'commit' : 'cancel'}`);
       return runFlip(f, commit, Math.abs(vf));
     }
