@@ -48,7 +48,7 @@ async function renderLibrary() {
     html += `<section class="empty">
       <div class="empty-art" aria-hidden="true"></div>
       <h1>Your library is empty</h1>
-      <p>Spread reads EPUB files. Import one from your phone, or share an EPUB to Spread from your Files app once the app is installed.</p>
+      <p>BookFlips reads EPUB files. Import one from your phone, or share an EPUB to BookFlips from your Files app once the app is installed.</p>
       <div class="cta"><button class="btn" data-import>Import an EPUB</button></div>
       <p class="empty-links">Free, DRM-free classics: <a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a> · <a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a></p>
     </section>`;
@@ -91,7 +91,7 @@ async function renderLibrary() {
       }).join('')}
       <div class="tile add">
         <button class="tile-cover add-cover" data-import><span class="plus" aria-hidden="true">+</span><span>Add a book</span></button>
-        <p class="add-help">Import any DRM-free EPUB, or share one to Spread from your Files app. Free classics: <a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a> · <a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a></p>
+        <p class="add-help">Import any DRM-free EPUB, or share one to BookFlips from your Files app. Free classics: <a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a> · <a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a></p>
       </div>
     </div>
   </section>`;

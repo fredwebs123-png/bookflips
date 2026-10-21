@@ -1,6 +1,6 @@
 {
-  "name": "Spread Books",
-  "short_name": "Spread",
+  "name": "BookFlips",
+  "short_name": "BookFlips",
   "description": "A book reader built for foldables: two-page spreads when open, one page when closed.",
   "start_url": "./",
   "scope": "./",
