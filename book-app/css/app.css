@@ -237,7 +237,7 @@ button { font: inherit; color: inherit; }
 #reader[data-align="left"] .flow { text-align: left; }
 #reader[data-hyphens="0"] .flow { hyphens: manual; -webkit-hyphens: manual; }
 #reader[data-para="space"] .flow p { text-indent: 0 !important; margin-bottom: .65em; }
-#reader[data-dropcaps="0"] .flow .sb-ch-open + p::first-letter { float: none !important; font: inherit; color: inherit; padding: 0; }
+#reader[data-dropcaps="0"] .flow .sb-ch-open + p::first-letter, #reader[data-dropcaps="0"] .flow .sb-ch-open + .sb-figure + p::first-letter { float: none !important; font: inherit; color: inherit; padding: 0; }
 #reader[data-runheads="0"] .run-head, #reader[data-folios="0"] .folio, #reader[data-footers="0"] .foot { display: none; }
 #reader[data-spine="0"] .spine { display: none !important; }
 #reader[data-edges="0"] .edges { display: none; }
@@ -328,7 +328,7 @@ button { font: inherit; color: inherit; }
 .flow .sb-kicker { text-indent: 0; text-align: center; font-family: var(--ui); font-size: .62em; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); }
 .flow .sb-title { font-size: 1.85em; line-height: 1.15; margin: .4em 0 .3em; letter-spacing: .03em; color: var(--ink); }
 .flow .sb-sub { text-indent: 0; font-style: italic; color: var(--muted); font-size: .9em; text-wrap: balance; text-align: center; }
-.sb-ch-open + p::first-letter {
+.sb-ch-open + p::first-letter, .sb-ch-open + .sb-figure + p::first-letter {
   float: left !important; font-family: var(--display); font-weight: 700; color: var(--accent);
   font-size: 3.5em; line-height: .85; padding: .06em .08em 0 0;
 }
@@ -336,10 +336,18 @@ button { font: inherit; color: inherit; }
   margin: 1.2em .4em; padding: .7em 0; text-align: center; font-style: italic; font-size: 1.12em; line-height: 1.45;
   border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); color: var(--accent); break-inside: avoid; text-wrap: balance;
 }
+/* Picture books: a full-width illustration with a caption, and scene breaks */
+.flow .sb-figure { margin: 0 0 1.1em; padding: 0; text-align: center; break-inside: avoid; }
+.flow .sb-figure img { margin: 0 auto; border-radius: 8px; box-shadow: 0 6px 22px #0003; max-height: calc(var(--vh) * .55); }
+.flow .sb-figure figcaption { font-style: italic; font-size: .86em; color: var(--muted); margin-top: .5em; text-indent: 0; text-align: center; text-wrap: balance; }
+.flow .sb-figure + p { text-indent: 0; }
+.flow .sb-break { text-indent: 0; text-align: center; color: var(--accent); letter-spacing: .5em; margin: 1.1em 0; break-after: avoid; }
+.flow .sb-break + p { text-indent: 0; }
 .sb-note {
   display: block; margin: 1.1em 0; padding: .8em 1em; border-radius: 10px; background: var(--note);
   border-left: 3px solid var(--accent); font-size: .9em; line-height: 1.5; text-align: left; break-inside: avoid;
 }
+.flow .sb-note .sb-note-title + p { text-indent: 0; }
 .sb-note-title { display: block; font-family: var(--ui); font-size: .72em; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: .35em; }
 .flow ol.sb-timeline { list-style: none; padding: 0 0 0 1.3em; border-left: 2px solid var(--rule); margin-left: .4em; }
 .epub-doc .sb-timeline li { position: relative !important; margin: 0 0 .85em; break-inside: avoid; }
